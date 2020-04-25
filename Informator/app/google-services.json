@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "903907528605",
+    "firebase_url": "https://informator-b509e.firebaseio.com",
+    "project_id": "informator-b509e",
+    "storage_bucket": "informator-b509e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903907528605:android:f9beed158bb644f1592974",
+        "android_client_info": {
+          "package_name": "com.informator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903907528605-mn4fjje9v98g5c1tullllkd5umkelbl6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.informator",
+            "certificate_hash": "28fb16f9d9b9fd82235f08bc90a7dc90bc654c78"
+          }
+        },
+        {
+          "client_id": "903907528605-i3vvng9ia2kc1mcuv7ep5u394dlkveth.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtWMs5M9PfsBjn-fSeB7GlOFHCK29CVnk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903907528605-i3vvng9ia2kc1mcuv7ep5u394dlkveth.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
