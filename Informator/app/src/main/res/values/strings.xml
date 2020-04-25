@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Informator</string>
+    <string name="mainActivity_btnLogin_text">Log In</string>
+    <string name="mainActivity_btnRegister_text">Register</string>
 </resources>
