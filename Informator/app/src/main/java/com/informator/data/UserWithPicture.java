@@ -2,11 +2,12 @@ package com.informator.data;
 
 import android.graphics.Bitmap;
 
-public class User {
+public class UserWithPicture {
     String fullName;
     String email;
     String phone;
     String username;
+    Bitmap profilePhoto;
     String id;
 
     public String getId() {
@@ -17,14 +18,14 @@ public class User {
         this.id = id;
     }
 
-    public User(String fullName, String email, String phone, String username) {
+    public UserWithPicture(String fullName, String email, String phone, String username) {
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.username = username;
     }
 
-    public User() {
+    public UserWithPicture() {
         fullName = "";
         email = "";
         phone = "";
@@ -47,6 +48,13 @@ public class User {
         this.email = email;
     }
 
+    public Bitmap getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(Bitmap profilePhoto) {
+        this.profilePhoto = Bitmap.createBitmap(profilePhoto);
+    }
     public String getPhone() {
         return phone;
     }
