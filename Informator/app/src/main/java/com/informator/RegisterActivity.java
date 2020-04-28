@@ -55,7 +55,8 @@ public class RegisterActivity extends AppCompatActivity {
     Bitmap image;
     FirebaseStorage storage;
     StorageReference storageRef;
-    boolean isUserExists = false;
+    String Password = "";
+
 
     static final int  REQUEST_IMAGE_CAPTURE = 1;
     static final int  REQUEST_PICK_IMAGE = 2;
@@ -117,7 +118,7 @@ public class RegisterActivity extends AppCompatActivity {
                 user.setPhone(etPhone.getText().toString());
                 user.setUsername(etUsername.getText().toString());
 
-                String Password=etPassword.getText().toString();
+                Password=etPassword.getText().toString();
                 String ConfPassword=etConfPassword.getText().toString();
 
                 if(TextUtils.isEmpty(user.getUsername())){
@@ -155,7 +156,48 @@ public class RegisterActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if(dataSnapshot.exists()){
-                           isUserExists = true;
+                            etUsername.setError("Username is taken !");
+                            return;
+                        }
+                        else{
+                            firebaseAuth.createUserWithEmailAndPassword(user.getEmail(),Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if(task.isSuccessful()){
+                                        user.setId(FirebaseAuth.getInstance().getUid());
+                                        mDatabase.child("users").child(user.getUsername().toString()).setValue(user);
+                                        StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
+                                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                        if(image != null) {
+                                            image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                            byte[] data = baos.toByteArray();
+
+                                            UploadTask uploadTask = profilePicture.putBytes(data);
+                                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                                                }
+                                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                @Override
+                                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                    Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
+
+                                                }
+                                            });
+                                        }
+                                        else{
+                                            Toast.makeText(RegisterActivity.this, "Error while uploading picture", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Toast.makeText(RegisterActivity.this,
+                                                "Error "+task.getException().getMessage(),Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
                         }
                     }
 
@@ -164,50 +206,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                     }
                 });
-                if(isUserExists){
-                    etUsername.setError("Username is taken");
-                    return;
-                }
-
-                firebaseAuth.createUserWithEmailAndPassword(user.getEmail(),Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            user.setId(FirebaseAuth.getInstance().getUid());
-                            mDatabase.child("users").child(user.getUsername().toString()).setValue(user);
-                            StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            if(image != null) {
-                                image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                                byte[] data = baos.toByteArray();
-
-                                UploadTask uploadTask = profilePicture.putBytes(data);
-                                uploadTask.addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-
-                                    }
-                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                    @Override
-                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                        Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
-
-                                    }
-                                });
-                            }
-                            else{
-                                Toast.makeText(RegisterActivity.this, "Error while uploading picture", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                        else
-                        {
-                            Toast.makeText(RegisterActivity.this,
-                                    "Error "+task.getException().getMessage(),Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
 
             }
         });
