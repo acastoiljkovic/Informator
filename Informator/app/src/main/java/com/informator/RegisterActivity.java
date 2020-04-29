@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -56,6 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
     FirebaseStorage storage;
     StorageReference storageRef;
     String Password = "";
+    ProgressBar progressBar;
 
 
     static final int  REQUEST_IMAGE_CAPTURE = 1;
@@ -108,7 +110,8 @@ public class RegisterActivity extends AppCompatActivity {
         etPhone = (EditText)findViewById(R.id.registerPhone);
         btnSignUp = (Button) findViewById(R.id.registerBtnSignUp);
         etFullName = (EditText)findViewById(R.id.registerFullName);
-
+        progressBar=(ProgressBar)findViewById(R.id.id_progress_bar);
+        progressBar.setVisibility(View.GONE);
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
                 user.setFullName(etFullName.getText().toString());
                 user.setPhone(etPhone.getText().toString());
                 user.setUsername(etUsername.getText().toString());
+                progressBar.setVisibility(View.VISIBLE);
 
                 Password=etPassword.getText().toString();
                 String ConfPassword=etConfPassword.getText().toString();
@@ -183,6 +187,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                                     Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
+                                                    startActivity(new Intent(getApplicationContext(),StartActivity.class));
 
                                                 }
                                             });
