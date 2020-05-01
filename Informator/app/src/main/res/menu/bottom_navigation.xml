@@ -3,7 +3,7 @@
     <item
         android:id="@+id/groups"
         android:icon="@drawable/ic_people_black_24dp"
-        android:title="Home">
+        android:title="Groups">
 
     </item>
 

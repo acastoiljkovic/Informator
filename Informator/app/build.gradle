@@ -35,9 +35,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:19.3.0'
     implementation 'com.google.firebase:firebase-storage:19.1.1'
 
-    //add fro bottom navigation menu design
+    //added for bottom navigation menu design
     implementation 'com.android.support:design:29.0.3'
 
+    //added for google maps
+    implementation 'com.google.android.gms:play-services-maps:16.0.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
