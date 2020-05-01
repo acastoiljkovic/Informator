@@ -4,8 +4,12 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -63,6 +67,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     static final int  REQUEST_IMAGE_CAPTURE = 1;
     static final int  REQUEST_PICK_IMAGE = 2;
+    static final int  CAMERA_PERMISSION = 3;
+    static final int  STORAGE_PERMISSION = 4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,14 +100,31 @@ public class RegisterActivity extends AppCompatActivity {
         btnTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dispatchTakePictureIntent();
+
+                if (ContextCompat.checkSelfPermission(RegisterActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(RegisterActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            CAMERA_PERMISSION);
+                }
+                else{
+                    dispatchTakePictureIntent();
+                }
             }
         });
 
         btnAddPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openImagePicker();
+                if (ContextCompat.checkSelfPermission(RegisterActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(RegisterActivity.this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            STORAGE_PERMISSION);
+                }
+                else {
+                    openImagePicker();
+                }
             }
         });
 
@@ -225,6 +249,32 @@ public class RegisterActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case 3: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dispatchTakePictureIntent();
+                } else {
+
+                    Toast.makeText(RegisterActivity.this, "Permission denied to access to your Camera", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            case 4: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openImagePicker();
+                } else {
+
+                    Toast.makeText(RegisterActivity.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
     }
 
     private void dispatchTakePictureIntent() {
