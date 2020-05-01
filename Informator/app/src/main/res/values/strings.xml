@@ -3,4 +3,17 @@
     <string name="mainActivity_btnLogin_text">Log In</string>
     <string name="mainActivity_btnRegister_text">Register</string>
     <string name="mainActivity_btnSignUp_text">Sign Up</string>
+    <string name="add_group">Add Group</string>
+    <string name="find_group">Find Group</string>
+    <string name="add_event">Add Event</string>
+    <string name="find_event">Find Event</string>
+    <string name="search_on_map">Search on map</string>
+    <string name="groups">Groups</string>
+    <string name="map">Map</string>
+    <string name="events">Events</string>
+    <string name="profile">Profile</string>
+    <string name="search_friends">Search friends</string>
+    <string name="messages">Messages</string>
+    <string name="logout">Logout</string>
+
 </resources>
