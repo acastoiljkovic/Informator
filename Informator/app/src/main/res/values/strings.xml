@@ -15,5 +15,8 @@
     <string name="search_friends">Search friends</string>
     <string name="messages">Messages</string>
     <string name="logout">Logout</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="friends">Friends</string>
+    <string name="points">Points</string>
 
 </resources>

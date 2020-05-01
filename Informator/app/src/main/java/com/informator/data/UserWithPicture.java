@@ -25,6 +25,21 @@ public class UserWithPicture {
         this.username = username;
     }
 
+    public UserWithPicture(User user, Bitmap image) {
+        fullName = user.fullName;
+        email = user.email;
+        phone = user.phone;
+        username = user.username;
+        profilePhoto = image;
+    }
+    public UserWithPicture(User user) {
+        fullName = user.fullName;
+        email = user.email;
+        phone = user.phone;
+        username = user.username;
+        profilePhoto = null;
+    }
+
     public UserWithPicture() {
         fullName = "";
         email = "";

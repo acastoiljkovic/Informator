@@ -39,7 +39,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.informator.data.StoredData;
 import com.informator.data.User;
+import com.informator.data.UserWithPicture;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -188,15 +190,20 @@ public class RegisterActivity extends AppCompatActivity {
                             return;
                         }
                         else{
+                            // progress bar visible
                             progressBar.setVisibility(View.VISIBLE);
                             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+                            // login with firebase
                             firebaseAuth.createUserWithEmailAndPassword(user.getEmail(),Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if(task.isSuccessful()){
+                                        // add user
                                         user.setId(FirebaseAuth.getInstance().getUid());
                                         mDatabase.child("users").child(user.getUsername()).setValue(user);
+                                        //add picture
                                         StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
                                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                                         if(image != null) {
@@ -208,11 +215,14 @@ public class RegisterActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
                                                     Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-
+                                                    progressBar.setVisibility(View.GONE);
+                                                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                                 }
                                             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                                 @Override
                                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                                                    StoredData.getInstance().setUser(new UserWithPicture(user,image));
                                                     Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
                                                     Intent i = new Intent(getApplicationContext(),StartActivity.class);
                                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
