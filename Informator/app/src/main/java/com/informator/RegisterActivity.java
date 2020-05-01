@@ -165,7 +165,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if(task.isSuccessful()){
                                         user.setId(FirebaseAuth.getInstance().getUid());
-                                        mDatabase.child("users").child(user.getUsername().toString()).setValue(user);
+                                        mDatabase.child("users").child(user.getUsername()).setValue(user);
                                         StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
                                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                                         if(image != null) {
