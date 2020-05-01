@@ -67,6 +67,12 @@
                 android:layout_margin="5dp"
                 android:background="@drawable/button_black_border"
                 />
+            <ProgressBar
+                android:id="@+id/id_progress_bar_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="45dp"
+                ></ProgressBar>
         </LinearLayout>
 
         <LinearLayout
@@ -77,6 +83,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="2"/>
+        android:layout_weight="2">
+
+
+    </LinearLayout>
 
 </LinearLayout>

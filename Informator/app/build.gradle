@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.android.support:design:29.0.3'
 
     //added for google maps
-    implementation 'com.google.android.gms:play-services-maps:16.0.0'
+    implementation 'com.google.android.gms:play-services-maps:16.1.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

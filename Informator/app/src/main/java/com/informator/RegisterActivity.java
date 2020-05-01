@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -120,7 +121,6 @@ public class RegisterActivity extends AppCompatActivity {
                 user.setFullName(etFullName.getText().toString());
                 user.setPhone(etPhone.getText().toString());
                 user.setUsername(etUsername.getText().toString());
-                progressBar.setVisibility(View.VISIBLE);
 
                 Password=etPassword.getText().toString();
                 String ConfPassword=etConfPassword.getText().toString();
@@ -164,6 +164,9 @@ public class RegisterActivity extends AppCompatActivity {
                             return;
                         }
                         else{
+                            progressBar.setVisibility(View.VISIBLE);
+                            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                             firebaseAuth.createUserWithEmailAndPassword(user.getEmail(),Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -187,19 +190,27 @@ public class RegisterActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                                     Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
-                                                    startActivity(new Intent(getApplicationContext(),StartActivity.class));
+                                                    Intent i = new Intent(getApplicationContext(),StartActivity.class);
+                                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                    startActivity(i);
+                                                    progressBar.setVisibility(View.GONE);
+                                                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
                                                 }
                                             });
                                         }
                                         else{
                                             Toast.makeText(RegisterActivity.this, "Error while uploading picture", Toast.LENGTH_SHORT).show();
+                                            progressBar.setVisibility(View.GONE);
+                                            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                         }
                                     }
                                     else
                                     {
                                         Toast.makeText(RegisterActivity.this,
                                                 "Error "+task.getException().getMessage(),Toast.LENGTH_SHORT).show();
+                                        progressBar.setVisibility(View.GONE);
+                                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                     }
                                 }
                             });
