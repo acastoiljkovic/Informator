@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="325dp"
+    android:layout_height="425dp"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    android:background="@drawable/rounded_style">
+
+    <TextView
+        android:id="@+id/popup_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/popup_add_virtual_object_title"
+        android:textStyle="bold"
+        android:textColor="@color/color_black"
+        android:layout_gravity="center"
+        android:textSize="25sp"
+        android:paddingBottom="0dp"
+        android:layout_margin="0dp"
+        >
+
+    </TextView>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/color_gray">
+
+    </View>
+
+    <EditText
+        android:id="@+id/title_edit_text"
+        android:background="@drawable/button_white_border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:layout_margin="20dp"
+        android:inputType="textEmailAddress"
+        android:hint="Title"
+        android:textSize="25sp"
+        android:layout_gravity="center"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_photo"
+            android:textSize="16sp"
+            android:textColor="@color/color_black"
+            android:layout_gravity="center"
+            android:gravity="center"
+            >
+
+        </TextView>
+
+        <ImageButton
+            android:id="@+id/add_photo_forVO"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="15dp"
+            android:background="@drawable/button_white_border"
+            android:padding="5dp"
+            android:src="@drawable/ic_add_a_photo_black_24dp"
+            android:text="@string/mainActivity_btnRegister_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/description"
+            android:textSize="16sp"
+            android:textColor="@color/color_black"
+            android:layout_gravity="start"
+            android:gravity="center"
+            >
+        </TextView>
+
+        <EditText
+            android:id="@+id/edit_text_desc"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:hint="@string/type_description"
+            android:textSize="16sp"
+            android:layout_gravity="top"
+            android:gravity="top"
+            android:background="@drawable/gray_box_style"
+            android:textColor="@color/color_black"
+            >
+
+        </EditText>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_create_VO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/create"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textColor="@color/color_black"
+        android:textSize="24sp"
+        android:padding="5dp"
+        android:layout_margin="5dp"
+        android:layout_gravity="center"
+        android:background="@drawable/button_white_border"
+        />
+
+
+
+
+
+</LinearLayout>

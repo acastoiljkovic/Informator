@@ -2,6 +2,8 @@ package com.informator.data;
 
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
+
 public class UserWithPicture {
     String fullName;
     String email;
@@ -9,6 +11,7 @@ public class UserWithPicture {
     String username;
     Bitmap profilePhoto;
     String id;
+    ArrayList<VirtualObject> listVO;
 
     public String getId() {
         return id;
@@ -23,6 +26,7 @@ public class UserWithPicture {
         this.email = email;
         this.phone = phone;
         this.username = username;
+        this.listVO=new ArrayList<>();
     }
 
     public UserWithPicture(User user, Bitmap image) {
@@ -31,6 +35,7 @@ public class UserWithPicture {
         phone = user.phone;
         username = user.username;
         profilePhoto = image;
+        this.listVO=new ArrayList<>();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -38,6 +43,7 @@ public class UserWithPicture {
         phone = user.phone;
         username = user.username;
         profilePhoto = null;
+        this.listVO=new ArrayList<>();
     }
 
     public UserWithPicture() {
@@ -84,5 +90,13 @@ public class UserWithPicture {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public ArrayList<VirtualObject> getListVO() {
+        return listVO;
+    }
+
+    public void setListVO(ArrayList<VirtualObject> listVO) {
+        this.listVO = listVO;
     }
 }
