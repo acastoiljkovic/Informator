@@ -38,9 +38,6 @@ public class GroupsFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id=item.getItemId();
 
-        if(id==R.id.add_group){
-            Toast.makeText(getActivity(),"dsfdsdsfdsf",Toast.LENGTH_SHORT).show();
-        }
         return super.onOptionsItemSelected(item);
     }
 }

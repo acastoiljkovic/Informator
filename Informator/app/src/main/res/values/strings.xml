@@ -16,4 +16,6 @@
     <string name="messages">Messages</string>
     <string name="logout">Logout</string>
 
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBgfNFwt06DZZQyugZ25EpsFJ-LjDRB8ho</string>
+
 </resources>
