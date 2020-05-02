@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCe5LYBjcZoqlQfEVilhp7VFLbUnj5-X5M"></meta-data>
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCq1mvHeXzvk5dYzwy4AB0bOyU1SwS0f_I"></meta-data>
 
         <activity android:name=".StartActivity">
         </activity>
