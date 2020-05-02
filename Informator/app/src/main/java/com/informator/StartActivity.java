@@ -24,28 +24,31 @@ public class StartActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-
-                Fragment selectedFragment=null;
-                if(menuItem.getItemId()==R.id.groups){
-                    selectedFragment=new GroupsFragment();
-                    //Toast.makeText(getApplicationContext(),"Groups fragment",Toast.LENGTH_SHORT).show();
-                }
-                else if(menuItem.getItemId()==R.id.map){
-                    selectedFragment=new MapFragment();
-                }
-                else if(menuItem.getItemId()==R.id.events)
-                {
-                    selectedFragment=new EventsFragment();
-                }
-                else if(menuItem.getItemId()==R.id.profile){
-                    selectedFragment=new ProfileFragment();
-                }
-
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
-
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,getSelectedFragment(menuItem.getItemId())).commit();
                 return true;
             }
         });
+    }
+
+    public Fragment getSelectedFragment(int itemId){
+
+        Fragment retFragment = null;
+
+        if(itemId==R.id.groups){
+            retFragment=new GroupsFragment();
+        }
+        else if(itemId==R.id.map){
+            retFragment=new MapFragment();
+        }
+        else if(itemId==R.id.events)
+        {
+            retFragment=new EventsFragment();
+        }
+        else if(itemId==R.id.profile){
+            retFragment=new ProfileFragment();
+        }
+
+        return retFragment;
     }
 
 }
