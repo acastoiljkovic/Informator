@@ -73,20 +73,20 @@ public class ProfileFragment extends Fragment {
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.logout :{
-                        StoredData.getInstance().setUser(null);
-                        Intent i = new Intent(getContext(),MainActivity.class);
-                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(i);
-                        Toast.makeText(getContext(),"Successful logout",Toast.LENGTH_SHORT).show();
-                    }
-                    case R.id.search_friends :{
-                        //TODO add fragment for search friends
-                    }
-                    case R.id.send_message :{
-                        //TODO add fragment for messages
-                    }
+                if(item.getItemId() == R.id.logout){
+                    StoredData.getInstance().setUser(null);
+                    Intent i = new Intent(getContext(),MainActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    Toast.makeText(getContext(),"Successful logout",Toast.LENGTH_SHORT).show();
+                }
+                else if( item.getItemId() == R.id.search_friends){
+                    ((StartActivity) getActivity()).setFragment(R.id.search_friends);
+
+                }
+                else if( item.getItemId() == R.id.send_message){
+                    ((StartActivity) getActivity()).setFragment(R.id.send_message);
+
                 }
                 return false;
             }
