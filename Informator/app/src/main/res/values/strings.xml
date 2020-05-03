@@ -13,6 +13,8 @@
     <string name="events">Events</string>
     <string name="profile">Profile</string>
     <string name="search_friends">Search friends</string>
+    <string name="add_friends_bluetooth">Add friends via bluetooth</string>
+    <string name="search">Search</string>
     <string name="messages">Messages</string>
     <string name="logout">Logout</string>
     <string name="edit_profile">Edit profile</string>

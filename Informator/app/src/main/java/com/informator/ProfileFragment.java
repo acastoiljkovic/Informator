@@ -1,7 +1,12 @@
 package com.informator;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +32,12 @@ import com.informator.profile_fragments.TabAdapterProfile;
 
 import org.w3c.dom.Text;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Set;
+import java.util.UUID;
+
+import static android.app.Activity.RESULT_OK;
+
 public class ProfileFragment extends Fragment {
 
     private TabAdapterProfile adapter;
@@ -37,6 +48,8 @@ public class ProfileFragment extends Fragment {
     private TextView tvFriends;
     private TextView tvGroups;
     private TextView tvPoints;
+
+
 
 
     @Override
@@ -61,6 +74,8 @@ public class ProfileFragment extends Fragment {
 
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
+
+
 
         if(StoredData.getInstance().getUser() != null) {
             imageViewProfilePicture = (ImageView) view.findViewById(R.id.profile_picture);
@@ -88,13 +103,18 @@ public class ProfileFragment extends Fragment {
                     ((StartActivity) getActivity()).setFragment(R.id.send_message);
 
                 }
+                else if( item.getItemId() == R.id.add_friends_bluetooth){
+                    ((StartActivity) getActivity()).setFragment(R.id.add_friends_bluetooth);
+
+                }
                 return false;
             }
         });
 
+
+
+
         return view;
     }
-
-
 
 }

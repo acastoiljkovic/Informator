@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.informator.profile_fragments.AddFriendsBluetoothFragment;
 import com.informator.profile_fragments.SearchFriendsFragment;
 import com.informator.profile_fragments.SendMessageFragment;
 
@@ -70,6 +71,9 @@ public class StartActivity extends AppCompatActivity {
         }
         else if(itemId==R.id.send_message){
             retFragment=new SendMessageFragment();
+        }
+        else if(itemId==R.id.add_friends_bluetooth){
+            retFragment=new AddFriendsBluetoothFragment();
         }
 
         return retFragment;
