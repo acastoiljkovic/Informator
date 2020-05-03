@@ -20,6 +20,11 @@
     <string name="edit_profile">Edit profile</string>
     <string name="friends">Friends</string>
     <string name="points">Points</string>
+    <string name="popup_add_virtual_object_title">Create virtual object</string>
+    <string name="add_photo">Add photo:</string>
+    <string name="description">Description:</string>
+    <string name="type_description">Type a description...</string>
+    <string name="create">Create</string>
 
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBgfNFwt06DZZQyugZ25EpsFJ-LjDRB8ho</string>
 

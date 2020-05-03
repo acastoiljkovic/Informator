@@ -16,6 +16,8 @@ import com.informator.profile_fragments.SendMessageFragment;
 
 public class StartActivity extends AppCompatActivity {
 
+    public static String url="gs://informator-b509e.appspot.com";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

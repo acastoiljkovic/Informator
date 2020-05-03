@@ -82,7 +82,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         user = new User();
-        storage = FirebaseStorage.getInstance("gs://informator-b509e.appspot.com");
+        storage = FirebaseStorage.getInstance(StartActivity.url);
         storageRef = storage.getReference();
 
         try {
