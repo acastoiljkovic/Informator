@@ -1,17 +1,10 @@
 package com.informator;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,13 +26,6 @@ import com.google.android.material.tabs.TabLayout;
 import com.informator.profile_fragments.EventsFragment;
 import com.informator.profile_fragments.TabAdapterProfile;
 
-import org.w3c.dom.Text;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Set;
-import java.util.UUID;
-
-import static android.app.Activity.RESULT_OK;
 
 public class ProfileFragment extends Fragment {
 

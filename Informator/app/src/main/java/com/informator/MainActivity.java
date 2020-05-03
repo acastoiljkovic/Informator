@@ -130,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
                                         dialogHide();
                                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                         startActivity(i);
-                                        MainActivity.super.onBackPressed();
                                     }
                                 });
                             }

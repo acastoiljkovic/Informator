@@ -183,13 +183,25 @@ public class AddFriendsBluetoothFragment extends Fragment {
 
     @Override
     public void onStop() {
-        getActivity().unregisterReceiver(blReceiver);
+        try {
+            // probaj da odregistrujes kao je nesto registrovano
+            getActivity().unregisterReceiver(blReceiver);
+        }
+        catch (Exception e){
+
+        }
         super.onStop();
     }
 
     @Override
     public void onDestroy() {
-        getActivity().unregisterReceiver(blReceiver);
+        try {
+            // probaj da odregistrujes kao je nesto registrovano
+            getActivity().unregisterReceiver(blReceiver);
+        }
+        catch (Exception e){
+
+        }
         super.onDestroy();
     }
 
