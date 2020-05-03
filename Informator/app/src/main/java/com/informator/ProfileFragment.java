@@ -3,7 +3,9 @@ package com.informator;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,6 +25,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.profile_fragments.*;
 
@@ -48,8 +51,7 @@ public class ProfileFragment extends Fragment {
     private TextView tvFriends;
     private TextView tvGroups;
     private TextView tvPoints;
-
-
+    SharedPreferences sharedPreferences;
 
 
     @Override
@@ -65,6 +67,8 @@ public class ProfileFragment extends Fragment {
 
         tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
         viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
+
+        sharedPreferences = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
         adapter = new TabAdapterProfile(getFragmentManager());
         adapter.addFragment(new RankingFragment(),"Ranking");
@@ -93,7 +97,14 @@ public class ProfileFragment extends Fragment {
                     Intent i = new Intent(getContext(),MainActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
-                    Toast.makeText(getContext(),"Successful logout",Toast.LENGTH_SHORT).show();
+
+                    SharedPreferences.Editor edit = sharedPreferences.edit();
+                    edit.putBoolean(Constants.SHARED_PREFERENCES_LOGGED,false);
+                    edit.putString(Constants.SHARED_PREFERENCES_EMAIL,"");
+                    edit.putString(Constants.SHARED_PREFERENCES_USERNAME,"");
+                    edit.putString(Constants.SHARED_PREFERENCES_PASSWORD,"");
+                    edit.commit();
+//                    Toast.makeText(getContext(),"Successful logout",Toast.LENGTH_SHORT).show();
                 }
                 else if( item.getItemId() == R.id.search_friends){
                     ((StartActivity) getActivity()).setFragment(R.id.search_friends);

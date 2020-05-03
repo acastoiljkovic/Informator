@@ -126,8 +126,10 @@ public class SearchFriendsFragment extends Fragment {
                             public void onSuccess(byte[] bytes) {
                                 Bitmap picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                 profileImages.add(picture);
-                                adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
-                                listViewSearchFriends.setAdapter(adapter);
+                                if(getActivity() != null) {
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    listViewSearchFriends.setAdapter(adapter);
+                                }
                             }
                         });
                     }
@@ -139,8 +141,10 @@ public class SearchFriendsFragment extends Fragment {
                             public void onSuccess(byte[] bytes) {
                                 Bitmap picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                 profileImages.add(picture);
-                                adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
-                                listViewSearchFriends.setAdapter(adapter);
+                                if(getActivity() != null) {
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    listViewSearchFriends.setAdapter(adapter);
+                                }
 
                             }
                         });

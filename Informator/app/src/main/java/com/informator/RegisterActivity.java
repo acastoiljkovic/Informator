@@ -8,7 +8,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -39,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.data.User;
 import com.informator.data.UserWithPicture;
@@ -64,8 +68,8 @@ public class RegisterActivity extends AppCompatActivity {
     FirebaseStorage storage;
     StorageReference storageRef;
     String Password = "";
-    ProgressBar progressBar;
-
+    ProgressDialog dialog;
+    SharedPreferences sharedPreferences;
 
     static final int  REQUEST_IMAGE_CAPTURE = 1;
     static final int  REQUEST_PICK_IMAGE = 2;
@@ -94,6 +98,14 @@ public class RegisterActivity extends AppCompatActivity {
         catch (Exception e){
             Toast.makeText(this,"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
         }
+
+        dialog =new ProgressDialog(this);
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Loading...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+
+        sharedPreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
         mDatabase = database.getReference();
 
@@ -137,8 +149,6 @@ public class RegisterActivity extends AppCompatActivity {
         etPhone = (EditText)findViewById(R.id.registerPhone);
         btnSignUp = (Button) findViewById(R.id.registerBtnSignUp);
         etFullName = (EditText)findViewById(R.id.registerFullName);
-        progressBar=(ProgressBar)findViewById(R.id.id_progress_bar);
-        progressBar.setVisibility(View.GONE);
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,7 +201,7 @@ public class RegisterActivity extends AppCompatActivity {
                         }
                         else{
                             // progress bar visible
-                            progressBar.setVisibility(View.VISIBLE);
+                            dialogShow();
                             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
@@ -203,6 +213,13 @@ public class RegisterActivity extends AppCompatActivity {
                                         // add user
                                         user.setId(FirebaseAuth.getInstance().getUid());
                                         mDatabase.child("users").child(user.getUsername()).setValue(user);
+
+                                        SharedPreferences.Editor edit = sharedPreferences.edit();
+                                        edit.putString(Constants.SHARED_PREFERENCES_EMAIL,user.getEmail());
+                                        edit.putString(Constants.SHARED_PREFERENCES_USERNAME,user.getUsername());
+                                        edit.putString(Constants.SHARED_PREFERENCES_PASSWORD,Password);
+                                        edit.commit();
+
                                         //add picture
                                         StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
                                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -215,7 +232,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
                                                     Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                    progressBar.setVisibility(View.GONE);
+                                                    dialogHide();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                                 }
                                             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -223,11 +240,11 @@ public class RegisterActivity extends AppCompatActivity {
                                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
                                                     StoredData.getInstance().setUser(new UserWithPicture(user,image));
-                                                    Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
+//                                                    Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
                                                     Intent i = new Intent(getApplicationContext(),StartActivity.class);
                                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                     startActivity(i);
-                                                    progressBar.setVisibility(View.GONE);
+                                                    dialogHide();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
                                                 }
@@ -235,7 +252,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         }
                                         else{
                                             Toast.makeText(RegisterActivity.this, "Error while uploading picture", Toast.LENGTH_SHORT).show();
-                                            progressBar.setVisibility(View.GONE);
+                                            dialogHide();
                                             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                         }
                                     }
@@ -243,7 +260,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     {
                                         Toast.makeText(RegisterActivity.this,
                                                 "Error "+task.getException().getMessage(),Toast.LENGTH_SHORT).show();
-                                        progressBar.setVisibility(View.GONE);
+                                        dialogHide();
                                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                     }
                                 }
@@ -261,6 +278,25 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    public void dialogShow(){
+        try {
+            if (!dialog.isShowing())
+                dialog.show();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void dialogHide(){
+        try {
+            if (dialog.isShowing())
+                dialog.hide();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
