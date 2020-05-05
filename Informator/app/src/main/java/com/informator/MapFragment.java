@@ -77,6 +77,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     EditText editTextDesc;
     EditText editTextTitle;
 
+    private float currentZoom;
 
 
     @Override
@@ -95,7 +96,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         popup_add_virtual_object=new Dialog(this.getActivity());
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_map_toolbar);
-
+        currentZoom = 12;
 
         toolbar.setOnMenuItemClickListener(new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
             @Override
@@ -247,8 +248,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 public void onMyLocationChange(Location location) {
                     if(location!=null){
                         //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("blblblb"));
-                        CameraPosition cp = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(12).bearing(0).build();
+                        CameraPosition cp = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(currentZoom).bearing(0).build();
                         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cp));
+                    }
+                }
+            });
+            mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+                @Override
+                public void onCameraChange(CameraPosition cameraPosition) {
+                    if(cameraPosition.zoom != currentZoom){
+                        currentZoom = cameraPosition.zoom;
                     }
                 }
             });

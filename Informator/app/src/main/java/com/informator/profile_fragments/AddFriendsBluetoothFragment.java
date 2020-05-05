@@ -80,7 +80,7 @@ public class AddFriendsBluetoothFragment extends Fragment {
 
         iwBluetoothState = view.findViewById(R.id.image_add_friends_bluetooth_state);
         tvBluetoothState = view.findViewById(R.id.text_add_friends_bluetooth_state);
-
+        
         if(mBTAdapter.isEnabled()){
             iwBluetoothState.setImageResource(R.drawable.ic_bluetooth_green_24dp);
             tvBluetoothState.setText("Enabled");
