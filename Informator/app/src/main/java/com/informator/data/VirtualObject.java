@@ -13,6 +13,8 @@ public class VirtualObject {
     private float rating;
     private Bitmap virtual_object_image;
     private ArrayList<Post> posts;
+    private double latitude;
+    private double longitude;
 
     public VirtualObject(String title, String description, Bitmap virtual_object_image) {
         this.title = title;
@@ -22,9 +24,22 @@ public class VirtualObject {
         this.posts=new ArrayList<Post>();
     }
 
-    public VirtualObject(String title, String description) {
+    public VirtualObject(String title, String description,double latitude,double longitude) {
         this.title = title;
         this.description = description;
+        this.latitude=latitude;
+        this.longitude=longitude;
+        this.rating=0;
+        this.posts=new ArrayList<Post>();
+    }
+
+    public VirtualObject(String title, String description,double latitude,double longitude,float rating) {
+        this.title = title;
+        this.description = description;
+        this.latitude=latitude;
+        this.longitude=longitude;
+        this.rating=rating;
+        this.posts=new ArrayList<Post>();
     }
 
     public String getTitle() {
@@ -73,5 +88,21 @@ public class VirtualObject {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

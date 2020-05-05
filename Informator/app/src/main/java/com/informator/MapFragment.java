@@ -2,11 +2,18 @@ package com.informator;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -17,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,12 +36,16 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,6 +61,8 @@ import com.informator.data.StoredData;
 import com.informator.data.VirtualObject;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
@@ -56,10 +70,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
     private GoogleMap mMap;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private Location current_user_location;
+
+    private float current_zoom=12;
+    private ArrayList<VirtualObject> virtualObjects;
+    private HashMap<Marker,String> markerPlaceIdMap;
+
     static final int PERMISSION_ACCESS_FINE_LOCATION=1;
     static final int  CAMERA_PERMISSION = 2;
     static final int  REQUEST_IMAGE_CAPTURE = 3;
-    LocationManager locationManager;
     Toolbar toolbar;
     Dialog popup_add_virtual_object;
 
@@ -76,6 +97,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     EditText editTextDesc;
     EditText editTextTitle;
+    Bitmap bitmap;
 
     private float currentZoom;
 
@@ -93,6 +115,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map,container,false);
+
+        firebaseStorage=FirebaseStorage.getInstance(StartActivity.url);
+        storageReference=firebaseStorage.getReference();
+        firebaseDatabase=FirebaseDatabase.getInstance();
+        databaseReference=firebaseDatabase.getReference();
+        firebaseAuth = FirebaseAuth.getInstance();
+        virtualObjects=new ArrayList<VirtualObject>();
 
         popup_add_virtual_object=new Dialog(this.getActivity());
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_map_toolbar);
@@ -115,6 +144,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.mapFrag);
         mapFragment.getMapAsync(MapFragment.this);
+
+        locationManager=(LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locationListener=new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                centreMapOnLocation(location);
+                current_user_location=new Location(location);
+                //addVirtualObjectMarkers();
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+
 
         return view;
     }
@@ -149,13 +205,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     return;
                 }
 
-                firebaseStorage=FirebaseStorage.getInstance(StartActivity.url);
-                storageReference=firebaseStorage.getReference();
-                firebaseDatabase=FirebaseDatabase.getInstance();
-                databaseReference=firebaseDatabase.getReference();
-                firebaseAuth = FirebaseAuth.getInstance();
-                final VirtualObject virtualObject=new VirtualObject(editTextTitle.getText().toString(),editTextDesc.getText().toString());
-                virtualObject.setId(firebaseAuth.getUid());
+
+                double lat=current_user_location.getLatitude();
+                double lon=current_user_location.getLongitude();
+                final VirtualObject virtualObject=new VirtualObject(editTextTitle.getText().toString(),editTextDesc.getText().toString(),lat,lon);
+
+                String key=databaseReference.child("users").push().getKey();
+                virtualObject.setId(key);
 
                 final Bitmap image=virtual_object_image;
 
@@ -223,11 +279,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        //mapView.onResume();
-    }
 
 
     @Override
@@ -243,14 +294,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         else
         {
             mMap.setMyLocationEnabled(true);
-            mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+
+            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
+                Location currentLocation=locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                centreMapOnLocation(currentLocation);
+                showVirtualObjectsOnMap();
+            }
+            else if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,locationListener);
+                Location currentLocation=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                centreMapOnLocation(currentLocation);
+                showVirtualObjectsOnMap();
+            }
+            else
+            {
+                Toast.makeText(getActivity(),"Nije ukljucen ni gps provider ni network provider nemoguce je pronaci lokaciju",Toast.LENGTH_LONG).show();
+                return;
+            }
+
+
+            mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
                 @Override
-                public void onMyLocationChange(Location location) {
-                    if(location!=null){
-                        //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("blblblb"));
-                        CameraPosition cp = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(currentZoom).bearing(0).build();
-                        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cp));
-                    }
+
+//                public void onMyLocationChange(Location location) {
+//                    if(location!=null){
+//                        //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("blblblb"));
+//                        CameraPosition cp = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(currentZoom).bearing(0).build();
+//                        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cp));
+//                    }
+
+                public void onCameraMove() {
+                    current_zoom=mMap.getCameraPosition().zoom;
+
                 }
             });
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
@@ -265,6 +341,113 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    private void centreMapOnLocation(Location location){
+        LatLng userLocation=new LatLng(location.getLatitude(),location.getLongitude());
+        //mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(userLocation).title("Current user location"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,current_zoom));
+    }
+
+    //treba da pinuje na mapi sve virtuelne objekte i svoje i svojih prijatelja
+    private void showVirtualObjectsOnMap(){
+        databaseReference.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("virtual_objects").getValue()==null)
+                    return;
+
+                for(DataSnapshot dataSnapshot1: dataSnapshot.child((StoredData.getInstance().getUser().getUsername()))
+                        .child("virtual_objects").getChildren()){
+                    String id=dataSnapshot1.child("id").getValue().toString();
+                    String description=dataSnapshot1.child("description").getValue().toString();
+
+                    double lat=(Double) dataSnapshot1.child("latitude").getValue();
+                    double lon=(Double)dataSnapshot1.child("longitude").getValue();
+                    float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
+                    String title=dataSnapshot1.child("title").getValue().toString();
+                    VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
+                    virtualObject.setId(id);
+                    StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
+                    bitmap=null;
+                    if(virtualObjectImage!=null){
+                        virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                            }
+
+
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(),"Neuspelo skidanje slike",Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                    else
+                    {
+                        //bitmap=null;
+                    }
+                    virtualObject.setVirtual_object_image(bitmap);
+
+
+                    virtualObjects.add(virtualObject);
+                }
+
+                addVirtualObjectMarkers();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void addVirtualObjectMarkers(){
+        markerPlaceIdMap=new HashMap<Marker, String>();
+
+        for(int i=0;i<virtualObjects.size();i++){
+            LatLng location=new LatLng(virtualObjects.get(i).getLatitude(),virtualObjects.get(i).getLongitude());
+            MarkerOptions markerOptions=new MarkerOptions();
+            markerOptions.position(location);
+            if(virtualObjects.get(i).getVirtual_object_image()!=null){
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(virtualObjects.get(i).getVirtual_object_image()));
+            }
+            else
+            {
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
+            }
+            markerOptions.title(virtualObjects.get(i).getTitle());
+            Marker marker=mMap.addMarker(markerOptions);
+            markerPlaceIdMap.put(marker,virtualObjects.get(i).getId());
+        }
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                //logika za klik na marker
+                Toast.makeText(getActivity(),"kliknuto na marker",Toast.LENGTH_LONG).show();
+                return true;
+            }
+        });
+    }
+
+    private Bitmap getResizedBitmap(Bitmap bitmap,int newWidth,int newHeight){
+        int width=bitmap.getWidth();
+        int height=bitmap.getHeight();
+        float scaleWidth=((float)newWidth)/width;
+        float scaleHeight=((float)newHeight)/height;
+
+        Matrix matrix=new Matrix();
+        Bitmap resizedBitmap=Bitmap.createBitmap(bitmap,0,0,width,height,matrix,false);
+        bitmap.recycle();
+
+        return resizedBitmap;
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -272,17 +455,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             case PERMISSION_ACCESS_FINE_LOCATION: {
                 if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
                     mMap.setMyLocationEnabled(true);
-                    mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-                        @Override
-                        public void onMyLocationChange(Location location) {
-                            if(location!=null){
-                                //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("blblblb"));
-                                CameraPosition cp = CameraPosition.builder().target(new LatLng(location.getLatitude(), location.getLongitude())).zoom(10).bearing(0).build();
-                                mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cp));
-                            }
-                        }
-                    });
-
                 }
                 return;
             }
@@ -300,5 +472,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //mapView.onResume();
+    }
+
 
 }

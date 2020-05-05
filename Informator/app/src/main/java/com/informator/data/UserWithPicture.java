@@ -11,7 +11,7 @@ public class UserWithPicture {
     String username;
     Bitmap profilePhoto;
     String id;
-    ArrayList<VirtualObject> listVO;
+    ArrayList<VirtualObject> virtual_objects;
 
     public String getId() {
         return id;
@@ -26,7 +26,7 @@ public class UserWithPicture {
         this.email = email;
         this.phone = phone;
         this.username = username;
-        this.listVO=new ArrayList<>();
+        this.virtual_objects=new ArrayList<>();
     }
 
     public UserWithPicture(User user, Bitmap image) {
@@ -34,8 +34,9 @@ public class UserWithPicture {
         email = user.email;
         phone = user.phone;
         username = user.username;
+        id=user.id;
         profilePhoto = image;
-        this.listVO=new ArrayList<>();
+        this.virtual_objects=new ArrayList<>();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -43,7 +44,7 @@ public class UserWithPicture {
         phone = user.phone;
         username = user.username;
         profilePhoto = null;
-        this.listVO=new ArrayList<>();
+        this.virtual_objects=new ArrayList<>();
     }
 
     public UserWithPicture() {
@@ -93,10 +94,10 @@ public class UserWithPicture {
     }
 
     public ArrayList<VirtualObject> getListVO() {
-        return listVO;
+        return virtual_objects;
     }
 
     public void setListVO(ArrayList<VirtualObject> listVO) {
-        this.listVO = listVO;
+        this.virtual_objects = listVO;
     }
 }
