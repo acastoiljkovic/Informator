@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         try{
             database = FirebaseDatabase.getInstance();
-            storage = FirebaseStorage.getInstance("gs://informator-b509e.appspot.com");
+            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
             storageRef = storage.getReference();
             mDatabase = database.getReference();
         }

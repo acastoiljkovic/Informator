@@ -14,29 +14,32 @@ import com.informator.profile_fragments.AddFriendsBluetoothFragment;
 import com.informator.profile_fragments.SearchFriendsFragment;
 import com.informator.profile_fragments.SendMessageFragment;
 
-public class StartActivity extends AppCompatActivity {
-
-    public static String url="gs://informator-b509e.appspot.com";
+public class StartActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+    BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        BottomNavigationView bottomNavigationView=findViewById(R.id.bottom_navigation);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new GroupsFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new GroupsFragment()).addToBackStack(null).commit();
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                setFragment(menuItem.getItemId());
-                return true;
-            }
-        });
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
     }
 
-    public static Fragment getSelectedFragment(int itemId){
+
+    @Override
+    public void onBackPressed() {
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public static Fragment getSelectedFragment(int itemId, Bundle bundle){
 
         Fragment retFragment = null;
 
@@ -52,6 +55,7 @@ public class StartActivity extends AppCompatActivity {
         }
         else if(itemId==R.id.profile){
             retFragment=new ProfileFragment();
+            retFragment.setArguments(bundle);
         }
         else if(itemId==R.id.add_group){
 //            retFragment=new AddGroupFragment();
@@ -81,13 +85,18 @@ public class StartActivity extends AppCompatActivity {
         return retFragment;
     }
 
-    public void setFragment(int fragmentId){
+    public void setFragment(int fragmentId,Bundle bundle){
         try {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, getSelectedFragment(fragmentId)).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, getSelectedFragment(fragmentId,bundle)).addToBackStack(null).commit();
         }
         catch (Exception e){
-            Log.e("Error :",e.getMessage().toString());
+            Log.e("Error :",e.getMessage());
         }
     }
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        setFragment(menuItem.getItemId(),null);
+        return true;
+    }
 }
