@@ -88,7 +88,7 @@ public class SearchFriendsFragment extends Fragment {
         listViewSearchFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContext(),"Username : "+usernames.get(position) ,Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(),"Username : "+usernames.get(position) ,Toast.LENGTH_SHORT).show();
                 Bundle bundle = new Bundle();
                 bundle.putString("username",usernames.get(position));
                 ((StartActivity)getActivity()).setFragment(R.id.profile,bundle);
@@ -116,8 +116,6 @@ public class SearchFriendsFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if(s.length() > 2){
                     fetchDataFromDatabase(s.toString());
-                    dialogShow();
-                    hideDialogAfter10sec();
                 }
             }
 
@@ -133,7 +131,7 @@ public class SearchFriendsFragment extends Fragment {
             public void onClick(View v) {
                 fetchDataFromDatabase(etSearchFriends.getText().toString());
                 dialogShow();
-                hideDialogAfter10sec();
+                hideDialogAfter5sec();
             }
         });
 
@@ -141,13 +139,13 @@ public class SearchFriendsFragment extends Fragment {
 
     }
 
-    public void hideDialogAfter10sec(){
+    public void hideDialogAfter5sec(){
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                dialogHide();
+                dialogDismiss();
             }
-        }, 10*1000);
+        }, 5*1000);
         return;
     }
 
@@ -171,7 +169,6 @@ public class SearchFriendsFragment extends Fragment {
                             public void onSuccess(byte[] bytes) {
                                 Bitmap picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                 profileImages.add(picture);
-                                Toast.makeText(getContext(),user.getUsername(),Toast.LENGTH_SHORT).show();
                                 if(getActivity() != null) {
                                     adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
@@ -224,6 +221,15 @@ public class SearchFriendsFragment extends Fragment {
         try {
             if (dialog.isShowing())
                 dialog.hide();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void dialogDismiss(){
+        try{
+            dialog.dismiss();
         }
         catch (Exception e){
             e.printStackTrace();

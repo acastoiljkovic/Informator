@@ -65,6 +65,7 @@
                 </FrameLayout>
 
                 <LinearLayout
+                    android:id="@+id/edit_profile_or_add_friend"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="10"
@@ -80,6 +81,7 @@
                         android:id="@+id/textView_editProfile"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="#000000"
                         android:text="@string/edit_profile" />
                 </LinearLayout>
 
@@ -107,6 +109,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="4"
+                        android:textColor="#000000"
                         android:gravity="center" />
 
                     <TextView
@@ -114,6 +117,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="5"
+                        android:textColor="#000000"
                         android:gravity="center_vertical"
                         android:text="@string/friends" />
 
@@ -122,6 +126,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="5"
+                        android:textColor="#000000"
                         android:gravity="center_vertical"
                         android:text="@string/groups" />
 
@@ -130,6 +135,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="5"
+                        android:textColor="#000000"
                         android:gravity="center_vertical"
                         android:text="@string/points" />
                 </LinearLayout>

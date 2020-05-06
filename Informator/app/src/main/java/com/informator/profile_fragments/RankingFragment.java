@@ -22,9 +22,10 @@ public class RankingFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_ranking, container, false);
 
         tvWelcome = (TextView)view.findViewById(R.id.tv_welcome_text_ranking_fragment);
-        if(savedInstanceState == null){
+//        if(savedInstanceState == null){
+        //TODO provera da li mu prosledjujemo rankove prijatelja
             tvWelcome.setText(R.string.no_ranking);
-        }
+//        }
         return  view;
     }
 }

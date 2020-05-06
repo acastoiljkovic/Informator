@@ -20,9 +20,10 @@ public class EventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile_events, container, false);
 
         tvWelcome = (TextView)view.findViewById(R.id.tv_welcome_text_events_profile_fragment);
-        if(savedInstanceState == null){
+//        if(savedInstanceState == null){
+        //TODO provera da li mu prosledjujemo evente
             tvWelcome.setText(R.string.no_events);
-        }
+//        }
         return  view;
     }
 }

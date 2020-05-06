@@ -152,7 +152,7 @@ public class AddFriendsBluetoothFragment extends Fragment {
         if(!mBTAdapter.isEnabled()){
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            Toast.makeText(getContext(),"Bluetooth turned on",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(),"Bluetooth turned on",Toast.LENGTH_SHORT).show();
         }
         else{
             Toast.makeText(getContext(),"Bluetooth is already on",Toast.LENGTH_SHORT).show();

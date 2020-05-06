@@ -34,6 +34,8 @@ import com.informator.data.StoredData;
 import com.informator.data.User;
 import com.informator.data.UserWithPicture;
 
+import java.util.ArrayList;
+
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -112,8 +114,18 @@ public class LoginActivity extends AppCompatActivity {
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                         int i = 0;
                                         for(DataSnapshot data : dataSnapshot.getChildren()){
-                                            if(i == 0)
-                                                user = data.getValue(User.class);
+                                            if(i == 0) {
+                                                user.setUsername(String.valueOf(data.child("username").getValue()));
+                                                user.setEmail(String.valueOf(data.child("email").getValue()));
+                                                user.setFullName(String.valueOf(data.child("fullName").getValue()));
+                                                user.setPhone(String.valueOf(data.child("phone").getValue()));
+                                                user.setId(String.valueOf(data.child("id").getValue()));
+                                                ArrayList<String> friends = new ArrayList<>();
+                                                for(DataSnapshot data1 : data.child("friends").getChildren()){
+                                                    friends.add(String.valueOf(data1.getValue()));
+                                                }
+                                                user.setFriends(friends);
+                                            }
                                             i++;
                                         }
 

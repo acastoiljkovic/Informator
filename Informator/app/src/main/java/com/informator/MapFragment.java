@@ -343,10 +343,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void centreMapOnLocation(Location location){
-        LatLng userLocation=new LatLng(location.getLatitude(),location.getLongitude());
-        //mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(userLocation).title("Current user location"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,current_zoom));
+        if(location != null) {
+            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            //mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(userLocation).title("Current user location"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, current_zoom));
+        }
     }
 
     //treba da pinuje na mapi sve virtuelne objekte i svoje i svojih prijatelja

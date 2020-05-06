@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -32,6 +33,9 @@ import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.data.User;
 import com.informator.data.UserWithPicture;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -111,23 +115,43 @@ public class MainActivity extends AppCompatActivity {
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 int i = 0;
                                 for(DataSnapshot data : dataSnapshot.getChildren()){
-                                    if(i == 0)
-                                        user = data.getValue(User.class);
+                                    if(i == 0) {
+                                        user.setUsername(String.valueOf(data.child("username").getValue()));
+                                        user.setEmail(String.valueOf(data.child("email").getValue()));
+                                        user.setFullName(String.valueOf(data.child("fullName").getValue()));
+                                        user.setPhone(String.valueOf(data.child("phone").getValue()));
+                                        user.setId(String.valueOf(data.child("id").getValue()));
+                                        ArrayList<String> friends = new ArrayList<>();
+                                        for(DataSnapshot data1 : data.child("friends").getChildren()){
+                                            friends.add(String.valueOf(data1.getValue()));
+                                        }
+                                        user.setFriends(friends);
+                                    }
                                     i++;
                                 }
-
-                                StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
+                                StorageReference profilePicture = storageRef.child(user.getUsername() + ".jpg");
 
                                 picture = null;
                                 profilePicture.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                     @Override
                                     public void onSuccess(byte[] bytes) {
-                                        picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                        StoredData.getInstance().setUser(new UserWithPicture(user,picture));
-//                                        Toast.makeText(MainActivity.this, "Login Successfully...", Toast.LENGTH_SHORT).show();
-                                        Intent i = new Intent(getApplicationContext(),StartActivity.class);
+                                        picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                        StoredData.getInstance().setUser(new UserWithPicture(user, picture));
+                                        dialogDismiss();
+                                        Intent i = new Intent(getApplicationContext(), StartActivity.class);
                                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        dialogHide();
+                                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                                        startActivity(i);
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        StoredData.getInstance().setUser(new UserWithPicture(user,
+                                                ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp))));
+                                        dialogDismiss();
+                                        Toast.makeText(MainActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
+                                        Intent i = new Intent(getApplicationContext(), StartActivity.class);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                         startActivity(i);
                                     }
@@ -165,8 +189,18 @@ public class MainActivity extends AppCompatActivity {
 
     public void dialogHide(){
         try {
-            if (dialog.isShowing())
+            if (dialog.isShowing()) {
                 dialog.hide();
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void dialogDismiss(){
+        try{
+            dialog.dismiss();
         }
         catch (Exception e){
             e.printStackTrace();

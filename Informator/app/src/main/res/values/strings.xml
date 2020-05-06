@@ -27,8 +27,8 @@
     <string name="create">Create</string>
     <string name="add_friend">Add Friend</string>
     <string name="no_ranking">There is no ranking at the moment. Please try again later.</string>
-    <string name="no_friends">You don\'t have any friend.</string>
-    <string name="no_photos">You don\'t have any photo.</string>
+    <string name="no_friends">There is no friends.</string>
+    <string name="no_photos">There is no photos.</string>
     <string name="no_events">There is no events at the moment. Please try again later.</string>
     <string name="no_text">Empty</string>
 
