@@ -36,6 +36,8 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentFactory;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -59,6 +61,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.informator.data.StoredData;
 import com.informator.data.VirtualObject;
+import com.informator.map_fragments.VirtualObjectFragment;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -75,7 +78,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private Location current_user_location;
 
     private float current_zoom=12;
-    private ArrayList<VirtualObject> virtualObjects;
+    public static ArrayList<VirtualObject> virtualObjects;
     private HashMap<Marker,String> markerPlaceIdMap;
 
     static final int PERMISSION_ACCESS_FINE_LOCATION=1;
@@ -329,27 +332,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 }
             });
-            mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-                @Override
-                public void onCameraChange(CameraPosition cameraPosition) {
-                    if(cameraPosition.zoom != currentZoom){
-                        currentZoom = cameraPosition.zoom;
-                    }
-                }
-            });
 
         }
     }
 
     private void centreMapOnLocation(Location location){
-        LatLng userLocation=new LatLng(location.getLatitude(),location.getLongitude());
-        //mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(userLocation).title("Current user location"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,current_zoom));
+        if(location!=null){
+            LatLng userLocation=new LatLng(location.getLatitude(),location.getLongitude());
+            //mMap.clear();
+            //mMap.addMarker(new MarkerOptions().position(userLocation).title("Current user location"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,current_zoom));
+        }
+
+        return;
     }
 
     //treba da pinuje na mapi sve virtuelne objekte i svoje i svojih prijatelja
     private void showVirtualObjectsOnMap(){
+        markerPlaceIdMap=new HashMap<Marker, String>();
+
+        //ovo je deo gde prikazuje samo svoje virtuelne objekte na mapi
+        //potrebno je dodati i deo gde za svoje prijatelje takodje dodaje objekte na mapi
         databaseReference.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -366,8 +369,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     double lon=(Double)dataSnapshot1.child("longitude").getValue();
                     float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
                     String title=dataSnapshot1.child("title").getValue().toString();
-                    VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
+                    final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
                     virtualObject.setId(id);
+                    virtualObject.setUserRecommended(StoredData.getInstance().user.getUsername());
                     StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
                     bitmap=null;
                     if(virtualObjectImage!=null){
@@ -375,28 +379,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             @Override
                             public void onSuccess(byte[] bytes) {
                                 bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                                virtualObject.setVirtual_object_image(bitmap);
+                                addVirtualObjectMarker(virtualObject);
+                                virtualObjects.add(virtualObject);
                             }
 
 
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                addVirtualObjectMarker(virtualObject);
+                                virtualObjects.add(virtualObject);
                                 Toast.makeText(getActivity(),"Neuspelo skidanje slike",Toast.LENGTH_LONG).show();
                             }
                         });
                     }
-                    else
-                    {
-                        //bitmap=null;
-                    }
-                    virtualObject.setVirtual_object_image(bitmap);
 
-
-                    virtualObjects.add(virtualObject);
                 }
-
-                addVirtualObjectMarkers();
-
             }
 
             @Override
@@ -406,29 +405,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    private void addVirtualObjectMarkers(){
-        markerPlaceIdMap=new HashMap<Marker, String>();
-
-        for(int i=0;i<virtualObjects.size();i++){
-            LatLng location=new LatLng(virtualObjects.get(i).getLatitude(),virtualObjects.get(i).getLongitude());
-            MarkerOptions markerOptions=new MarkerOptions();
-            markerOptions.position(location);
-            if(virtualObjects.get(i).getVirtual_object_image()!=null){
-                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(virtualObjects.get(i).getVirtual_object_image()));
-            }
-            else
-            {
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
-            }
-            markerOptions.title(virtualObjects.get(i).getTitle());
-            Marker marker=mMap.addMarker(markerOptions);
-            markerPlaceIdMap.put(marker,virtualObjects.get(i).getId());
+    private void addVirtualObjectMarker(VirtualObject virtualObject){
+        LatLng location=new LatLng(virtualObject.getLatitude(),virtualObject.getLongitude());
+        MarkerOptions markerOptions=new MarkerOptions();
+        markerOptions.position(location);
+        if(virtualObject.getVirtual_object_image()!=null){
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(virtualObject.getVirtual_object_image(),55,55,false)));
         }
+        else {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
+        }
+        markerOptions.title(virtualObject.getTitle());
+        Marker marker=mMap.addMarker(markerOptions);
+        markerPlaceIdMap.put(marker,virtualObject.getId());
+
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 //logika za klik na marker
+                Bundle result=new Bundle();
+                result.putString("idVirtualObject",markerPlaceIdMap.get(marker));
+
+                VirtualObjectFragment virtualObjectFragment=new VirtualObjectFragment();
+                virtualObjectFragment.setArguments(result);
+                getFragmentManager().beginTransaction().replace(R.id.fragment_container,virtualObjectFragment).commit();
+
                 Toast.makeText(getActivity(),"kliknuto na marker",Toast.LENGTH_LONG).show();
                 return true;
             }
