@@ -147,7 +147,13 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
                                         StoredData.getInstance().setUser(new UserWithPicture(user,
-                                                ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp))));
+                                                Bitmap.createScaledBitmap(
+                                                        ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
+                                                        3000,
+                                                        3000,
+                                                        false)
+                                                )
+                                        );
                                         dialogDismiss();
                                         Toast.makeText(MainActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
                                         Intent i = new Intent(getApplicationContext(), StartActivity.class);

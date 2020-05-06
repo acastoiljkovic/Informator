@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -144,11 +145,28 @@ public class LoginActivity extends AppCompatActivity {
                                             public void onSuccess(byte[] bytes) {
                                                 picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                                 StoredData.getInstance().setUser(new UserWithPicture(user,picture));
-//                                                Toast.makeText(LoginActivity.this, "Login Successfully...", Toast.LENGTH_SHORT).show();
+                                                dialogDismiss();
                                                 Intent i = new Intent(getApplicationContext(),StartActivity.class);
                                                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 startActivity(i);
-                                                dialogHide();
+                                                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                StoredData.getInstance().setUser(new UserWithPicture(user,
+                                                                Bitmap.createScaledBitmap(
+                                                                        ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
+                                                                        3000,
+                                                                        3000,
+                                                                        false)
+                                                        )
+                                                );
+                                                dialogDismiss();
+                                                Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
+                                                Intent i = new Intent(getApplicationContext(),StartActivity.class);
+                                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                startActivity(i);
                                                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                             }
                                         });
@@ -191,6 +209,15 @@ public class LoginActivity extends AppCompatActivity {
         try {
             if (dialog.isShowing())
                 dialog.hide();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void dialogDismiss(){
+        try{
+            dialog.dismiss();
         }
         catch (Exception e){
             e.printStackTrace();
