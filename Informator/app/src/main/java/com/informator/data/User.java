@@ -2,12 +2,15 @@ package com.informator.data;
 
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
+
 public class User {
     String fullName;
     String email;
     String phone;
     String username;
     String id;
+    ArrayList<String> friends;
 
     public String getId() {
         return id;
@@ -22,6 +25,7 @@ public class User {
         this.email = email;
         this.phone = phone;
         this.username = username;
+        this.friends = new ArrayList<>();
     }
 
     public User() {
@@ -29,6 +33,21 @@ public class User {
         email = "";
         phone = "";
         username = "";
+        this.friends = new ArrayList<>();
+    }
+
+    public String getFriend(int index){
+        return friends.get(index);
+    }
+
+    public ArrayList<String> getFriends(){
+        return friends;
+    }
+    public void addFriend(String username){
+        friends.add(username);
+    }
+    public void setFriends(ArrayList<String> friends){
+        this.friends = friends;
     }
 
     public String getFullName() {

@@ -59,6 +59,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.data.VirtualObject;
 import com.informator.map_fragments.VirtualObjectFragment;
@@ -119,7 +120,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map,container,false);
 
-        firebaseStorage=FirebaseStorage.getInstance(StartActivity.url);
+        firebaseStorage=FirebaseStorage.getInstance(Constants.URL_STORAGE);
         storageReference=firebaseStorage.getReference();
         firebaseDatabase=FirebaseDatabase.getInstance();
         databaseReference=firebaseDatabase.getReference();
@@ -337,6 +338,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void centreMapOnLocation(Location location){
+
         if(location!=null){
             LatLng userLocation=new LatLng(location.getLatitude(),location.getLongitude());
             //mMap.clear();

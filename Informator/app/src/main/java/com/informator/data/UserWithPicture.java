@@ -9,6 +9,7 @@ public class UserWithPicture {
     String email;
     String phone;
     String username;
+    ArrayList<String> friends;
     Bitmap profilePhoto;
     String id;
     ArrayList<VirtualObject> virtual_objects;
@@ -27,6 +28,7 @@ public class UserWithPicture {
         this.phone = phone;
         this.username = username;
         this.virtual_objects=new ArrayList<>();
+        this.friends = new ArrayList<>();
     }
 
     public UserWithPicture(User user, Bitmap image) {
@@ -37,6 +39,7 @@ public class UserWithPicture {
         id=user.id;
         profilePhoto = image;
         this.virtual_objects=new ArrayList<>();
+        this.friends = new ArrayList<>();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -45,6 +48,7 @@ public class UserWithPicture {
         username = user.username;
         profilePhoto = null;
         this.virtual_objects=new ArrayList<>();
+        this.friends = new ArrayList<>();
     }
 
     public UserWithPicture() {
@@ -52,7 +56,21 @@ public class UserWithPicture {
         email = "";
         phone = "";
         username = "";
+        this.virtual_objects=new ArrayList<>();
+        this.friends = new ArrayList<>();
     }
+
+    public String getFriend(int index){
+        return friends.get(index);
+    }
+
+    public ArrayList<String> getFriends(){
+        return friends;
+    }
+    public void addFriend(String username){
+        friends.add(username);
+    }
+
 
     public String getFullName() {
         return fullName;

@@ -26,6 +26,8 @@ public class EventsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events,container,false);
+
+
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_event_toolbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override

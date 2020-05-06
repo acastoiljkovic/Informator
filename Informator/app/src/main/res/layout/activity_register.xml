@@ -106,11 +106,7 @@
                     android:layout_margin="5dp"
                     android:background="@drawable/button_black_border"
                     android:padding="5dp"
-                    android:src="@drawable/ic_camera_alt_black_24dp"
-                    android:text="@string/mainActivity_btnRegister_text"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="24sp" />
+                    android:src="@drawable/ic_camera_alt_black_24dp"/>
 
                 <ImageButton
                     android:id="@+id/registerAddFromGallery"
@@ -119,11 +115,7 @@
                     android:layout_margin="5dp"
                     android:background="@drawable/button_black_border"
                     android:padding="5dp"
-                    android:src="@drawable/ic_photo_white_24dp"
-                    android:text="@string/mainActivity_btnRegister_text"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="24sp" />
+                    android:src="@drawable/ic_photo_white_24dp" />
             </LinearLayout>
             <Button
                 android:id="@+id/registerBtnSignUp"

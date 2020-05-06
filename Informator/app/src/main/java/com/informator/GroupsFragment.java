@@ -27,6 +27,7 @@ public class GroupsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_groups,container,false);
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_groups_toolbar);
+
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {

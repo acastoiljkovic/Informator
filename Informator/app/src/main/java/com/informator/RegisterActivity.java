@@ -82,7 +82,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         user = new User();
-        storage = FirebaseStorage.getInstance(StartActivity.url);
+        storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
         storageRef = storage.getReference();
 
         try {
@@ -231,6 +231,7 @@ public class RegisterActivity extends AppCompatActivity {
                                             uploadTask.addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
+                                                    // TODO obrisati kreiranog korisnika sa servera
                                                     Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                                     dialogHide();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

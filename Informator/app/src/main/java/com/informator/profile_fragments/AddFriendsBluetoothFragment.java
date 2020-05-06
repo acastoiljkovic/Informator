@@ -70,7 +70,7 @@ public class AddFriendsBluetoothFragment extends Fragment {
         mBTAdapter = BluetoothAdapter.getDefaultAdapter();
         if(mBTAdapter == null){
             Toast.makeText(getContext(),"This device does not support bluetooth !",Toast.LENGTH_SHORT).show();
-            ((StartActivity) getActivity()).setFragment(R.id.profile);
+            ((StartActivity) getActivity()).setFragment(R.id.profile,null);
         }
         mBTArrayAdapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1);
 
@@ -80,18 +80,22 @@ public class AddFriendsBluetoothFragment extends Fragment {
 
         iwBluetoothState = view.findViewById(R.id.image_add_friends_bluetooth_state);
         tvBluetoothState = view.findViewById(R.id.text_add_friends_bluetooth_state);
-        
-        if(mBTAdapter.isEnabled()){
-            iwBluetoothState.setImageResource(R.drawable.ic_bluetooth_green_24dp);
-            tvBluetoothState.setText("Enabled");
-            tvBluetoothState.setTextColor(getResources().getColor(R.color.color_green));
+
+        if(mBTAdapter != null) {
+            if (mBTAdapter.isEnabled()) {
+                iwBluetoothState.setImageResource(R.drawable.ic_bluetooth_green_24dp);
+                tvBluetoothState.setText("Enabled");
+                tvBluetoothState.setTextColor(getResources().getColor(R.color.color_green));
+            } else {
+                iwBluetoothState.setImageResource(R.drawable.ic_bluetooth_red_24dp);
+                tvBluetoothState.setText("Disabled");
+                tvBluetoothState.setTextColor(getResources().getColor(R.color.color_red));
+            }
         }
         else{
-            iwBluetoothState.setImageResource(R.drawable.ic_bluetooth_red_24dp);
-            tvBluetoothState.setText("Disabled");
-            tvBluetoothState.setTextColor(getResources().getColor(R.color.color_red));
+            Toast.makeText(getContext(),"This device does not support bluetooth !",Toast.LENGTH_SHORT).show();
+            ((StartActivity) getActivity()).setFragment(R.id.profile,null);
         }
-
         state = view.findViewById(R.id.group_bluetooth_state);
         state.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,7 +152,7 @@ public class AddFriendsBluetoothFragment extends Fragment {
         if(!mBTAdapter.isEnabled()){
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            Toast.makeText(getContext(),"Bluetooth turned on",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(),"Bluetooth turned on",Toast.LENGTH_SHORT).show();
         }
         else{
             Toast.makeText(getContext(),"Bluetooth is already on",Toast.LENGTH_SHORT).show();
