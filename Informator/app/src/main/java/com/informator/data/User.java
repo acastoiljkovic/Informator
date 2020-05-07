@@ -43,8 +43,17 @@ public class User {
     public ArrayList<String> getFriends(){
         return friends;
     }
+
     public void addFriend(String username){
         friends.add(username);
+    }
+
+    public int getNumberOfFriends(){
+        return friends.size();
+    }
+
+    public void removeFriend(String username){
+        friends.remove(username);
     }
     public void setFriends(ArrayList<String> friends){
         this.friends = friends;

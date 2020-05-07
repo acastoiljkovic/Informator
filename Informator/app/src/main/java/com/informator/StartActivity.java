@@ -55,7 +55,6 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         }
         else if(itemId==R.id.profile){
             retFragment=new ProfileFragment();
-            retFragment.setArguments(bundle);
         }
         else if(itemId==R.id.add_group){
 //            retFragment=new AddGroupFragment();
@@ -82,6 +81,7 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
             retFragment=new AddFriendsBluetoothFragment();
         }
 
+        retFragment.setArguments(bundle);
         return retFragment;
     }
 

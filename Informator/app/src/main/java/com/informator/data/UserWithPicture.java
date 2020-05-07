@@ -39,7 +39,7 @@ public class UserWithPicture {
         id=user.id;
         profilePhoto = image;
         this.virtual_objects=new ArrayList<>();
-        this.friends = new ArrayList<>();
+        this.friends = user.getFriends();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -48,7 +48,7 @@ public class UserWithPicture {
         username = user.username;
         profilePhoto = null;
         this.virtual_objects=new ArrayList<>();
-        this.friends = new ArrayList<>();
+        this.friends = user.getFriends();
     }
 
     public UserWithPicture() {
@@ -71,6 +71,14 @@ public class UserWithPicture {
         friends.add(username);
     }
 
+    public int getNumberOfFriends(){
+        return friends.size();
+    }
+
+
+    public void removeFriend(String username){
+        friends.remove(username);
+    }
 
     public String getFullName() {
         return fullName;
