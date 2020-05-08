@@ -24,7 +24,7 @@ public class RankingFragment extends Fragment {
         tvWelcome = (TextView)view.findViewById(R.id.tv_welcome_text_ranking_fragment);
 //        if(savedInstanceState == null){
         //TODO provera da li mu prosledjujemo rankove prijatelja
-            tvWelcome.setText(R.string.no_ranking);
+/*            tvWelcome.setText(R.string.no_ranking);*/
 //        }
         return  view;
     }

@@ -108,6 +108,7 @@ public class FriendsFragment extends Fragment {
         }
         else {
             btnAddFriend.setVisibility(View.GONE);
+
         }
 
         if(friendsUsernames.size() <= 0) {
@@ -152,6 +153,7 @@ public class FriendsFragment extends Fragment {
                 }
             });
         }
+
         return  view;
     }
 

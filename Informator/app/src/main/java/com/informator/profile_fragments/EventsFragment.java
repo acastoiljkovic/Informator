@@ -22,7 +22,7 @@ public class EventsFragment extends Fragment {
         tvWelcome = (TextView)view.findViewById(R.id.tv_welcome_text_events_profile_fragment);
 //        if(savedInstanceState == null){
         //TODO provera da li mu prosledjujemo evente
-            tvWelcome.setText(R.string.no_events);
+/*            tvWelcome.setText(R.string.no_events);*/
 //        }
         return  view;
     }

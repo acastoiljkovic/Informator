@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -25,7 +24,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.informator.data.Constants;
 import com.informator.data.StoredData;
-import com.informator.data.UserWithPicture;
+import com.informator.map_fragments.VirtualObjectFragment;
 import com.informator.profile_fragments.AddFriendsBluetoothFragment;
 import com.informator.profile_fragments.SearchFriendsFragment;
 import com.informator.profile_fragments.SendMessageFragment;
@@ -108,6 +107,10 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         }
         else if(itemId==R.id.add_friends_bluetooth){
             retFragment=new AddFriendsBluetoothFragment();
+        }
+        else if(itemId==R.string.virtualObjectId){
+            retFragment=new VirtualObjectFragment();
+            retFragment.setArguments(bundle);
         }
 
         retFragment.setArguments(bundle);

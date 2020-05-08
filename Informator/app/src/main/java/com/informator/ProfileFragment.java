@@ -125,8 +125,8 @@ public class ProfileFragment extends Fragment {
             friendsOfPerson = new ArrayList<>();
             Bitmap image = drawableToBitmap(getContext().getResources().getDrawable(R.drawable.ic_person_outline_black_24dp));
             imageViewEditProfile.setImageResource(R.drawable.ic_add_black_24dp);
-            tvEditProfile.setText(R.string.add_friend);
-            tvFullName.setText(R.string.no_text);
+/*            tvEditProfile.setText(R.string.add_friend);
+            tvFullName.setText(R.string.no_text);*/
             imageViewProfilePicture.setImageBitmap(Bitmap.createScaledBitmap(image, 3000, 3000, false));
             try{
                 database = FirebaseDatabase.getInstance();

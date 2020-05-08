@@ -14,6 +14,7 @@ public class UserWithPicture {
     String id;
     ArrayList<VirtualObject> virtual_objects;
 
+
     public String getId() {
         return id;
     }
@@ -79,6 +80,11 @@ public class UserWithPicture {
     public void removeFriend(String username){
         friends.remove(username);
     }
+
+    public void addVirtualObject(VirtualObject virtualObject){
+        this.virtual_objects.add(virtualObject);
+    }
+
 
     public String getFullName() {
         return fullName;

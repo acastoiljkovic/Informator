@@ -25,6 +25,7 @@
     <string name="description">Description:</string>
     <string name="type_description">Type a description...</string>
     <string name="create">Create</string>
+
     <string name="add_friend">Add Friend</string>
     <string name="remove_friend">Remove Friend</string>
     <string name="no_ranking">There is no ranking at the moment. Please try again later.</string>
@@ -32,6 +33,11 @@
     <string name="no_photos">There is no photos.</string>
     <string name="no_events">There is no events at the moment. Please try again later.</string>
     <string name="no_text">Empty</string>
+
+    <string name="virtual_object">Virtual object</string>
+    <string name="write_comment">Write a comment...</string>
+    <string name="virtualObjectId">Object5</string>
+
 
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBgfNFwt06DZZQyugZ25EpsFJ-LjDRB8ho</string>
 

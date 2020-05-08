@@ -15,11 +15,14 @@ public class VirtualObject {
     private ArrayList<Post> posts;
     private double latitude;
     private double longitude;
+    private int numberOfRates;
+    private String userRecommended;
 
     public VirtualObject(String title, String description, Bitmap virtual_object_image) {
         this.title = title;
         this.description = description;
         this.virtual_object_image = virtual_object_image;
+        this.numberOfRates=0;
         this.rating=0;
         this.posts=new ArrayList<Post>();
     }
@@ -29,6 +32,7 @@ public class VirtualObject {
         this.description = description;
         this.latitude=latitude;
         this.longitude=longitude;
+        this.numberOfRates=0;
         this.rating=0;
         this.posts=new ArrayList<Post>();
     }
@@ -40,6 +44,26 @@ public class VirtualObject {
         this.longitude=longitude;
         this.rating=rating;
         this.posts=new ArrayList<Post>();
+    }
+
+    public void addPost(Post post){
+        this.posts.add(post);
+    }
+
+    public String getUserRecommended() {
+        return userRecommended;
+    }
+
+    public void setUserRecommended(String userRecommended) {
+        this.userRecommended = userRecommended;
+    }
+
+    public int getNumberOfRates() {
+        return numberOfRates;
+    }
+
+    public void setNumberOfRates(int numberOfRates) {
+        this.numberOfRates = numberOfRates;
     }
 
     public String getTitle() {

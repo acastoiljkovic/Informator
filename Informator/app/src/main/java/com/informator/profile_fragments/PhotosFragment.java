@@ -113,8 +113,6 @@ public class PhotosFragment extends Fragment {
         StorageReference imagesOfUser = storageRef.child("images").child(StoredData.getInstance().getUser().getUsername());
         fetchImages(imagesOfUser);
 
-        //TODO provera da li mu prosledjujeo slike
-        tvWelcome.setText(R.string.no_photos);
 
         return  view;
     }
