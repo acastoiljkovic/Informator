@@ -74,6 +74,10 @@ public class ProfileFragment extends Fragment {
     String username = null;
     boolean isFriends = false;
     ArrayList<String> friendsOfPerson;
+    RankingFragment fragmentRanking;
+    FriendsFragment fragmentFriends;
+    com.informator.profile_fragments.EventsFragment fragmentEvents;
+    PhotosFragment fragmentPhotos;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,11 +94,17 @@ public class ProfileFragment extends Fragment {
 
         editOrAdd = (LinearLayout)view.findViewById(R.id.edit_profile_or_add_friend);
 
-        RankingFragment fragmentRanking = new RankingFragment();
-        FriendsFragment fragmentFriends = new FriendsFragment();
-        com.informator.profile_fragments.EventsFragment fragmentEvents = new com.informator.profile_fragments.EventsFragment();
-        PhotosFragment fragmentPhotos = new PhotosFragment();
+        fragmentRanking = new RankingFragment();
+        fragmentFriends = new FriendsFragment();
+        fragmentEvents = new com.informator.profile_fragments.EventsFragment();
+        fragmentPhotos = new PhotosFragment();
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_profile_toolbar);
+
+        tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
+
+
+        adapter = new TabAdapterProfile(getFragmentManager());
 
         sharedPreferences = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
@@ -111,7 +121,7 @@ public class ProfileFragment extends Fragment {
         tvGroups = (TextView) view.findViewById(R.id.tvGroups);
         tvPoints = (TextView) view.findViewById(R.id.tvPoints);
         //gledamo tudji profil
-        if (username != null) {
+        if (username != null && username.compareTo(StoredData.getInstance().getUser().getUsername()) != 0) {
             friendsOfPerson = new ArrayList<>();
             Bitmap image = drawableToBitmap(getContext().getResources().getDrawable(R.drawable.ic_person_outline_black_24dp));
             imageViewEditProfile.setImageResource(R.drawable.ic_add_black_24dp);
@@ -145,6 +155,22 @@ public class ProfileFragment extends Fragment {
                         }
                         tvFriends.setText(getContext().getResources().getString(R.string.friends) +" " + friendsOfPerson.size());
 
+                        Bundle bundleProfile = new Bundle();
+                        bundleProfile.putBoolean("profile",true);
+                        fragmentRanking.setArguments(bundleProfile);
+                        Bundle bundleFrends = new Bundle();
+                        bundleFrends.putBoolean("profile",true);
+                        bundleFrends.putStringArrayList("friends",friendsOfPerson);
+                        fragmentFriends.setArguments(bundleFrends);
+                        fragmentPhotos.setArguments(bundleProfile);
+                        fragmentEvents.setArguments(bundleProfile);
+                        adapter.addFragment(fragmentRanking, "Ranking");
+                        adapter.addFragment(fragmentFriends, "Friends");
+                        adapter.addFragment(fragmentPhotos, "Photos");
+                        adapter.addFragment(fragmentEvents, "Events");
+
+                        viewPager.setAdapter(adapter);
+                        tabLayout.setupWithViewPager(viewPager);
                     }
 
                     StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
@@ -194,16 +220,6 @@ public class ProfileFragment extends Fragment {
                 }
             });
 
-            //TODO bundle koji sadrzi ranking,slike i evente profila kome se pristupa
-            Bundle bundleProfile = new Bundle();
-            bundleProfile.putBoolean("profile",true);
-            fragmentRanking.setArguments(bundleProfile);
-            Bundle bundleFrends = new Bundle();
-            bundleFrends.putBoolean("profile",true);
-            bundleFrends.putStringArrayList("friends",friendsOfPerson);
-            fragmentFriends.setArguments(bundleFrends);
-            fragmentPhotos.setArguments(bundleProfile);
-            fragmentEvents.setArguments(bundleProfile);
 
         }
         // gledamo svoj profil
@@ -256,21 +272,16 @@ public class ProfileFragment extends Fragment {
             fragmentFriends.setArguments(bundleFrends);
             fragmentPhotos.setArguments(null);
             fragmentEvents.setArguments(null);
+            adapter.addFragment(fragmentRanking, "Ranking");
+            adapter.addFragment(fragmentFriends, "Friends");
+            adapter.addFragment(fragmentPhotos, "Photos");
+            adapter.addFragment(fragmentEvents, "Events");
 
+            viewPager.setAdapter(adapter);
+            tabLayout.setupWithViewPager(viewPager);
         }
 
-        tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
 
-
-        adapter = new TabAdapterProfile(getFragmentManager());
-        adapter.addFragment(fragmentRanking, "Ranking");
-        adapter.addFragment(fragmentFriends, "Friends");
-        adapter.addFragment(fragmentPhotos, "Photos");
-        adapter.addFragment(fragmentEvents, "Events");
-
-        viewPager.setAdapter(adapter);
-        tabLayout.setupWithViewPager(viewPager);
 
         return view;
     }

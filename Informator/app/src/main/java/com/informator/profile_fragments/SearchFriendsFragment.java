@@ -32,6 +32,7 @@ import com.google.firebase.storage.StorageReference;
 import com.informator.ProfileFragment;
 import com.informator.R;
 import com.informator.StartActivity;
+import com.informator.data.Constants;
 import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.User;
 
@@ -100,7 +101,7 @@ public class SearchFriendsFragment extends Fragment {
         try {
             database = FirebaseDatabase.getInstance();
             mDatabase = database.getReference();
-            storage = FirebaseStorage.getInstance("gs://informator-b509e.appspot.com");
+            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
             storageRef = storage.getReference();
         }
         catch (Exception e){
