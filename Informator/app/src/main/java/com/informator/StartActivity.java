@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.informator.map_fragments.VirtualObjectFragment;
 import com.informator.profile_fragments.AddFriendsBluetoothFragment;
 import com.informator.profile_fragments.SearchFriendsFragment;
 import com.informator.profile_fragments.SendMessageFragment;
@@ -80,6 +81,10 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         }
         else if(itemId==R.id.add_friends_bluetooth){
             retFragment=new AddFriendsBluetoothFragment();
+        }
+        else if(itemId==R.string.virtualObjectId){
+            retFragment=new VirtualObjectFragment();
+            retFragment.setArguments(bundle);
         }
 
         return retFragment;

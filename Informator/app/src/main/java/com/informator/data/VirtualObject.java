@@ -46,6 +46,9 @@ public class VirtualObject {
         this.posts=new ArrayList<Post>();
     }
 
+    public void addPost(Post post){
+        this.posts.add(post);
+    }
 
     public String getUserRecommended() {
         return userRecommended;

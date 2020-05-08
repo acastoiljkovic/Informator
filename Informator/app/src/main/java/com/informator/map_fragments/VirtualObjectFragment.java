@@ -29,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.informator.MapFragment;
 import com.informator.R;
+import com.informator.StartActivity;
 import com.informator.data.StoredData;
 
 public class VirtualObjectFragment extends Fragment {
@@ -81,7 +82,7 @@ public class VirtualObjectFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 MapFragment mapFragment=new MapFragment();
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container,mapFragment).commit();
+                ((StartActivity) getActivity()).setFragment(R.id.map,null);
             }
         });
 
@@ -89,23 +90,23 @@ public class VirtualObjectFragment extends Fragment {
         Bundle bundle=this.getArguments();
         idVirtualObject=bundle.getString("idVirtualObject");
 
-        for(int i=0;i< MapFragment.virtualObjects.size();i++){
-            if(MapFragment.virtualObjects.get(i).getId().compareTo(idVirtualObject)==0){
-                imageView.setImageBitmap(MapFragment.virtualObjects.get(i).getVirtual_object_image());
-                textViewTitle.setText(MapFragment.virtualObjects.get(i).getTitle());
-                textViewRecommendedBy.setText("Recommended by "+MapFragment.virtualObjects.get(i).getUserRecommended());
-                textViewDescription.setText(MapFragment.virtualObjects.get(i).getDescription());
-                textViewNumberOfPosts.setText(MapFragment.virtualObjects.get(i).getPosts().size()+" comments");
+        for(int i=0;i< StoredData.getInstance().user.getListVO().size();i++){
+            if(StoredData.getInstance().user.getListVO().get(i).getId().compareTo(idVirtualObject)==0){
+                imageView.setImageBitmap(StoredData.getInstance().user.getListVO().get(i).getVirtual_object_image());
+                textViewTitle.setText(StoredData.getInstance().user.getListVO().get(i).getTitle());
+                textViewRecommendedBy.setText("Recommended by "+StoredData.getInstance().user.getListVO().get(i).getUserRecommended());
+                textViewDescription.setText(StoredData.getInstance().user.getListVO().get(i).getDescription());
+                textViewNumberOfPosts.setText(StoredData.getInstance().user.getListVO().get(i).getPosts().size()+" comments");
                 imageViewUserImage.setImageBitmap(StoredData.getInstance().user.getProfilePhoto());
-                textViewRating.setText("Rate: "+MapFragment.virtualObjects.get(i).getRating());
+                textViewRating.setText("Rate: "+StoredData.getInstance().user.getListVO().get(i).getRating());
 
-                if(MapFragment.virtualObjects.get(i).getPosts().size()>0)//postoje komentari treba ih dodati
+                if(StoredData.getInstance().user.getListVO().get(i).getPosts().size()>0)//postoje komentari treba ih dodati
                 {
 
                 }
 
                 //ako je prijateljev objekat moguce ga je oceniti
-                if(MapFragment.virtualObjects.get(i).getUserRecommended().compareTo(StoredData.getInstance().user.getUsername())==0){
+                if(StoredData.getInstance().user.getListVO().get(i).getUserRecommended().compareTo(StoredData.getInstance().user.getUsername())!=0){
                     RatingBar ratingBar=new RatingBar(getContext());
                     ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                         @Override
@@ -129,14 +130,14 @@ public class VirtualObjectFragment extends Fragment {
                                 Toast.makeText(getActivity(),"Rate first!",Toast.LENGTH_LONG).show();
                             }
                             else {
-                                int num=MapFragment.virtualObjects.get(finalI).getNumberOfRates()+1;
-                                float rating=(MapFragment.virtualObjects.get(finalI).getRating()
-                                        *MapFragment.virtualObjects.get(finalI).getNumberOfRates()+currentRating)/num;
-                                databaseReference.child("users").child(MapFragment.virtualObjects.get(finalI).getUserRecommended())
-                                        .child("virtual_objects").child(MapFragment.virtualObjects.get(finalI).getTitle())
+                                int num=StoredData.getInstance().user.getListVO().get(finalI).getNumberOfRates()+1;
+                                float rating=(StoredData.getInstance().user.getListVO().get(finalI).getRating()
+                                        *StoredData.getInstance().user.getListVO().get(finalI).getNumberOfRates()+currentRating)/num;
+                                databaseReference.child("users").child(StoredData.getInstance().user.getListVO().get(finalI).getUserRecommended())
+                                        .child("virtual_objects").child(StoredData.getInstance().user.getListVO().get(finalI).getTitle())
                                         .child("numberOfRates").setValue(num);
-                                databaseReference.child("users").child(MapFragment.virtualObjects.get(finalI).getUserRecommended())
-                                        .child("virtual_objects").child(MapFragment.virtualObjects.get(finalI).getTitle())
+                                databaseReference.child("users").child(StoredData.getInstance().user.getListVO().get(finalI).getUserRecommended())
+                                        .child("virtual_objects").child(StoredData.getInstance().user.getListVO().get(finalI).getTitle())
                                         .child("rating").setValue(rating);
 
                             }
@@ -153,4 +154,6 @@ public class VirtualObjectFragment extends Fragment {
         }
         return view;
     }
+
+
 }

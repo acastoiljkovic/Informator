@@ -60,6 +60,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.informator.data.Constants;
+import com.informator.data.Post;
 import com.informator.data.StoredData;
 import com.informator.data.VirtualObject;
 import com.informator.map_fragments.VirtualObjectFragment;
@@ -359,45 +360,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                if(dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("virtual_objects").getValue()==null)
-                    return;
-
-                for(DataSnapshot dataSnapshot1: dataSnapshot.child((StoredData.getInstance().getUser().getUsername()))
-                        .child("virtual_objects").getChildren()){
-                    String id=dataSnapshot1.child("id").getValue().toString();
-                    String description=dataSnapshot1.child("description").getValue().toString();
-
-                    double lat=(Double) dataSnapshot1.child("latitude").getValue();
-                    double lon=(Double)dataSnapshot1.child("longitude").getValue();
-                    float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
-                    String title=dataSnapshot1.child("title").getValue().toString();
-                    final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
-                    virtualObject.setId(id);
-                    virtualObject.setUserRecommended(StoredData.getInstance().user.getUsername());
-                    StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
-                    bitmap=null;
-                    if(virtualObjectImage!=null){
-                        virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                            @Override
-                            public void onSuccess(byte[] bytes) {
-                                bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                virtualObject.setVirtual_object_image(bitmap);
-                                addVirtualObjectMarker(virtualObject);
-                                virtualObjects.add(virtualObject);
-                            }
-
-
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                addVirtualObjectMarker(virtualObject);
-                                virtualObjects.add(virtualObject);
-                                Toast.makeText(getActivity(),"Neuspelo skidanje slike",Toast.LENGTH_LONG).show();
-                            }
-                        });
+                if(dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("friends").getValue()!=null){
+                    for(DataSnapshot  ds: dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("friends").getChildren()){
+                        StoredData.getInstance().getUser().addFriend(ds.getValue().toString());
                     }
+                }
+
+                for(final String username: StoredData.getInstance().getUser().getFriends()){
+
+                    databaseReference.child("users").child("").orderByChild("id").equalTo(username).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            findVirtualObjectForUserWithUsername(username,dataSnapshot);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
 
                 }
+
+                findVirtualObjectForUserWithUsername(StoredData.getInstance().getUser().getUsername(),dataSnapshot);
+
+
+
             }
 
             @Override
@@ -405,6 +393,67 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             }
         });
+    }
+
+    private void findVirtualObjectForUserWithUsername(String username,DataSnapshot dataSnapshot){
+
+        if(dataSnapshot.child(username).child("virtual_objects").getValue()!=null)
+        {
+            for(DataSnapshot dataSnapshot1: dataSnapshot.child(username)
+                    .child("virtual_objects").getChildren()){
+                String id=dataSnapshot1.child("id").getValue().toString();
+                String description=dataSnapshot1.child("description").getValue().toString();
+
+                double lat=(Double) dataSnapshot1.child("latitude").getValue();
+                double lon=(Double)dataSnapshot1.child("longitude").getValue();
+                float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
+                String title=dataSnapshot1.child("title").getValue().toString();
+                int numberOfRates=Integer.parseInt(dataSnapshot1.child("numberOfRates").getValue().toString());
+                final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
+                virtualObject.setId(id);
+                virtualObject.setUserRecommended(StoredData.getInstance().user.getUsername());
+                virtualObject.setNumberOfRates(numberOfRates);
+                virtualObject.setRating(rating);
+
+                if(dataSnapshot1.child("comments").getValue()!=null){
+                    for(DataSnapshot dataSnapshot2:dataSnapshot1.child("comments").getChildren()){
+                        Post post=new Post();
+                        String user_comment=dataSnapshot2.child("user_comment").getValue().toString();
+                        String comment=dataSnapshot2.child("comment").getValue().toString();
+                        post.setPost(comment);
+                        post.setUsername(user_comment);
+                        virtualObject.addPost(post);
+                    }
+                }
+
+                StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
+                bitmap=null;
+                if(virtualObjectImage!=null){
+                    virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                            virtualObject.setVirtual_object_image(bitmap);
+                            addVirtualObjectMarker(virtualObject);
+                            //cuva sve virtuelne objekte i svoje i svojih prijatelja
+                            StoredData.getInstance().user.addVirtualObject(virtualObject);
+                            //virtualObjects.add(virtualObject);
+                        }
+
+
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            addVirtualObjectMarker(virtualObject);
+                            StoredData.getInstance().user.addVirtualObject(virtualObject);
+                            //virtualObjects.add(virtualObject);
+                            //Toast.makeText(getActivity(),"Neuspelo skidanje slike",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+
+            }
+        }
     }
 
     private void addVirtualObjectMarker(VirtualObject virtualObject){
@@ -427,11 +476,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public boolean onMarkerClick(Marker marker) {
                 //logika za klik na marker
                 Bundle result=new Bundle();
+                //problem onback press drugi put postavlja result na null??
                 result.putString("idVirtualObject",markerPlaceIdMap.get(marker));
 
-                VirtualObjectFragment virtualObjectFragment=new VirtualObjectFragment();
-                virtualObjectFragment.setArguments(result);
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container,virtualObjectFragment).commit();
+                ((StartActivity) getActivity()).setFragment(R.string.virtualObjectId,result);
 
                 Toast.makeText(getActivity(),"kliknuto na marker",Toast.LENGTH_LONG).show();
                 return true;
