@@ -1,7 +1,6 @@
 package com.informator.profile_fragments;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,7 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,16 +25,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
-import com.informator.MainActivity;
-import com.informator.ProfileFragment;
 import com.informator.R;
-import com.informator.RegisterActivity;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
-import com.informator.data.PhotosListViewItem;
-import com.informator.data.SearchFriendsListViewItem;
+import com.informator.data.ImageAdapter;
 import com.informator.data.StoredData;
-import com.informator.data.UserWithPicture;
 
 import java.util.ArrayList;
 
@@ -44,9 +38,10 @@ public class PhotosFragment extends Fragment {
     Boolean profile;
     ImageButton addPhotoCamera;
     ImageButton addPhotoGallery;
-    ListView listViewPhoytos;
+
+    GridView gridViewPhotos;
     ArrayList<Bitmap> images;
-    PhotosListViewItem adapter = null;
+    ImageAdapter adapter;
     FirebaseStorage storage;
     StorageReference storageRef;
 
@@ -57,11 +52,12 @@ public class PhotosFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_photos, container, false);
         Bundle bundle = getArguments();
 
-        listViewPhoytos = view.findViewById(R.id.list_photos);
+        gridViewPhotos = view.findViewById(R.id.grid_photos);
         images = new ArrayList<>();
+        images.add(StoredData.getInstance().getUser().getProfilePhoto());   
 
-        adapter = new PhotosListViewItem(getActivity(),images);
-        listViewPhoytos.setAdapter(adapter);
+        adapter = new ImageAdapter(getContext(),images);
+        gridViewPhotos.setAdapter(adapter);
 
         try {
             storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
@@ -115,6 +111,15 @@ public class PhotosFragment extends Fragment {
         tvWelcome = (TextView)view.findViewById(R.id.tv_welcome_text_photos_fragment);
 
         StorageReference imagesOfUser = storageRef.child("images").child(StoredData.getInstance().getUser().getUsername());
+        fetchImages(imagesOfUser);
+
+        //TODO provera da li mu prosledjujeo slike
+        tvWelcome.setText(R.string.no_photos);
+
+        return  view;
+    }
+
+    private void fetchImages(StorageReference imagesOfUser){
         imagesOfUser.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
@@ -123,7 +128,7 @@ public class PhotosFragment extends Fragment {
                 }
                 else{
                     tvWelcome.setVisibility(View.GONE);
-                    for(int i =0;i<listResult.getItems().size()-1;i++) {
+                    for(int i =0;i<listResult.getItems().size();i++) {
                         listResult.getItems().get(i).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                             @Override
                             public void onSuccess(byte[] bytes) {
@@ -140,10 +145,5 @@ public class PhotosFragment extends Fragment {
                 }
             }
         });
-
-        //TODO provera da li mu prosledjujeo slike
-        tvWelcome.setText(R.string.no_photos);
-
-        return  view;
     }
 }

@@ -202,7 +202,6 @@ public class RegisterActivity extends AppCompatActivity {
                             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
-                            // login with firebase
                             firebaseAuth.createUserWithEmailAndPassword(user.getEmail(),Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -230,7 +229,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                 public void onFailure(@NonNull Exception e) {
                                                     // TODO obrisati kreiranog korisnika sa servera
                                                     Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                    dialogHide();
+                                                    dialogDismiss();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                                 }
                                             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -242,7 +241,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                     Intent i = new Intent(getApplicationContext(),StartActivity.class);
                                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                     startActivity(i);
-                                                    dialogHide();
+                                                    dialogDismiss();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
                                                 }
@@ -295,6 +294,16 @@ public class RegisterActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    public void dialogDismiss(){
+        try{
+            dialog.dismiss();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
