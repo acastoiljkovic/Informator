@@ -28,6 +28,9 @@
     <string name="virtual_object">Virtual object</string>
     <string name="write_comment">Write a comment...</string>
     <string name="virtualObjectId">Object5</string>
+    <string name="open_comments">OpenComments123</string>
+    <string name="post">Post</string>
+    <string name="comments">Comments</string>
 
 
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBgfNFwt06DZZQyugZ25EpsFJ-LjDRB8ho</string>

@@ -303,12 +303,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                current_user_location=currentLocation;
                 centreMapOnLocation(currentLocation);
                 showVirtualObjectsOnMap();
             }
             else if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,locationListener);
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                current_user_location=currentLocation;
                 centreMapOnLocation(currentLocation);
                 showVirtualObjectsOnMap();
             }
@@ -418,8 +420,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 if(dataSnapshot1.child("comments").getValue()!=null){
                     for(DataSnapshot dataSnapshot2:dataSnapshot1.child("comments").getChildren()){
                         Post post=new Post();
-                        String user_comment=dataSnapshot2.child("user_comment").getValue().toString();
-                        String comment=dataSnapshot2.child("comment").getValue().toString();
+                        String user_comment=dataSnapshot2.child("username").getValue().toString();
+                        String comment=dataSnapshot2.child("post").getValue().toString();
                         post.setPost(comment);
                         post.setUsername(user_comment);
                         virtualObject.addPost(post);

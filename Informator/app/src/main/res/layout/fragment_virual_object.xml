@@ -136,6 +136,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <LinearLayout
+                android:orientation="vertical"
+                android:id="@+id/linear_layout_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linear_layout_textView"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -172,13 +188,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <TextView
+                    android:id="@+id/text_view_write_comment"
                     android:layout_marginTop="7.5dp"
                     android:hint="@string/write_comment"
                     android:textSize="14sp"
                     android:textColor="@color/color_black"
                     android:background="@drawable/backround_comments"
-                    android:layout_gravity="center"
-                    android:gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 

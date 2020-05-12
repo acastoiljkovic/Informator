@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginRight="40dp"
+            android:text="@string/comments"
+            android:textColor="@color/color_black"
+            android:textSize="24sp">
+
+        </TextView>
+
+    </LinearLayout>
+
+    <View
+
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/color_gray">
+
+    </View>
+
+    <ListView
+        android:id="@+id/list_view_comments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+    <LinearLayout
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:id="@+id/id_write_comment"
+            android:layout_marginTop="7.5dp"
+            android:hint="@string/write_comment"
+            android:textSize="14sp"
+            android:textColor="@color/color_black"
+            android:background="@drawable/backround_comments"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content">
+
+        </EditText>
+
+        <Button
+            android:layout_marginLeft="5dp"
+            android:text="@string/post"
+            android:textSize="13sp"
+            android:textColor="@color/color_white"
+            android:background="@drawable/button_black_border"
+            android:id="@+id/btn_add_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+        </Button>
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
