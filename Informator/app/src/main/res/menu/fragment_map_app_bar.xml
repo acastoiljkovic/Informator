@@ -12,8 +12,16 @@
     </item>
 
     <item
+        android:id="@+id/search_in_radius"
+        android:icon="@drawable/ic_gps_fixed_black_24dp"
+        android:title="@string/search_in_radius"
+        app:showAsAction="ifRoom">
+
+    </item>
+
+    <item
         android:id="@+id/search_on_map"
-        android:icon="@drawable/ic_search_black_24dp"
+        android:icon="@drawable/ic_filter_list_black_24dp"
         android:title="@string/map"
         app:showAsAction="ifRoom"
         >

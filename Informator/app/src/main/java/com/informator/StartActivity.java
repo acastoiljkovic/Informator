@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.informator.map_fragments.CommentsFragment;
+import com.informator.map_fragments.ListVirtualObjectsFragment;
 import com.informator.map_fragments.VirtualObjectFragment;
 import com.informator.profile_fragments.AddFriendsBluetoothFragment;
 import com.informator.profile_fragments.SearchFriendsFragment;
@@ -90,6 +91,9 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         else if(itemId==R.string.open_comments){
             retFragment=new CommentsFragment();
             retFragment.setArguments(bundle);
+        }
+        else if(itemId==R.string.open_listVO){
+            retFragment=new ListVirtualObjectsFragment();
         }
 
         return retFragment;

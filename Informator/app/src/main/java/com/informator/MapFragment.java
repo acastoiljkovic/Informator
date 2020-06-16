@@ -48,6 +48,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -68,6 +69,7 @@ import com.informator.map_fragments.VirtualObjectFragment;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
@@ -105,6 +107,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     Bitmap bitmap;
 
     private float currentZoom;
+    private float radius;
 
 
     @Override
@@ -140,6 +143,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 }else if(item.getItemId()==R.id.search_on_map){
                     
+                }
+                else if(item.getItemId()==R.id.search_in_radius){
+                     getVirtualObjects();
+                    ((StartActivity)getActivity()).setFragment(R.string.open_listVO,null);
                 }
                 return false;
             }
@@ -305,14 +312,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 current_user_location=currentLocation;
                 centreMapOnLocation(currentLocation);
-                showVirtualObjectsOnMap();
+                calculateVisibleRegionRadius();
+                //showVirtualObjectsOnMap();
             }
             else if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,locationListener);
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 current_user_location=currentLocation;
                 centreMapOnLocation(currentLocation);
-                showVirtualObjectsOnMap();
+                calculateVisibleRegionRadius();
+                //showVirtualObjectsOnMap();
             }
             else
             {
@@ -333,11 +342,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 public void onCameraMove() {
                     current_zoom=mMap.getCameraPosition().zoom;
+                    radius=calculateVisibleRegionRadius();
+                    Toast.makeText(getActivity(),String.valueOf(radius),Toast.LENGTH_LONG).show();
 
                 }
             });
 
         }
+    }
+
+    private float calculateVisibleRegionRadius(){
+        VisibleRegion visibleRegion=mMap.getProjection().getVisibleRegion();
+
+        LatLng topLeft=visibleRegion.farLeft;
+        LatLng bottomRight=visibleRegion.nearRight;
+
+        float[] diagonalDistance=new float[1];
+
+        Location.distanceBetween(
+                topLeft.latitude,
+                topLeft.longitude,
+                bottomRight.latitude,
+                bottomRight.longitude,
+                diagonalDistance
+        );
+
+        this.radius=diagonalDistance[0]/2;
+
+        return diagonalDistance[0]/2;
+
     }
 
     private void centreMapOnLocation(Location location){
@@ -352,12 +385,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return;
     }
 
-    //treba da pinuje na mapi sve virtuelne objekte i svoje i svojih prijatelja
-    private void showVirtualObjectsOnMap(){
+
+    private void getVirtualObjects() {
         markerPlaceIdMap=new HashMap<Marker, String>();
 
-        //ovo je deo gde prikazuje samo svoje virtuelne objekte na mapi
-        //potrebno je dodati i deo gde za svoje prijatelje takodje dodaje objekte na mapi
         databaseReference.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -386,8 +417,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 findVirtualObjectForUserWithUsername(StoredData.getInstance().getUser().getUsername(),dataSnapshot);
 
-
-
             }
 
             @Override
@@ -403,59 +432,77 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         {
             for(DataSnapshot dataSnapshot1: dataSnapshot.child(username)
                     .child("virtual_objects").getChildren()){
-                String id=dataSnapshot1.child("id").getValue().toString();
-                String description=dataSnapshot1.child("description").getValue().toString();
 
                 double lat=(Double) dataSnapshot1.child("latitude").getValue();
                 double lon=(Double)dataSnapshot1.child("longitude").getValue();
-                float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
-                String title=dataSnapshot1.child("title").getValue().toString();
-                int numberOfRates=Integer.parseInt(dataSnapshot1.child("numberOfRates").getValue().toString());
-                final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
-                virtualObject.setId(id);
-                virtualObject.setUserRecommended(StoredData.getInstance().user.getUsername());
-                virtualObject.setNumberOfRates(numberOfRates);
-                virtualObject.setRating(rating);
+                if(checkIfInRadius(new LatLng(lat,lon))){
 
-                if(dataSnapshot1.child("comments").getValue()!=null){
-                    for(DataSnapshot dataSnapshot2:dataSnapshot1.child("comments").getChildren()){
-                        Post post=new Post();
-                        String user_comment=dataSnapshot2.child("username").getValue().toString();
-                        String comment=dataSnapshot2.child("post").getValue().toString();
-                        post.setPost(comment);
-                        post.setUsername(user_comment);
-                        virtualObject.addPost(post);
+                    String id=dataSnapshot1.child("id").getValue().toString();
+                    String description=dataSnapshot1.child("description").getValue().toString();
+
+
+                    float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
+                    String title=dataSnapshot1.child("title").getValue().toString();
+                    int numberOfRates=Integer.parseInt(dataSnapshot1.child("numberOfRates").getValue().toString());
+                    final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
+                    virtualObject.setId(id);
+                    virtualObject.setUserRecommended(StoredData.getInstance().user.getUsername());
+                    virtualObject.setNumberOfRates(numberOfRates);
+                    virtualObject.setRating(rating);
+
+                    if(dataSnapshot1.child("comments").getValue()!=null){
+                        for(DataSnapshot dataSnapshot2:dataSnapshot1.child("comments").getChildren()){
+                            Post post=new Post();
+                            String user_comment=dataSnapshot2.child("username").getValue().toString();
+                            String comment=dataSnapshot2.child("post").getValue().toString();
+                            post.setPost(comment);
+                            post.setUsername(user_comment);
+                            virtualObject.addPost(post);
+                        }
+                    }
+
+                    StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
+                    bitmap=null;
+                    if(virtualObjectImage!=null){
+                        virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                                virtualObject.setVirtual_object_image(bitmap);
+                                StoredData.getInstance().user.addVirtualObject(virtualObject);
+                                List<VirtualObject> vo=StoredData.getInstance().getUser().getListVO();
+                            }
+
+
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                StoredData.getInstance().user.addVirtualObject(virtualObject);
+                            }
+                        });
                     }
                 }
 
-                StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
-                bitmap=null;
-                if(virtualObjectImage!=null){
-                    virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                        @Override
-                        public void onSuccess(byte[] bytes) {
-                            bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                            virtualObject.setVirtual_object_image(bitmap);
-                            addVirtualObjectMarker(virtualObject);
-                            //cuva sve virtuelne objekte i svoje i svojih prijatelja
-                            StoredData.getInstance().user.addVirtualObject(virtualObject);
-                            //virtualObjects.add(virtualObject);
-                        }
-
-
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            addVirtualObjectMarker(virtualObject);
-                            StoredData.getInstance().user.addVirtualObject(virtualObject);
-                            //virtualObjects.add(virtualObject);
-                            //Toast.makeText(getActivity(),"Neuspelo skidanje slike",Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
 
             }
         }
+    }
+
+    private boolean checkIfInRadius(LatLng position){
+        float distanceFromCurrentLocation[]=new float[1];
+
+        Location.distanceBetween(
+                current_user_location.getLatitude(),
+                current_user_location.getLongitude(),
+                position.latitude,
+                position.longitude,
+                distanceFromCurrentLocation
+                );
+
+        if(distanceFromCurrentLocation[0] > radius)
+            return false;
+        else
+            return true;
     }
 
     private void addVirtualObjectMarker(VirtualObject virtualObject){
