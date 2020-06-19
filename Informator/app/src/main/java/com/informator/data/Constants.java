@@ -7,4 +7,8 @@ public class Constants {
     public static final String SHARED_PREFERENCES_EMAIL = "email";
     public static final String SHARED_PREFERENCES_PASSWORD = "password";
     public static String URL_STORAGE = "gs://informator-b509e.appspot.com";
+    public static final int  REQUEST_IMAGE_CAPTURE = 1;
+    public static final int  REQUEST_PICK_IMAGE = 2;
+    public static final int  CAMERA_PERMISSION = 3;
+    public static final int  STORAGE_PERMISSION = 4;
 }

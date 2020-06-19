@@ -27,6 +27,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -37,6 +38,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.informator.data.Constants;
+import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.StoredData;
 import com.informator.data.User;
 import com.informator.data.UserWithPicture;
@@ -71,6 +73,11 @@ public class ProfileFragment extends Fragment {
     SharedPreferences sharedPreferences;
     String username = null;
     boolean isFriends = false;
+    ArrayList<String> friendsOfPerson;
+    RankingFragment fragmentRanking;
+    FriendsFragment fragmentFriends;
+    com.informator.profile_fragments.EventsFragment fragmentEvents;
+    PhotosFragment fragmentPhotos;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,11 +94,17 @@ public class ProfileFragment extends Fragment {
 
         editOrAdd = (LinearLayout)view.findViewById(R.id.edit_profile_or_add_friend);
 
-        RankingFragment fragmentRanking = new RankingFragment();
-        FriendsFragment fragmentFriends = new FriendsFragment();
-        com.informator.profile_fragments.EventsFragment fragmentEvents = new com.informator.profile_fragments.EventsFragment();
-        PhotosFragment fragmentPhotos = new PhotosFragment();
+        fragmentRanking = new RankingFragment();
+        fragmentFriends = new FriendsFragment();
+        fragmentEvents = new com.informator.profile_fragments.EventsFragment();
+        fragmentPhotos = new PhotosFragment();
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_profile_toolbar);
+
+        tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
+
+
+        adapter = new TabAdapterProfile(getFragmentManager());
 
         sharedPreferences = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
 
@@ -104,9 +117,12 @@ public class ProfileFragment extends Fragment {
         tvEditProfile = (TextView) view.findViewById(R.id.textView_editProfile);
         imageViewProfilePicture = (ImageView) view.findViewById(R.id.profile_picture);
         tvFullName = (TextView) view.findViewById(R.id.tvFullName);
-
+        tvFriends = (TextView) view.findViewById(R.id.tvFriends);
+        tvGroups = (TextView) view.findViewById(R.id.tvGroups);
+        tvPoints = (TextView) view.findViewById(R.id.tvPoints);
         //gledamo tudji profil
-        if (username != null) {
+        if (username != null && username.compareTo(StoredData.getInstance().getUser().getUsername()) != 0) {
+            friendsOfPerson = new ArrayList<>();
             Bitmap image = drawableToBitmap(getContext().getResources().getDrawable(R.drawable.ic_person_outline_black_24dp));
             imageViewEditProfile.setImageResource(R.drawable.ic_add_black_24dp);
 /*            tvEditProfile.setText(R.string.add_friend);
@@ -123,16 +139,38 @@ public class ProfileFragment extends Fragment {
             mDatabase.child("users").child(username).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    user = new User();
                     if(dataSnapshot != null){
-                        tvFullName.setText(String.valueOf(dataSnapshot.child("fullName").getValue()).toUpperCase());
+                        user.setUsername(String.valueOf(dataSnapshot.child("username").getValue()));
+                        user.setEmail(String.valueOf(dataSnapshot.child("email").getValue()));
+                        user.setFullName(String.valueOf(dataSnapshot.child("fullName").getValue()));
+                        tvFullName.setText(String.valueOf(user.getFullName()).toUpperCase());
                         for(DataSnapshot data1 : dataSnapshot.child("friends").getChildren()){
-                            if(String.valueOf(data1.getValue()) == StoredData.getInstance().getUser().getUsername()){
+                            friendsOfPerson.add(String.valueOf(data1.getValue()));
+                            if(String.valueOf(data1.getValue()).compareTo(StoredData.getInstance().getUser().getUsername()) == 0){
                                 isFriends = true;
-                                // vec su prijatelji, nema potrebe da stoji dugme add friend
-                                editOrAdd.setVisibility(View.GONE);
+                                tvEditProfile.setText(R.string.remove_friend);
+                                imageViewEditProfile.setImageResource(R.drawable.ic_delete_black_24dp);
                             }
                         }
+                        tvFriends.setText(getContext().getResources().getString(R.string.friends) +" " + friendsOfPerson.size());
 
+                        Bundle bundleProfile = new Bundle();
+                        bundleProfile.putBoolean("profile",true);
+                        fragmentRanking.setArguments(bundleProfile);
+                        Bundle bundleFrends = new Bundle();
+                        bundleFrends.putBoolean("profile",true);
+                        bundleFrends.putStringArrayList("friends",friendsOfPerson);
+                        fragmentFriends.setArguments(bundleFrends);
+                        fragmentPhotos.setArguments(bundleProfile);
+                        fragmentEvents.setArguments(bundleProfile);
+                        adapter.addFragment(fragmentRanking, "Ranking");
+                        adapter.addFragment(fragmentFriends, "Friends");
+                        adapter.addFragment(fragmentPhotos, "Photos");
+                        adapter.addFragment(fragmentEvents, "Events");
+
+                        viewPager.setAdapter(adapter);
+                        tabLayout.setupWithViewPager(viewPager);
                     }
 
                     StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
@@ -143,6 +181,11 @@ public class ProfileFragment extends Fragment {
                         public void onSuccess(byte[] bytes) {
                             picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                             imageViewProfilePicture.setImageBitmap(Bitmap.createScaledBitmap(picture, 3000, 3000, false));
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            e.printStackTrace();
                         }
                     });
                 }
@@ -157,38 +200,26 @@ public class ProfileFragment extends Fragment {
             editOrAdd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mDatabase.child("users").child(username).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if(dataSnapshot != null){
-
-
-                                // ako nisu prijatelji napravi da jesu
-                                if(!isFriends){
-                                    mDatabase.child("users").child(username)
-                                            .child("friends").child(StoredData.getInstance().user.getUsername())
-                                            .setValue(StoredData.getInstance().user.getUsername());
-                                    mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
-                                            .child("friends").child(username).setValue(username);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
+                    if(!isFriends){
+                        mDatabase.child("users").child(username)
+                                .child("friends").child(StoredData.getInstance().user.getUsername())
+                                .setValue(StoredData.getInstance().user.getUsername());
+                        mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
+                                .child("friends").child(username).setValue(username);
+                        StoredData.getInstance().getUser().addFriend(username);
+                        Toast.makeText(getContext(),"Dodao",Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        mDatabase.child("users").child(username)
+                                .child("friends").child(StoredData.getInstance().user.getUsername()).removeValue();
+                        mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
+                                .child("friends").child(username).removeValue();
+                        StoredData.getInstance().getUser().removeFriend(username);
+                        Toast.makeText(getContext(),"Obrisao",Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
-            //TODO bundle koji sadrzi ranking,prijatelje,slike i evente profila kome se pristupa
-            Bundle bundleProfile = new Bundle();
-            bundleProfile.putBoolean("profile",true);
-            fragmentRanking.setArguments(bundleProfile);
-            fragmentFriends.setArguments(bundleProfile);
-            fragmentPhotos.setArguments(bundleProfile);
-            fragmentEvents.setArguments(bundleProfile);
 
         }
         // gledamo svoj profil
@@ -198,6 +229,7 @@ public class ProfileFragment extends Fragment {
             if (StoredData.getInstance().getUser() != null) {
                 imageViewProfilePicture.setImageBitmap(StoredData.getInstance().user.getProfilePhoto());
                 tvFullName.setText(StoredData.getInstance().user.getFullName().toUpperCase());
+                tvFriends.setText(getContext().getResources().getString(R.string.friends) +" " + StoredData.getInstance().getUser().getNumberOfFriends());
             }
 
             toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -235,24 +267,21 @@ public class ProfileFragment extends Fragment {
             });
 
             fragmentRanking.setArguments(null);
-            fragmentFriends.setArguments(null);
+            Bundle bundleFrends = new Bundle();
+            bundleFrends.putStringArrayList("friends",StoredData.getInstance().getUser().getFriends());
+            fragmentFriends.setArguments(bundleFrends);
             fragmentPhotos.setArguments(null);
             fragmentEvents.setArguments(null);
+            adapter.addFragment(fragmentRanking, "Ranking");
+            adapter.addFragment(fragmentFriends, "Friends");
+            adapter.addFragment(fragmentPhotos, "Photos");
+            adapter.addFragment(fragmentEvents, "Events");
 
+            viewPager.setAdapter(adapter);
+            tabLayout.setupWithViewPager(viewPager);
         }
 
-        tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
 
-
-        adapter = new TabAdapterProfile(getFragmentManager());
-        adapter.addFragment(fragmentRanking, "Ranking");
-        adapter.addFragment(fragmentFriends, "Friends");
-        adapter.addFragment(fragmentPhotos, "Photos");
-        adapter.addFragment(fragmentEvents, "Events");
-
-        viewPager.setAdapter(adapter);
-        tabLayout.setupWithViewPager(viewPager);
 
         return view;
     }

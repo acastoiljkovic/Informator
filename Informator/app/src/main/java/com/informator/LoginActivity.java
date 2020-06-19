@@ -102,6 +102,7 @@ public class LoginActivity extends AppCompatActivity {
                     etPassword.setError("Password must be >= 6 characters");
                     return;
                 }
+
                 if(firebaseAuth != null) {
                     dialogShow();
                     getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,

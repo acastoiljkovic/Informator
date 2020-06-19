@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,8 +29,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.informator.ProfileFragment;
 import com.informator.R;
 import com.informator.StartActivity;
+import com.informator.data.Constants;
 import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.User;
 
@@ -98,7 +101,7 @@ public class SearchFriendsFragment extends Fragment {
         try {
             database = FirebaseDatabase.getInstance();
             mDatabase = database.getReference();
-            storage = FirebaseStorage.getInstance("gs://informator-b509e.appspot.com");
+            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
             storageRef = storage.getReference();
         }
         catch (Exception e){
@@ -158,7 +161,9 @@ public class SearchFriendsFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    user = snapshot.getValue(User.class);
+                    user.setUsername(String.valueOf(snapshot.child("username").getValue()));
+                    user.setEmail(String.valueOf(snapshot.child("email").getValue()));
+                    user.setFullName(String.valueOf(snapshot.child("fullName").getValue()));
                     if(user.getEmail().contains(text)){
                         fullname.add(user.getFullName());
                         usernames.add(user.getUsername());
@@ -169,6 +174,20 @@ public class SearchFriendsFragment extends Fragment {
                             public void onSuccess(byte[] bytes) {
                                 Bitmap picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                 profileImages.add(picture);
+                                if(getActivity() != null) {
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    listViewSearchFriends.setAdapter(adapter);
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                profileImages.add(Bitmap.createScaledBitmap(
+                                        ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
+                                        3000,
+                                        3000,
+                                        false)
+                                );
                                 if(getActivity() != null) {
                                     adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
@@ -191,6 +210,20 @@ public class SearchFriendsFragment extends Fragment {
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
 
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                profileImages.add(Bitmap.createScaledBitmap(
+                                        ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
+                                        3000,
+                                        3000,
+                                        false)
+                                );
+                                if(getActivity() != null) {
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    listViewSearchFriends.setAdapter(adapter);
+                                }
                             }
                         });
                     }
