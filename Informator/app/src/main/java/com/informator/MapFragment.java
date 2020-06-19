@@ -190,16 +190,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         };
 
-        for(String friendUsername: StoredData.getInstance().getListFriendsUsername()){
-            Toast.makeText(getActivity(),friendUsername,Toast.LENGTH_LONG).show();
-        }
-
-//        for(VirtualObject virtualObject: StoredData.getInstance().getMyVirtualObjects()){
-//            Toast.makeText(getActivity(),virtualObject.getTitle(),Toast.LENGTH_LONG).show();
-//        }
-
-
-
         return view;
     }
 

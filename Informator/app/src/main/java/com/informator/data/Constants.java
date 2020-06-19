@@ -11,4 +11,5 @@ public class Constants {
     public static final int  REQUEST_PICK_IMAGE = 2;
     public static final int  CAMERA_PERMISSION = 3;
     public static final int  STORAGE_PERMISSION = 4;
+    public static final String FIREBASE_CHILD="users";
 }
