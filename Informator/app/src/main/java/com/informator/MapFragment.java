@@ -2,6 +2,7 @@ package com.informator;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -95,6 +96,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     Bitmap virtual_object_image;
     ImageButton imgButton;
     Button createButton;
+    ProgressDialog dialog;
 
     FirebaseAuth firebaseAuth = null;
     FirebaseStorage firebaseStorage;  //za slike
@@ -131,6 +133,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         firebaseAuth = FirebaseAuth.getInstance();
         virtualObjects=new ArrayList<VirtualObject>();
 
+        dialog =new ProgressDialog(getActivity());
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Loading...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+
         popup_add_virtual_object=new Dialog(this.getActivity());
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_map_toolbar);
         currentZoom = 12;
@@ -145,7 +153,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     
                 }
                 else if(item.getItemId()==R.id.search_in_radius){
-                     getVirtualObjects();
+                    getVirtualObjects();
                     ((StartActivity)getActivity()).setFragment(R.string.open_listVO,null);
                 }
                 return false;
@@ -182,9 +190,37 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         };
 
+        for(String friendUsername: StoredData.getInstance().getListFriendsUsername()){
+            Toast.makeText(getActivity(),friendUsername,Toast.LENGTH_LONG).show();
+        }
+
+//        for(VirtualObject virtualObject: StoredData.getInstance().getMyVirtualObjects()){
+//            Toast.makeText(getActivity(),virtualObject.getTitle(),Toast.LENGTH_LONG).show();
+//        }
+
 
 
         return view;
+    }
+
+    public void dialogShow(){
+        try {
+            if (!dialog.isShowing())
+                dialog.show();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void dialogHide(){
+        try {
+            if (dialog.isShowing())
+                dialog.hide();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void showPopup(){
@@ -343,7 +379,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 public void onCameraMove() {
                     current_zoom=mMap.getCameraPosition().zoom;
                     radius=calculateVisibleRegionRadius();
-                    Toast.makeText(getActivity(),String.valueOf(radius),Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getActivity(),String.valueOf(radius),Toast.LENGTH_LONG).show();
 
                 }
             });
@@ -388,6 +424,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void getVirtualObjects() {
         markerPlaceIdMap=new HashMap<Marker, String>();
+        StoredData.getInstance().getUser().setListVO(new ArrayList<VirtualObject>());
 
         databaseReference.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -446,7 +483,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     int numberOfRates=Integer.parseInt(dataSnapshot1.child("numberOfRates").getValue().toString());
                     final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
                     virtualObject.setId(id);
-                    virtualObject.setUserRecommended(StoredData.getInstance().user.getUsername());
+                    virtualObject.setUserRecommended(StoredData.getInstance().getUser().getUsername());
                     virtualObject.setNumberOfRates(numberOfRates);
                     virtualObject.setRating(rating);
 
@@ -469,7 +506,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             public void onSuccess(byte[] bytes) {
                                 bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                 virtualObject.setVirtual_object_image(bitmap);
-                                StoredData.getInstance().user.addVirtualObject(virtualObject);
+                                StoredData.getInstance().getUser().addVirtualObject(virtualObject);
                                 List<VirtualObject> vo=StoredData.getInstance().getUser().getListVO();
                             }
 
@@ -477,7 +514,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                StoredData.getInstance().user.addVirtualObject(virtualObject);
+                                StoredData.getInstance().getUser().addVirtualObject(virtualObject);
                             }
                         });
                     }

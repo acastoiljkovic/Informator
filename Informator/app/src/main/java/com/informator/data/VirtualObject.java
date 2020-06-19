@@ -18,10 +18,10 @@ public class VirtualObject {
     private int numberOfRates;
     private String userRecommended;
 
-    public VirtualObject(String title, String description, Bitmap virtual_object_image) {
-        this.title = title;
-        this.description = description;
-        this.virtual_object_image = virtual_object_image;
+    public VirtualObject() {
+        this.title = "title";
+        this.description = "description";
+        this.virtual_object_image = null;
         this.numberOfRates=0;
         this.rating=0;
         this.posts=new ArrayList<Post>();
