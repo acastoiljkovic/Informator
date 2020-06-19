@@ -1,6 +1,7 @@
 package com.informator.data;
 
 import android.graphics.Bitmap;
+import android.location.Location;
 
 import java.util.ArrayList;
 
@@ -13,6 +14,7 @@ public class UserWithPicture {
     Bitmap profilePhoto;
     String id;
     ArrayList<VirtualObject> virtual_objects;
+    Location currentLocation;
 
 
     public String getId() {
@@ -42,6 +44,7 @@ public class UserWithPicture {
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
     }
+
     public UserWithPicture(User user) {
         fullName = user.fullName;
         email = user.email;

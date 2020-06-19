@@ -94,6 +94,7 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         }
         else if(itemId==R.string.open_listVO){
             retFragment=new ListVirtualObjectsFragment();
+            retFragment.setArguments(bundle);
         }
 
         return retFragment;

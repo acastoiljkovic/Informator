@@ -153,8 +153,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     
                 }
                 else if(item.getItemId()==R.id.search_in_radius){
-                    getVirtualObjects();
-                    ((StartActivity)getActivity()).setFragment(R.string.open_listVO,null);
+                    Bundle bundle=new Bundle();
+                    bundle.putFloat("radius",radius);
+                    ((StartActivity)getActivity()).setFragment(R.string.open_listVO,bundle);
                 }
                 return false;
             }
@@ -189,14 +190,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             }
         };
-
-        for(String friendUsername: StoredData.getInstance().getListFriendsUsername()){
-            Toast.makeText(getActivity(),friendUsername,Toast.LENGTH_LONG).show();
-        }
-
-//        for(VirtualObject virtualObject: StoredData.getInstance().getMyVirtualObjects()){
-//            Toast.makeText(getActivity(),virtualObject.getTitle(),Toast.LENGTH_LONG).show();
-//        }
 
 
 

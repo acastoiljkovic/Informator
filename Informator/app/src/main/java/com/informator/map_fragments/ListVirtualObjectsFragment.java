@@ -3,6 +3,7 @@ package com.informator.map_fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,12 +12,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.informator.R;
 import com.informator.data.StoredData;
 import com.informator.data.VirtualObject;
@@ -37,20 +40,44 @@ public class ListVirtualObjectsFragment extends Fragment {
         ArrayList<String> titles=new ArrayList<>();
         ArrayList<Bitmap> images=new ArrayList<>();
 
-        ArrayList<VirtualObject> vo=StoredData.getInstance().getUser().getListVO();
+        Bundle bundle=this.getArguments();
+        float radius=bundle.getFloat("radius");
+        Toast.makeText(getActivity(),String.valueOf(radius),Toast.LENGTH_LONG).show();
 
-        for(int i=0;i<StoredData.getInstance().getUser().getListVO().size();i++){
-            titles.add(StoredData.getInstance().getUser().getListVO().get(i).getTitle());
-            images.add(StoredData.getInstance().getUser().getListVO().get(i).getVirtual_object_image());
+        for(VirtualObject virtualObject:StoredData.getInstance().getUser().getListVO()){
+
         }
 
-        ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),titles,images);
-        listView.setAdapter(listVirtualObjectsAdapter);
+
+//        for(int i=0;i<StoredData.getInstance().getUser().getListVO().size();i++){
+//            titles.add(StoredData.getInstance().getUser().getListVO().get(i).getTitle());
+//            images.add(StoredData.getInstance().getUser().getListVO().get(i).getVirtual_object_image());
+//        }
+
+//        ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),titles,images);
+//        listView.setAdapter(listVirtualObjectsAdapter);
 
 
 
         return view;
     }
+
+//    private boolean checkIfInRadius(LatLng position,float radius){
+//        float distanceFromCurrentLocation[]=new float[1];
+//
+//        Location.distanceBetween(
+//                current_user_location.getLatitude(),
+//                current_user_location.getLongitude(),
+//                position.latitude,
+//                position.longitude,
+//                distanceFromCurrentLocation
+//        );
+//
+//        if(distanceFromCurrentLocation[0] > radius)
+//            return false;
+//        else
+//            return true;
+//    }
 
     public class ListVirtualObjectsAdapter extends BaseAdapter{
 
