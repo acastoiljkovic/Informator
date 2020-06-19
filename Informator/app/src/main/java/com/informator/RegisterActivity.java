@@ -51,6 +51,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class RegisterActivity extends AppCompatActivity {
+
     FirebaseAuth firebaseAuth = null;
     FirebaseDatabase database;
     DatabaseReference mDatabase;
@@ -71,10 +72,6 @@ public class RegisterActivity extends AppCompatActivity {
     ProgressDialog dialog;
     SharedPreferences sharedPreferences;
 
-    static final int  REQUEST_IMAGE_CAPTURE = 1;
-    static final int  REQUEST_PICK_IMAGE = 2;
-    static final int  CAMERA_PERMISSION = 3;
-    static final int  STORAGE_PERMISSION = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
                         != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(RegisterActivity.this,
                             new String[]{Manifest.permission.CAMERA},
-                            CAMERA_PERMISSION);
+                            Constants.CAMERA_PERMISSION);
                 }
                 else{
                     dispatchTakePictureIntent();
@@ -134,7 +131,7 @@ public class RegisterActivity extends AppCompatActivity {
                         != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(RegisterActivity.this,
                             new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            STORAGE_PERMISSION);
+                            Constants.STORAGE_PERMISSION);
                 }
                 else {
                     openImagePicker();
@@ -205,7 +202,6 @@ public class RegisterActivity extends AppCompatActivity {
                             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
-                            // login with firebase
                             firebaseAuth.createUserWithEmailAndPassword(user.getEmail(),Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -233,7 +229,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                 public void onFailure(@NonNull Exception e) {
                                                     // TODO obrisati kreiranog korisnika sa servera
                                                     Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                    dialogHide();
+                                                    dialogDismiss();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                                 }
                                             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -245,7 +241,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                     Intent i = new Intent(getApplicationContext(),StartActivity.class);
                                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                     startActivity(i);
-                                                    dialogHide();
+                                                    dialogDismiss();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
                                                 }
@@ -298,6 +294,16 @@ public class RegisterActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    public void dialogDismiss(){
+        try{
+            dialog.dismiss();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
@@ -327,7 +333,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if(takePictureIntent.resolveActivity(getPackageManager()) != null){
-            startActivityForResult(takePictureIntent,REQUEST_IMAGE_CAPTURE);
+            startActivityForResult(takePictureIntent,Constants.REQUEST_IMAGE_CAPTURE);
         }
     }
 
@@ -335,18 +341,18 @@ public class RegisterActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_PICK_IMAGE);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), Constants.REQUEST_PICK_IMAGE);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+        if(requestCode == Constants.REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
             Bundle extras = data.getExtras();
             image = (Bitmap) extras.get("data");
             Toast.makeText(RegisterActivity.this, "Image Added!", Toast.LENGTH_SHORT).show();
             btnTakePhoto.setBackgroundResource(R.drawable.button_green_border );
             btnAddPhoto.setBackgroundResource(R.drawable.button_black_border );
         }
-        else if(requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK){
+        else if(requestCode == Constants.REQUEST_PICK_IMAGE && resultCode == RESULT_OK){
             if (data != null) {
                 Uri contentURI = data.getData();
                 try {

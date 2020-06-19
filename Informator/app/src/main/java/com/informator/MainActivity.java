@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         }
         try{
             database = FirebaseDatabase.getInstance();
-            storage = FirebaseStorage.getInstance("gs://informator-b509e.appspot.com");
+            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
             storageRef = storage.getReference();
             mDatabase = database.getReference();
         }
@@ -121,11 +121,11 @@ public class MainActivity extends AppCompatActivity {
                                         user.setFullName(String.valueOf(data.child("fullName").getValue()));
                                         user.setPhone(String.valueOf(data.child("phone").getValue()));
                                         user.setId(String.valueOf(data.child("id").getValue()));
-                                        ArrayList<String> friends = new ArrayList<>();
-                                        for(DataSnapshot data1 : data.child("friends").getChildren()){
-                                            friends.add(String.valueOf(data1.getValue()));
-                                        }
-                                        user.setFriends(friends);
+//                                        ArrayList<String> friends = new ArrayList<>();
+//                                        for(DataSnapshot data1 : data.child("friends").getChildren()){
+//                                            friends.add(String.valueOf(data1.getValue()));
+//                                        }
+//                                        user.setFriends(friends);
                                     }
                                     i++;
                                 }

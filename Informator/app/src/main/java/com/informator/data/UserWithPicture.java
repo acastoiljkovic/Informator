@@ -3,6 +3,15 @@ package com.informator.data;
 import android.graphics.Bitmap;
 import android.location.Location;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 
 public class UserWithPicture {
@@ -15,6 +24,8 @@ public class UserWithPicture {
     String id;
     ArrayList<VirtualObject> virtual_objects;
     Location currentLocation;
+    DatabaseReference databaseReference;
+    ListUserUpdateEventListener updateListener;
 
 
     public String getId() {
@@ -43,8 +54,72 @@ public class UserWithPicture {
         profilePhoto = image;
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("friends").addChildEventListener(childEventListenerFrineds);
+        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("virtual_objects").addChildEventListener(childEventListenerVirtualObjects);
+
     }
 
+<<<<<<< HEAD
+=======
+    ChildEventListener childEventListenerVirtualObjects= new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            VirtualObject virtualObject=dataSnapshot.getValue(VirtualObject.class);
+            virtual_objects.add(virtualObject);
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
+    ChildEventListener childEventListenerFrineds= new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            String friendUsername=dataSnapshot.getValue(String.class);
+            friends.add(friendUsername);
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
+
+>>>>>>> master
     public UserWithPicture(User user) {
         fullName = user.fullName;
         email = user.email;
@@ -75,10 +150,18 @@ public class UserWithPicture {
         friends.add(username);
     }
 
+    public int getNumberOfFriends(){
+        return friends.size();
+    }
+
+
+    public void removeFriend(String username){
+        friends.remove(username);
+    }
+
     public void addVirtualObject(VirtualObject virtualObject){
         this.virtual_objects.add(virtualObject);
     }
-
 
     public String getFullName() {
         return fullName;
