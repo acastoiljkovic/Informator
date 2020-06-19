@@ -70,6 +70,7 @@ public class ProfileFragment extends Fragment {
     private TextView tvGroups;
     private TextView tvPoints;
     private LinearLayout editOrAdd;
+    Toolbar toolbar;
     SharedPreferences sharedPreferences;
     String username = null;
     boolean isFriends = false;
@@ -92,34 +93,7 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile,container,false);
         Bundle bundle = getArguments();
 
-        editOrAdd = (LinearLayout)view.findViewById(R.id.edit_profile_or_add_friend);
-
-        fragmentRanking = new RankingFragment();
-        fragmentFriends = new FriendsFragment();
-        fragmentEvents = new com.informator.profile_fragments.EventsFragment();
-        fragmentPhotos = new PhotosFragment();
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_profile_toolbar);
-
-        tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
-
-
-        adapter = new TabAdapterProfile(getFragmentManager());
-
-        sharedPreferences = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
-
-        if(bundle != null) {
-            username = bundle.get("username").toString();
-
-        }
-
-        imageViewEditProfile = (ImageView) view.findViewById(R.id.imageView_editProfile);
-        tvEditProfile = (TextView) view.findViewById(R.id.textView_editProfile);
-        imageViewProfilePicture = (ImageView) view.findViewById(R.id.profile_picture);
-        tvFullName = (TextView) view.findViewById(R.id.tvFullName);
-        tvFriends = (TextView) view.findViewById(R.id.tvFriends);
-        tvGroups = (TextView) view.findViewById(R.id.tvGroups);
-        tvPoints = (TextView) view.findViewById(R.id.tvPoints);
+        Initialize(view,bundle);
 
         //gledamo tudji profil
         if (username != null && username.compareTo(StoredData.getInstance().getUser().getUsername()) != 0) {
@@ -202,21 +176,10 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     if(!isFriends){
-                        mDatabase.child("users").child(username)
-                                .child("friends").child(StoredData.getInstance().user.getUsername())
-                                .setValue(StoredData.getInstance().user.getUsername());
-                        mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
-                                .child("friends").child(username).setValue(username);
-                        StoredData.getInstance().getUser().addFriend(username);
-                        Toast.makeText(getContext(),"Dodao",Toast.LENGTH_SHORT).show();
+                        AddFriend();
                     }
                     else{
-                        mDatabase.child("users").child(username)
-                                .child("friends").child(StoredData.getInstance().user.getUsername()).removeValue();
-                        mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
-                                .child("friends").child(username).removeValue();
-                        StoredData.getInstance().getUser().removeFriend(username);
-                        Toast.makeText(getContext(),"Obrisao",Toast.LENGTH_SHORT).show();
+                        RemoveFriend();
                     }
                 }
             });
@@ -237,17 +200,7 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     if (item.getItemId() == R.id.logout) {
-                        StoredData.getInstance().setUser(null);
-                        Intent i = new Intent(getContext(), MainActivity.class);
-                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(i);
-
-                        SharedPreferences.Editor edit = sharedPreferences.edit();
-                        edit.putBoolean(Constants.SHARED_PREFERENCES_LOGGED, false);
-                        edit.putString(Constants.SHARED_PREFERENCES_EMAIL, "");
-                        edit.putString(Constants.SHARED_PREFERENCES_USERNAME, "");
-                        edit.putString(Constants.SHARED_PREFERENCES_PASSWORD, "");
-                        edit.commit();
+                        Logout();
                     } else if (item.getItemId() == R.id.search_friends) {
                         ((StartActivity) getActivity()).setFragment(R.id.search_friends, null);
 
@@ -285,6 +238,82 @@ public class ProfileFragment extends Fragment {
 
 
         return view;
+    }
+
+    public void Initialize(View view, Bundle bundle){
+        editOrAdd = (LinearLayout)view.findViewById(R.id.edit_profile_or_add_friend);
+
+        fragmentRanking = new RankingFragment();
+        fragmentFriends = new FriendsFragment();
+        fragmentEvents = new com.informator.profile_fragments.EventsFragment();
+        fragmentPhotos = new PhotosFragment();
+        toolbar = (Toolbar) view.findViewById(R.id.fragment_profile_toolbar);
+
+        tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
+
+
+        adapter = new TabAdapterProfile(getFragmentManager());
+
+        sharedPreferences = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
+
+        if(bundle != null) {
+            username = bundle.get("username").toString();
+
+        }
+
+        imageViewEditProfile = (ImageView) view.findViewById(R.id.imageView_editProfile);
+        tvEditProfile = (TextView) view.findViewById(R.id.textView_editProfile);
+        imageViewProfilePicture = (ImageView) view.findViewById(R.id.profile_picture);
+        tvFullName = (TextView) view.findViewById(R.id.tvFullName);
+        tvFriends = (TextView) view.findViewById(R.id.tvFriends);
+        tvGroups = (TextView) view.findViewById(R.id.tvGroups);
+        tvPoints = (TextView) view.findViewById(R.id.tvPoints);
+    }
+
+    public void Logout(){
+        StoredData.getInstance().setUser(null);
+        Intent i = new Intent(getContext(), MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        edit.putBoolean(Constants.SHARED_PREFERENCES_LOGGED, false);
+        edit.putString(Constants.SHARED_PREFERENCES_EMAIL, "");
+        edit.putString(Constants.SHARED_PREFERENCES_USERNAME, "");
+        edit.putString(Constants.SHARED_PREFERENCES_PASSWORD, "");
+        edit.commit();
+    }
+
+    public void AddFriend(){
+
+        // korisniku sa username dodaje logovanog korisnika kao prijatelja
+        mDatabase.child("users").child(username)
+                .child("friends").child(StoredData.getInstance().user.getUsername())
+                .setValue(StoredData.getInstance().user.getUsername());
+
+        // logovanom korisniku dodaje korisnika sa username kao priajtelja
+        mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
+                .child("friends").child(username).setValue(username);
+
+        StoredData.getInstance().getUser().addFriend(username);
+
+        Toast.makeText(getContext(),"Dodao",Toast.LENGTH_SHORT).show();
+    }
+
+    public void RemoveFriend(){
+
+        // korisniku sa username uklanja logovanog korisnika kao prijatelja
+        mDatabase.child("users").child(username)
+                .child("friends").child(StoredData.getInstance().user.getUsername()).removeValue();
+
+        // logovanom korisniku uklanja korisnika sa username kao priajtelja
+        mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
+                .child("friends").child(username).removeValue();
+
+        StoredData.getInstance().getUser().removeFriend(username);
+
+        Toast.makeText(getContext(),"Obrisao",Toast.LENGTH_SHORT).show();
     }
 
     public static Bitmap drawableToBitmap (Drawable drawable) {
