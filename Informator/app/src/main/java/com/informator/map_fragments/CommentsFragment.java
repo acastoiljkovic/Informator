@@ -67,7 +67,8 @@ public class CommentsFragment extends Fragment {
         listImages=new ArrayList<Bitmap>();
 
         Bundle bundle=this.getArguments();
-        index=bundle.getInt("index_of_virtual_object");
+        final String userRecommended=bundle.getString("userRecommendedName");
+        final String virtualObjectName=bundle.getString("virtualObjectName");
 
         listViewComments=view.findViewById(R.id.list_view_comments);
         btnPost=view.findViewById(R.id.btn_add_comment);
@@ -76,15 +77,15 @@ public class CommentsFragment extends Fragment {
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                databaseReference.child("users").child(StoredData.getInstance().user.getUsername()).addListenerForSingleValueEvent(
+                databaseReference.child("users").child(userRecommended).addListenerForSingleValueEvent(
                         new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 String key=databaseReference.child("users").push().getKey();
                                 Post post=new Post(StoredData.getInstance().getUser().getUsername(),editTextWriteComment.getText().toString());
-                                databaseReference.child("users").child(StoredData.getInstance().user.getUsername())
-                                        .child("virtual_objects").child(StoredData.getInstance().getUser().getListVO().get(index).getTitle())
+                                databaseReference.child("users").child(userRecommended)
+                                        .child("virtual_objects").child(virtualObjectName)
                                         .child("comments").child(key)
                                         .setValue(post);
                             }

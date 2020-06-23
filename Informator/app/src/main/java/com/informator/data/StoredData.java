@@ -17,6 +17,7 @@ public class StoredData {
 
     private static  StoredData _instance = null;
     public UserWithPicture user;
+    public VirtualObject virtualObject;
 
     private StoredData(){
     }
@@ -26,6 +27,14 @@ public class StoredData {
             _instance = new StoredData();
 
         return _instance;
+    }
+
+    public VirtualObject getVirtualObject() {
+        return virtualObject;
+    }
+
+    public void setVirtualObject(VirtualObject virtualObject) {
+        this.virtualObject = virtualObject;
     }
 
     public UserWithPicture getUser() {
