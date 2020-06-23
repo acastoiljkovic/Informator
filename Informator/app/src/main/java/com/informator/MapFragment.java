@@ -172,6 +172,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public void onLocationChanged(Location location) {
                 centreMapOnLocation(location);
                 current_user_location=new Location(location);
+                StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
                 //addVirtualObjectMarkers();
             }
 
@@ -338,6 +339,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 current_user_location=currentLocation;
+                StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
                 centreMapOnLocation(currentLocation);
                 calculateVisibleRegionRadius();
                 //showVirtualObjectsOnMap();

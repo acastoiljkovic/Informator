@@ -74,10 +74,28 @@ public class UserWithPicture {
 
     }
 
+
+    public void addCurrentLocaation(Location location){
+        currentLocation=location;
+    }
+
+    public Location getCurrentLocation(){
+        return currentLocation;
+    }
+
+    public void setVirtualObjectWithId(String id,Bitmap bitmap){
+        for(VirtualObject virtualObject:this.virtual_objects){
+            if(virtualObject.getId().compareTo(id)==0){
+                virtualObject.setVirtual_object_image(bitmap);
+            }
+        }
+    }
+
     ChildEventListener childEventListenerVirtualObjects= new ChildEventListener() {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             VirtualObject virtualObject=dataSnapshot.getValue(VirtualObject.class);
+            virtualObject.setUserRecommended(StoredData.getInstance().getUser().getUsername());
             virtual_objects.add(virtualObject);
             // promeni moje poene
             setPoints();
@@ -163,6 +181,7 @@ public class UserWithPicture {
     public String getId() {
         return id;
     }
+
 
     public void setId(String id) {
         this.id = id;

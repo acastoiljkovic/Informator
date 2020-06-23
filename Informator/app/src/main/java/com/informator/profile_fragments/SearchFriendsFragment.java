@@ -230,6 +230,7 @@ public class SearchFriendsFragment extends Fragment {
                                 if(getActivity() != null) {
                                     adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
+
                                 }
                             }
                         });
