@@ -49,38 +49,16 @@ public class LoginActivity extends AppCompatActivity {
     Bitmap picture;
     User user;
     SharedPreferences sharedPreferences;
+    EditText etEmail;
+    EditText etPassword;
+    Button btnLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        user = new User();
-        try {
-            firebaseAuth = FirebaseAuth.getInstance();
-        }
-        catch (Exception e){
-            Toast.makeText(this,e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
-        try{
-            database = FirebaseDatabase.getInstance();
-            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
-            storageRef = storage.getReference();
-            mDatabase = database.getReference();
-        }
-        catch (Exception e){
-            Toast.makeText(this,"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
 
-        dialog =new ProgressDialog(this);
-        dialog.setTitle("Please Wait");
-        dialog.setMessage("Loading...");
-        dialog.setCancelable(false);
-        dialog.setInverseBackgroundForced(false);
-        sharedPreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
-
-        final EditText etEmail = (EditText) findViewById(R.id.loginEmail);
-        final EditText etPassword = (EditText) findViewById(R.id.loginPassword);
-        Button btnLogin = (Button) findViewById(R.id.loginBtnLogin);
+        Initialize();
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,8 +83,6 @@ public class LoginActivity extends AppCompatActivity {
 
                 if(firebaseAuth != null) {
                     dialogShow();
-                    getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     firebaseAuth.signInWithEmailAndPassword(Email, Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -122,11 +98,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 user.setFullName(String.valueOf(data.child("fullName").getValue()));
                                                 user.setPhone(String.valueOf(data.child("phone").getValue()));
                                                 user.setId(String.valueOf(data.child("id").getValue()));
-//                                                ArrayList<String> friends = new ArrayList<>();
-//                                                for(DataSnapshot data1 : data.child("friends").getChildren()){
-//                                                    friends.add(String.valueOf(data1.getValue()));
-//                                                }
-//                                                user.setFriends(friends);
+                                                user.setPoints(String.valueOf(data.child("points")));
                                             }
                                             i++;
                                         }
@@ -146,11 +118,7 @@ public class LoginActivity extends AppCompatActivity {
                                             public void onSuccess(byte[] bytes) {
                                                 picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                                 StoredData.getInstance().setUser(new UserWithPicture(user,picture));
-                                                dialogDismiss();
-                                                Intent i = new Intent(getApplicationContext(),StartActivity.class);
-                                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                startActivity(i);
-                                                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                                                successLogin();
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
@@ -163,29 +131,20 @@ public class LoginActivity extends AppCompatActivity {
                                                                         false)
                                                         )
                                                 );
-                                                dialogDismiss();
-                                                Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
-                                                Intent i = new Intent(getApplicationContext(),StartActivity.class);
-                                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                startActivity(i);
-                                                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                                                failedLoginPicture();
                                             }
                                         });
                                     }
 
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError databaseError) {
-                                        Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
-                                        dialogHide();
-                                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
+                                        failedLoginUser();
                                     }
                                 });
 
                             } else {
                                 Toast.makeText(LoginActivity.this, "Error " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                 dialogHide();
-                                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                 etEmail.setText("");
                                 etPassword.setText("");
                             }
@@ -196,10 +155,68 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void Initialize(){
+        user = new User();
+        try {
+            firebaseAuth = FirebaseAuth.getInstance();
+        }
+        catch (Exception e){
+            Toast.makeText(this,e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+        try{
+            database = FirebaseDatabase.getInstance();
+            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
+            storageRef = storage.getReference();
+            mDatabase = database.getReference();
+        }
+        catch (Exception e){
+            Toast.makeText(this,"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+
+        initDialog();
+
+        sharedPreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
+
+        etEmail = (EditText) findViewById(R.id.loginEmail);
+        etPassword = (EditText) findViewById(R.id.loginPassword);
+        btnLogin = (Button) findViewById(R.id.loginBtnLogin);
+    }
+
+    private void initDialog(){
+        dialog =new ProgressDialog(this);
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Loading...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+    }
+
+    private void successLogin(){
+        dialogDismiss();
+        Intent i = new Intent(getApplicationContext(), StartActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+    }
+
+    private void failedLoginPicture(){
+        dialogDismiss();
+        Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
+        Intent i = new Intent(getApplicationContext(),StartActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+    }
+
+    public void failedLoginUser(){
+        Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
+        dialogHide();
+    }
+
     public void dialogShow(){
         try {
-            if (!dialog.isShowing())
+            if (!dialog.isShowing()) {
                 dialog.show();
+                getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -210,6 +227,7 @@ public class LoginActivity extends AppCompatActivity {
         try {
             if (dialog.isShowing())
                 dialog.hide();
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -219,6 +237,7 @@ public class LoginActivity extends AppCompatActivity {
     public void dialogDismiss(){
         try{
             dialog.dismiss();
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
         catch (Exception e){
             e.printStackTrace();

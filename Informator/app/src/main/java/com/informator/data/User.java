@@ -10,6 +10,7 @@ public class User {
     String phone;
     String username;
     String id;
+    String points;
     ArrayList<String> friends;
 
     public String getId() {
@@ -26,6 +27,7 @@ public class User {
         this.phone = phone;
         this.username = username;
         this.friends = new ArrayList<>();
+        points = "0";
     }
 
     public User() {
@@ -34,6 +36,7 @@ public class User {
         phone = "";
         username = "";
         this.friends = new ArrayList<>();
+        points = "0";
     }
 
     public String getFriend(int index){
@@ -89,5 +92,13 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getPoints() {
+        return points;
+    }
+
+    public void setPoints(String points) {
+        this.points = points;
     }
 }

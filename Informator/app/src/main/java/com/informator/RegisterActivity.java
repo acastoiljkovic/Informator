@@ -1,6 +1,6 @@
 package com.informator;
 
-import androidx.annotation.ColorInt;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +33,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -170,6 +169,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 if(TextUtils.isEmpty(Password)){
                     etPassword.setError("Password is required");
+                    return;
                 }
 
                 if(etPassword.length()<6){
@@ -208,6 +208,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     if(task.isSuccessful()){
                                         // add user
                                         user.setId(FirebaseAuth.getInstance().getUid());
+                                        user.setPoints("0");
                                         mDatabase.child("users").child(user.getUsername()).setValue(user);
 
                                         SharedPreferences.Editor edit = sharedPreferences.edit();

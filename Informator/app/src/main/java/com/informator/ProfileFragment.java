@@ -132,13 +132,16 @@ public class ProfileFragment extends Fragment {
 
                         Bundle bundleProfile = new Bundle();
                         bundleProfile.putBoolean("profile",true);
-                        fragmentRanking.setArguments(bundleProfile);
                         Bundle bundleFrends = new Bundle();
                         bundleFrends.putBoolean("profile",true);
                         bundleFrends.putStringArrayList("friends",friendsOfPerson);
+                        fragmentRanking.setArguments(bundleFrends);
                         fragmentFriends.setArguments(bundleFrends);
                         fragmentPhotos.setArguments(bundleProfile);
                         fragmentEvents.setArguments(bundleProfile);
+
+                        if(adapter.getCount() > 0)
+                            adapter = new TabAdapterProfile(getFragmentManager());
                         adapter.addFragment(fragmentRanking, "Ranking");
                         adapter.addFragment(fragmentFriends, "Friends");
                         adapter.addFragment(fragmentPhotos, "Photos");
@@ -194,6 +197,8 @@ public class ProfileFragment extends Fragment {
                 imageViewProfilePicture.setImageBitmap(StoredData.getInstance().user.getProfilePhoto());
                 tvFullName.setText(StoredData.getInstance().user.getFullName().toUpperCase());
                 tvFriends.setText(getContext().getResources().getString(R.string.friends) +" " + StoredData.getInstance().getUser().getNumberOfFriends());
+                tvGroups.setText(getContext().getResources().getString(R.string.groups) +" " + StoredData.getInstance().getUser().getNumberOfFriends());
+                tvPoints.setText(getContext().getResources().getString(R.string.points) +" " + StoredData.getInstance().getUser().getPoints());
             }
 
             toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -216,16 +221,19 @@ public class ProfileFragment extends Fragment {
             editOrAdd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO otovri edit profile fragment
+                    ((StartActivity) getActivity()).setFragment(R.string.edit_profile_id, null);
                 }
             });
 
-            fragmentRanking.setArguments(null);
+
             Bundle bundleFrends = new Bundle();
             bundleFrends.putStringArrayList("friends",StoredData.getInstance().getUser().getFriends());
+            fragmentRanking.setArguments(bundleFrends);
             fragmentFriends.setArguments(bundleFrends);
             fragmentPhotos.setArguments(null);
             fragmentEvents.setArguments(null);
+            if(adapter.getCount() > 0)
+                adapter = new TabAdapterProfile(getFragmentManager());
             adapter.addFragment(fragmentRanking, "Ranking");
             adapter.addFragment(fragmentFriends, "Friends");
             adapter.addFragment(fragmentPhotos, "Photos");
@@ -240,7 +248,7 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    public void Initialize(View view, Bundle bundle){
+    private void Initialize(View view, Bundle bundle){
         editOrAdd = (LinearLayout)view.findViewById(R.id.edit_profile_or_add_friend);
 
         fragmentRanking = new RankingFragment();
@@ -271,7 +279,7 @@ public class ProfileFragment extends Fragment {
         tvPoints = (TextView) view.findViewById(R.id.tvPoints);
     }
 
-    public void Logout(){
+    private void Logout(){
         StoredData.getInstance().setUser(null);
         Intent i = new Intent(getContext(), MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -285,7 +293,7 @@ public class ProfileFragment extends Fragment {
         edit.commit();
     }
 
-    public void AddFriend(){
+    private void AddFriend(){
 
         // korisniku sa username dodaje logovanog korisnika kao prijatelja
         mDatabase.child("users").child(username)
@@ -301,7 +309,7 @@ public class ProfileFragment extends Fragment {
         Toast.makeText(getContext(),"Dodao",Toast.LENGTH_SHORT).show();
     }
 
-    public void RemoveFriend(){
+    private void RemoveFriend(){
 
         // korisniku sa username uklanja logovanog korisnika kao prijatelja
         mDatabase.child("users").child(username)

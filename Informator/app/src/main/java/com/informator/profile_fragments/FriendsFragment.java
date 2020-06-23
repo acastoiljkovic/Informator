@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.BounceInterpolator;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,6 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import com.informator.ProfileFragment;
 import com.informator.R;
 import com.informator.StartActivity;
+import com.informator.data.MapPicturesWithName;
 import com.informator.data.Constants;
 import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.StoredData;
@@ -43,7 +42,7 @@ public class FriendsFragment extends Fragment {
     ListView listFriends;
     ArrayList<String> friendsUsernames;
     ArrayList<String> friendsOfPersonFullNames;
-    ArrayList<Bitmap> friendsOfPersonPictures;
+    MapPicturesWithName friendsOfPersonPictures;
     SearchFriendsListViewItem adapter = null;
     FirebaseDatabase database;
     DatabaseReference mDatabase;
@@ -56,12 +55,66 @@ public class FriendsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
         final Bundle bundle = getArguments();
 
+        Initialize(view,bundle);
+
+
+        for(String friend : friendsUsernames) {
+
+            final String f = friend;
+
+            mDatabase.child("users").child(friend).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        friendsOfPersonFullNames.add(String.valueOf(dataSnapshot.child("fullName").getValue()));
+                        adapter.notifyDataSetChanged();
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+            StorageReference profilePicture = storageRef.child(f + ".jpg");
+            profilePicture.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+
+
+                    Bitmap picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    friendsOfPersonPictures.add(picture, f);
+                    adapter.notifyDataSetChanged();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                    friendsOfPersonPictures.add(Bitmap.createScaledBitmap(
+                            ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
+                            3000,
+                            3000,
+                            false), f
+                    );
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
+
+
+        return  view;
+    }
+
+    private void Initialize(View view, Bundle bundle){
+
+
         listFriends = view.findViewById(R.id.list_friends);
         tvWelcome = (TextView)view.findViewById(R.id.tv_welcome_text_friends_fragment);
         btnAddFriend = view.findViewById(R.id.fragment_friends_add_friend_button);
 
         friendsOfPersonFullNames = new ArrayList<>();
-        friendsOfPersonPictures = new ArrayList<>();
+        friendsOfPersonPictures = new MapPicturesWithName();
         friendsUsernames = new ArrayList<>();
 
         try {
@@ -74,8 +127,6 @@ public class FriendsFragment extends Fragment {
             Toast.makeText(getActivity(),"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
         }
 
-        adapter = new SearchFriendsListViewItem(getActivity(),friendsOfPersonFullNames,friendsOfPersonPictures);
-        listFriends.setAdapter(adapter);
 
         listFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -91,6 +142,20 @@ public class FriendsFragment extends Fragment {
             friendsUsernames = bundle.getStringArrayList("friends");
         }
 
+        SetBtnAdd();
+
+        if(friendsUsernames.size() <= 0) {
+            tvWelcome.setText(R.string.no_friends);
+        }
+        else{
+            tvWelcome.setVisibility(View.GONE);
+        }
+
+        adapter = new SearchFriendsListViewItem(getActivity(),friendsOfPersonFullNames,friendsUsernames, friendsOfPersonPictures);
+        listFriends.setAdapter(adapter);
+    }
+
+    private void SetBtnAdd(){
         if(!profile) {
             btnAddFriend.setVisibility(View.VISIBLE);
             btnAddFriend.setOnClickListener(new View.OnClickListener() {
@@ -110,52 +175,5 @@ public class FriendsFragment extends Fragment {
             btnAddFriend.setVisibility(View.GONE);
 
         }
-
-        if(friendsUsernames.size() <= 0) {
-            tvWelcome.setText(R.string.no_friends);
-        }
-        else{
-            tvWelcome.setVisibility(View.GONE);
-        }
-        for(String friend : friendsUsernames){
-            mDatabase.child("users").child(friend).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot != null){
-                        friendsOfPersonFullNames.add(String.valueOf(dataSnapshot.child("fullName").getValue()));
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            StorageReference profilePicture = storageRef.child(friend+".jpg");
-            profilePicture.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                    friendsOfPersonPictures.add(picture);
-                    adapter.notifyDataSetChanged();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    friendsOfPersonPictures.add(Bitmap.createScaledBitmap(
-                            ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
-                            3000,
-                            3000,
-                            false)
-                    );
-                    adapter.notifyDataSetChanged();
-                }
-            });
-        }
-
-        return  view;
     }
-
-
 }

@@ -42,6 +42,7 @@
     <string name="comments">Comments</string>
     <string name="search_in_radius">Search in radius</string>
     <string name="open_listVO">OpenListVo123</string>
+    <string name="edit_profile_id">aasd3#</string>
 
 
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBgfNFwt06DZZQyugZ25EpsFJ-LjDRB8ho</string>

@@ -28,6 +28,7 @@ import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.map_fragments.VirtualObjectFragment;
 import com.informator.profile_fragments.AddFriendsBluetoothFragment;
+import com.informator.profile_fragments.EditProfile;
 import com.informator.profile_fragments.SearchFriendsFragment;
 import com.informator.profile_fragments.SendMessageFragment;
 
@@ -121,6 +122,9 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         else if(itemId==R.string.open_listVO){
             retFragment=new ListVirtualObjectsFragment();
             retFragment.setArguments(bundle);
+        }
+        else if(itemId==R.string.edit_profile_id){
+            retFragment=new EditProfile();
         }
 
         retFragment.setArguments(bundle);

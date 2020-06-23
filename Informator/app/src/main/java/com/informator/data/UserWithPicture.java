@@ -19,6 +19,7 @@ public class UserWithPicture {
     String email;
     String phone;
     String username;
+    String points;
     ArrayList<String> friends;
     Bitmap profilePhoto;
     String id;
@@ -27,15 +28,6 @@ public class UserWithPicture {
     DatabaseReference databaseReference;
     ListUserUpdateEventListener updateListener;
 
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public UserWithPicture(String fullName, String email, String phone, String username) {
         this.fullName = fullName;
         this.email = email;
@@ -43,8 +35,28 @@ public class UserWithPicture {
         this.username = username;
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
+        points = "0";
+    }
+    public UserWithPicture(User user) {
+        fullName = user.fullName;
+        email = user.email;
+        phone = user.phone;
+        username = user.username;
+        profilePhoto = null;
+        this.virtual_objects=new ArrayList<>();
+        this.friends = new ArrayList<>();
+        points = user.points;
     }
 
+    public UserWithPicture() {
+        fullName = "";
+        email = "";
+        phone = "";
+        username = "";
+        this.virtual_objects=new ArrayList<>();
+        this.friends = new ArrayList<>();
+        points = "0";
+    }
     public UserWithPicture(User user, Bitmap image) {
         fullName = user.fullName;
         email = user.email;
@@ -52,21 +64,23 @@ public class UserWithPicture {
         username = user.username;
         id=user.id;
         profilePhoto = image;
+        points = user.points;
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("friends").addChildEventListener(childEventListenerFrineds);
         databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("virtual_objects").addChildEventListener(childEventListenerVirtualObjects);
+        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("points").addChildEventListener(childEventListenerPoints);
 
     }
 
-<<<<<<< HEAD
-=======
     ChildEventListener childEventListenerVirtualObjects= new ChildEventListener() {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             VirtualObject virtualObject=dataSnapshot.getValue(VirtualObject.class);
             virtual_objects.add(virtualObject);
+            // promeni moje poene
+            setPoints();
         }
 
         @Override
@@ -118,25 +132,54 @@ public class UserWithPicture {
         }
     };
 
+    ChildEventListener childEventListenerPoints= new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            String points = dataSnapshot.getValue(String.class);
+            setPoints(points);
+        }
 
->>>>>>> master
-    public UserWithPicture(User user) {
-        fullName = user.fullName;
-        email = user.email;
-        phone = user.phone;
-        username = user.username;
-        profilePhoto = null;
-        this.virtual_objects=new ArrayList<>();
-        this.friends = new ArrayList<>();
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
+    public String getId() {
+        return id;
     }
 
-    public UserWithPicture() {
-        fullName = "";
-        email = "";
-        phone = "";
-        username = "";
-        this.virtual_objects=new ArrayList<>();
-        this.friends = new ArrayList<>();
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getPoints() {
+        return points;
+    }
+
+    public void setPoints(String points){
+        this.points = points;
+//        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("points").setValue(this.points);
+    }
+
+    public void setPoints(){
+        this.points = String.valueOf(this.countPoints());
+//        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("points").setValue(this.points);
     }
 
     public String getFriend(int index){
@@ -146,6 +189,7 @@ public class UserWithPicture {
     public ArrayList<String> getFriends(){
         return friends;
     }
+
     public void addFriend(String username){
         friends.add(username);
     }
@@ -153,7 +197,6 @@ public class UserWithPicture {
     public int getNumberOfFriends(){
         return friends.size();
     }
-
 
     public void removeFriend(String username){
         friends.remove(username);
@@ -186,6 +229,7 @@ public class UserWithPicture {
     public void setProfilePhoto(Bitmap profilePhoto) {
         this.profilePhoto = Bitmap.createBitmap(profilePhoto);
     }
+
     public String getPhone() {
         return phone;
     }
@@ -208,5 +252,16 @@ public class UserWithPicture {
 
     public void setListVO(ArrayList<VirtualObject> listVO) {
         this.virtual_objects = listVO;
+    }
+
+    public int countPoints(){
+        int numVO = virtual_objects.size();
+        int points = 0;
+        if(numVO != 0) {
+            for (VirtualObject v : virtual_objects) {
+                points += (int) (10 * (v.getNumberOfRates() * v.getRating()) / Math.sqrt(numVO));
+            }
+        }
+        return  points;
     }
 }

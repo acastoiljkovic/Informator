@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -32,12 +31,12 @@ import com.google.firebase.storage.StorageReference;
 import com.informator.ProfileFragment;
 import com.informator.R;
 import com.informator.StartActivity;
+import com.informator.data.MapPicturesWithName;
 import com.informator.data.Constants;
 import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.User;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -48,7 +47,7 @@ public class SearchFriendsFragment extends Fragment {
     ListView listViewSearchFriends;
     ArrayList<String> fullname = null;
     ArrayList<String> usernames = null;
-    ArrayList<Bitmap> profileImages = null;
+    MapPicturesWithName profileImages = null;
     SearchFriendsListViewItem adapter = null;
     ProgressDialog dialog;
     Timer timer;
@@ -68,25 +67,9 @@ public class SearchFriendsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search_friends,container,false);
 
-        etSearchFriends = (EditText) view.findViewById(R.id.etSearchFriends);
-        btnSearchFrineds = (ImageButton) view.findViewById(R.id.btnSearchFriends);
-        listViewSearchFriends = (ListView) view.findViewById(R.id.listViewSearchFriends);
-
-        fullname = new ArrayList<>();
-        profileImages = new ArrayList<>();
-        usernames = new ArrayList<>();
-        adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+        Initialize(view);
 
         listViewSearchFriends.setAdapter(adapter);
-
-        timer = new Timer();
-
-
-        dialog =new ProgressDialog(getContext());
-        dialog.setTitle("Please Wait");
-        dialog.setMessage("Searching...");
-        dialog.setCancelable(false);
-        dialog.setInverseBackgroundForced(false);
 
         listViewSearchFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -97,17 +80,6 @@ public class SearchFriendsFragment extends Fragment {
                 ((StartActivity)getActivity()).setFragment(R.id.profile,bundle);
             }
         });
-
-        try {
-            database = FirebaseDatabase.getInstance();
-            mDatabase = database.getReference();
-            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
-            storageRef = storage.getReference();
-        }
-        catch (Exception e){
-            Toast.makeText(getActivity(),"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
-
 
         etSearchFriends.addTextChangedListener(new TextWatcher() {
             @Override
@@ -142,6 +114,39 @@ public class SearchFriendsFragment extends Fragment {
 
     }
 
+    private void Initialize(View view){
+        etSearchFriends = (EditText) view.findViewById(R.id.etSearchFriends);
+        btnSearchFrineds = (ImageButton) view.findViewById(R.id.btnSearchFriends);
+        listViewSearchFriends = (ListView) view.findViewById(R.id.listViewSearchFriends);
+
+        fullname = new ArrayList<>();
+        profileImages = new MapPicturesWithName();
+        usernames = new ArrayList<>();
+        adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
+
+        timer = new Timer();
+
+        initDialog();
+
+        try {
+            database = FirebaseDatabase.getInstance();
+            mDatabase = database.getReference();
+            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
+            storageRef = storage.getReference();
+        }
+        catch (Exception e){
+            Toast.makeText(getActivity(),"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void initDialog(){
+        dialog =new ProgressDialog(getContext());
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Searching...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+    }
+
     public void hideDialogAfter5sec(){
         timer.schedule(new TimerTask() {
             @Override
@@ -167,15 +172,16 @@ public class SearchFriendsFragment extends Fragment {
                     if(user.getEmail().contains(text)){
                         fullname.add(user.getFullName());
                         usernames.add(user.getUsername());
+                        final String fn = user.getUsername();
                         dialogHide();
                         StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
                         profilePicture.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                             @Override
                             public void onSuccess(byte[] bytes) {
                                 Bitmap picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                profileImages.add(picture);
+                                profileImages.add(picture,fn);
                                 if(getActivity() != null) {
-                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
                             }
@@ -186,10 +192,10 @@ public class SearchFriendsFragment extends Fragment {
                                         ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
                                         3000,
                                         3000,
-                                        false)
+                                        false), fn
                                 );
                                 if(getActivity() != null) {
-                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
                             }
@@ -198,15 +204,16 @@ public class SearchFriendsFragment extends Fragment {
                     else if(user.getFullName().contains(text)){
                         fullname.add(user.getFullName());
                         usernames.add(user.getUsername());
+                        final String fn = user.getUsername();
                         dialogHide();
                         StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
                         profilePicture.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                             @Override
                             public void onSuccess(byte[] bytes) {
                                 Bitmap picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                profileImages.add(picture);
+                                profileImages.add(picture,fn);
                                 if(getActivity() != null) {
-                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
 
@@ -218,10 +225,10 @@ public class SearchFriendsFragment extends Fragment {
                                         ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
                                         3000,
                                         3000,
-                                        false)
+                                        false), fn
                                 );
                                 if(getActivity() != null) {
-                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, profileImages);
+                                    adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
                             }

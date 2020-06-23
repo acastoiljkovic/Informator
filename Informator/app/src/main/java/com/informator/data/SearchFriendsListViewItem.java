@@ -1,7 +1,6 @@
 package com.informator.data;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +18,15 @@ public class SearchFriendsListViewItem extends ArrayAdapter<String> {
 
     private Activity context = null;
     private ArrayList<String> fullName = null;
-    private ArrayList<Bitmap> images = null;
+    private ArrayList<String> usernames = null;
+    private MapPicturesWithName images = null;
 
     public SearchFriendsListViewItem(Activity context,
-                                     ArrayList<String> fullName, ArrayList<Bitmap> images) {
+                                     ArrayList<String> fullName, ArrayList<String> usernames, MapPicturesWithName images) {
         super(context, R.layout.list_view_search_friends_item, fullName);
         this.context = context;
         this.fullName = fullName;
+        this.usernames = usernames;
         this.images = images;
 
     }
@@ -39,11 +40,14 @@ public class SearchFriendsListViewItem extends ArrayAdapter<String> {
         ImageView imageView = (ImageView) rowView.findViewById(R.id.list_item_image_view);
 
         txtTitle.setText(fullName.get(position));
-        if(position >= images.size()){
-            imageView.setImageResource(R.drawable.ic_person_outline_black_24dp);
+
+        Bitmap img = images.getImage(usernames.get(position));
+
+        if(img != null){
+            imageView.setImageBitmap(img);
         }
-        else {
-            imageView.setImageBitmap(images.get(position));
+        else{
+            imageView.setImageResource(R.drawable.ic_person_outline_black_24dp);
         }
         return rowView;
     }

@@ -58,8 +58,8 @@
                         android:src="@drawable/ic_person_outline_black_24dp" />
 
                     <ImageView
-                        android:layout_width="150"
-                        android:layout_height="150"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:src="@drawable/profile_picture"
                         android:visibility="visible" />
                 </FrameLayout>
