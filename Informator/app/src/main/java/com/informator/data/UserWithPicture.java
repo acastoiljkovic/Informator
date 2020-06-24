@@ -203,6 +203,12 @@ public class UserWithPicture {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             VirtualObject virtualObject=dataSnapshot.getValue(VirtualObject.class);
+            for(DataSnapshot ds:dataSnapshot.child("comments").getChildren()){
+                String username=ds.child("username").getValue().toString();
+                String comment=ds.child("post").getValue().toString();
+                Post post=new Post(username, comment);
+                virtualObject.getPosts().add(post);
+            }
             virtualObject.setUserRecommended(StoredData.getInstance().getUser().getUsername());
             virtual_objects.add(virtualObject);
             // promeni moje poene

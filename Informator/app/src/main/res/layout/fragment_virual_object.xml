@@ -154,6 +154,14 @@
 
         </LinearLayout>
 
+        <ListView
+            android:id="@+id/listComments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+        </ListView>
+
         <LinearLayout
             android:layout_marginTop="5dp"
             android:orientation="horizontal"

@@ -23,54 +23,65 @@
 
     </LinearLayout>
 
-    <View
-
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/color_gray">
-
-    </View>
-
-    <ListView
-        android:id="@+id/list_view_comments"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    </ListView>
-
     <LinearLayout
-        android:layout_margin="10dp"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <EditText
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:id="@+id/id_write_comment"
-            android:layout_marginTop="7.5dp"
-            android:hint="@string/write_comment"
-            android:textSize="14sp"
-            android:textColor="@color/color_black"
-            android:background="@drawable/backround_comments"
-            android:layout_width="250dp"
+        <View
+
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/color_gray"
+            >
+
+        </View>
+
+
+        <ListView
+            android:id="@+id/list_view_comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="35dp">
+
+        </ListView>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        </EditText>
+            <EditText
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:id="@+id/id_write_comment"
+                android:layout_marginTop="7.5dp"
+                android:hint="@string/write_comment"
+                android:textSize="14sp"
+                android:textColor="@color/color_black"
+                android:background="@drawable/backround_comments"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content">
 
-        <Button
-            android:layout_marginLeft="5dp"
-            android:text="@string/post"
-            android:textSize="13sp"
-            android:textColor="@color/color_white"
-            android:background="@drawable/button_black_border"
-            android:id="@+id/btn_add_comment"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            </EditText>
 
-        </Button>
+            <Button
+                android:layout_marginLeft="5dp"
+                android:text="@string/post"
+                android:textSize="13sp"
+                android:textColor="@color/color_white"
+                android:background="@drawable/button_black_border"
+                android:id="@+id/btn_add_comment"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+            </Button>
+
+        </LinearLayout>
 
     </LinearLayout>
+
+
 
 
 
