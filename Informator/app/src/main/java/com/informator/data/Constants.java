@@ -12,4 +12,6 @@ public class Constants {
     public static final int  CAMERA_PERMISSION = 3;
     public static final int  STORAGE_PERMISSION = 4;
     public static final String FIREBASE_CHILD_USERS ="users";
+    public static final String  CHANNEL_ID = "101";
+
 }

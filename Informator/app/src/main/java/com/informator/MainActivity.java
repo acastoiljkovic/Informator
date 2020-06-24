@@ -3,12 +3,15 @@ package com.informator;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -138,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                                         picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                                         user.setProfilePhoto(picture);
                                         StoredData.getInstance().setUser(user);
+                                        StoredData.getInstance().user.SetListeners();
                                         dialogDismiss();
                                         Intent i = new Intent(getApplicationContext(), StartActivity.class);
                                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -153,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
                                                 3000,
                                                 false));
                                         StoredData.getInstance().setUser(user);
+                                        StoredData.getInstance().user.SetListeners();
                                         dialogDismiss();
                                         Toast.makeText(MainActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
                                         Intent i = new Intent(getApplicationContext(), StartActivity.class);
@@ -181,6 +186,21 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         }
+
+
+    private void createNotificationChannel() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(Constants.CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
     public void dialogShow(){
         try {

@@ -240,6 +240,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                                                     user.setProfilePhoto(image);
                                                     StoredData.getInstance().setUser(user);
+                                                    StoredData.getInstance().user.SetListeners();
 //                                                    Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
                                                     Intent i = new Intent(getApplicationContext(),StartActivity.class);
                                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

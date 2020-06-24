@@ -42,7 +42,6 @@ public class UserWithPicture {
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
-        initListeners();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -56,7 +55,6 @@ public class UserWithPicture {
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
-        initListeners();
     }
 
     public UserWithPicture() {
@@ -64,14 +62,14 @@ public class UserWithPicture {
         email = "";
         phone = "";
         username = "";
-        this.virtual_objects=new ArrayList<>();
+        this.virtual_objects = new ArrayList<>();
         this.friends = new ArrayList<>();
         points = "0";
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
-        initListeners();
     }
+
     public UserWithPicture(User user, Bitmap image) {
         fullName = user.fullName;
         email = user.email;
@@ -85,10 +83,9 @@ public class UserWithPicture {
         this.friends = new ArrayList<>();
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
-        initListeners();
     }
 
-    private void initListeners(){
+    public void SetListeners(){
         databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("friends").addChildEventListener(childEventListenerFrineds);
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("virtual_objects").addChildEventListener(childEventListenerVirtualObjects);

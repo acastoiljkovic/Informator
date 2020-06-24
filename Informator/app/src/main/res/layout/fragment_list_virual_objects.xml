@@ -27,19 +27,6 @@
 
         </ListView>
 
-        <Button
-            android:textColor="@color/color_black"
-            android:textSize="16sp"
-            android:text="Show on map"
-            android:background="@drawable/button_white_border"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:id="@+id/show_on_map"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-        </Button>
-
     </LinearLayout>
 
 

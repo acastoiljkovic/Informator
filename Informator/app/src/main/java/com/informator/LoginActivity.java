@@ -120,6 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                                 user.setProfilePhoto(picture);
                                                 StoredData.getInstance().setUser(user);
+                                                StoredData.getInstance().user.SetListeners();
                                                 successLogin();
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
