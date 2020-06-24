@@ -36,6 +36,8 @@ import com.google.firebase.storage.UploadTask;
 import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
+import com.informator.data.ListVirtualObjectsAdapter;
+import com.informator.data.Post;
 import com.informator.data.StoredData;
 import com.informator.data.VirtualObject;
 
@@ -77,6 +79,7 @@ public class ListVirtualObjectsFragment extends Fragment {
         final ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),titles,images);
 
 
+        //preuzima moje virtuelne objekte i proverva da li su u radiusu
         for(final VirtualObject virtualObject:StoredData.getInstance().getUser().getListVO()){
             if(checkIfInRadius(new LatLng(virtualObject.getLatitude(),virtualObject.getLongitude()),radius))
             {
@@ -120,6 +123,7 @@ public class ListVirtualObjectsFragment extends Fragment {
             }
         }
 
+        //preuzima virtuelne objekte prijatelja i proverava da li su u radijusu
         for(final String friendUsername:StoredData.getInstance().getUser().getFriends()){
             databaseReference.child("users").child(friendUsername).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -142,6 +146,11 @@ public class ListVirtualObjectsFragment extends Fragment {
                                 vo.setRating(Float.valueOf(ds.child("rating").getValue().toString()));
                                 vo.setTitle(ds.child("title").getValue().toString());
                                 vo.setUserRecommended(friendUsername);
+
+                                for(DataSnapshot dataSnapshot1:ds.child("comments").getChildren()){
+                                    vo.getPosts().add(new Post(dataSnapshot1.child("username").getValue().toString(),dataSnapshot1.child("post").getValue().toString()));
+                                }
+
                                 virtualObjects.add(vo);
                                 virtualObjectIdMapPosition.put(vo.getId(), positionCount[0]);
                                 positionCount[0]++;
@@ -221,36 +230,5 @@ public class ListVirtualObjectsFragment extends Fragment {
             return true;
     }
 
-    public class ListVirtualObjectsAdapter extends ArrayAdapter<String> {
 
-        private Activity context = null;
-        private ArrayList<String> titles = null;
-        private ArrayList<Bitmap> images = null;
-
-        public ListVirtualObjectsAdapter(Activity context,ArrayList<String> titles,ArrayList<Bitmap> images){
-            super(context, R.layout.fragment_list_virual_objects, titles);
-            this.context=context;
-            this.titles=titles;
-            this.images=images;
-
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = context.getLayoutInflater();
-            View rowView= inflater.inflate(R.layout.list_view_comment_item, null, true);
-
-            TextView txtTitle = (TextView) rowView.findViewById(R.id.text_view_user_comment);
-            ImageView imageView = (ImageView) rowView.findViewById(R.id.image_user_comment);
-
-            txtTitle.setText(titles.get(position));
-            if(position >= images.size()){
-                imageView.setImageResource(R.drawable.ic_person_outline_black_24dp);
-            }
-            else {
-                imageView.setImageBitmap(images.get(position));
-            }
-            return rowView;
-        }
-    }
 }

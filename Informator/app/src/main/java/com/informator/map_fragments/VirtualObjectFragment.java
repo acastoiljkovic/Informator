@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,9 +40,11 @@ import com.informator.MapFragment;
 import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
+import com.informator.data.ListVirtualObjectsAdapter;
 import com.informator.data.StoredData;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 public class VirtualObjectFragment extends Fragment {
     String idVirtualObject;
@@ -60,6 +63,7 @@ public class VirtualObjectFragment extends Fragment {
     LinearLayout linearLayoutImage;
     LinearLayout linearLayoutTextView;
     TextView textViewWriteComment;
+    ListView listViewComments;
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
@@ -102,6 +106,7 @@ public class VirtualObjectFragment extends Fragment {
         linearLayoutImage=view.findViewById(R.id.linear_layout_image);
         linearLayoutTextView=view.findViewById(R.id.linear_layout_textView);
         textViewWriteComment=view.findViewById(R.id.text_view_write_comment);
+        listViewComments=view.findViewById(R.id.listComments);
 
         textViewWriteComment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,15 +135,57 @@ public class VirtualObjectFragment extends Fragment {
         textViewTitle.setText(StoredData.getInstance().getVirtualObject().getTitle());
         textViewRecommendedBy.setText("Recommended by "+StoredData.getInstance().getVirtualObject().getUserRecommended());
         textViewDescription.setText(StoredData.getInstance().getVirtualObject().getDescription());
-        textViewNumberOfPosts.setText(StoredData.getInstance().getVirtualObject().getNumberOfRates()+" comments");
+        textViewNumberOfPosts.setText(StoredData.getInstance().getVirtualObject().getPosts().size() +" comments");
         imageViewUserImage.setImageBitmap(StoredData.getInstance().user.getProfilePhoto());
         textViewRating.setText("Rate: "+StoredData.getInstance().getVirtualObject().getRating());
 
         String userRecommended=StoredData.getInstance().getVirtualObject().getUserRecommended();
 
+        if(StoredData.getInstance().getVirtualObject().getPosts().size()>0)//postoje komentari treba ih dodati
+        {
+            ArrayList<String> comments=new ArrayList<>();
+            final ArrayList<Bitmap> pictures=new ArrayList<>();
+
+
+            final ListVirtualObjectsAdapter listVirtualObjectsAdapter = new ListVirtualObjectsAdapter(getActivity(),comments,pictures);
+
+            comments.add(StoredData.getInstance().getVirtualObject().getPosts()
+                    .get(StoredData.getInstance().getVirtualObject().getPosts().size()-1).getPost());
+
+            //uzima poslednji komentar i samo njega prikazuje
+            StorageReference user_image_reference=storageReference.child(StoredData.getInstance().getVirtualObject()
+                    .getPosts().get(StoredData.getInstance().getVirtualObject()
+                            .getPosts().size()-1).getUsername()+".jpg");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            if(user_image_reference!=null){
+                user_image_reference.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap bitmap= BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                        pictures.add(bitmap);
+                        listVirtualObjectsAdapter.notifyDataSetChanged();
+
+                        //img.setImageBitmap(bitmap);
+                        //frameLayout.addView(img);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
+
+            listViewComments.setAdapter(listVirtualObjectsAdapter);
+
+
+
+        }
+
         //ako je prijateljev objekat moguce ga je oceniti
         if(StoredData.getInstance().getVirtualObject().getUserRecommended().compareTo(StoredData.getInstance().getUser().getUsername())!=0){
-            RatingBar ratingBar=new RatingBar(getContext());
+            final RatingBar ratingBar=new RatingBar(getContext());
             ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                 @Override
                 public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
@@ -147,7 +194,7 @@ public class VirtualObjectFragment extends Fragment {
                 }
             });
 
-            Button btnRate=new Button(getContext());
+            final Button btnRate=new Button(getContext());
             btnRate.setText("Rate");
             btnRate.setTextColor(getResources().getColor(R.color.color_black));
             btnRate.setBackground(getResources().getDrawable(R.drawable.button_white_border));
@@ -172,6 +219,8 @@ public class VirtualObjectFragment extends Fragment {
                                 .child("rating").setValue(rating);
 
                     }
+                    btnRate.setVisibility(View.GONE);
+                    ratingBar.setVisibility(View.GONE);
                 }
             });
 

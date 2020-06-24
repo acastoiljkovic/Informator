@@ -30,6 +30,7 @@ import com.google.firebase.storage.StorageReference;
 import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
+import com.informator.data.ListVirtualObjectsAdapter;
 import com.informator.data.Post;
 import com.informator.data.StoredData;
 
@@ -74,6 +75,8 @@ public class CommentsFragment extends Fragment {
         btnPost=view.findViewById(R.id.btn_add_comment);
         editTextWriteComment=view.findViewById(R.id.id_write_comment);
 
+        final ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),listUsernames,listImages);
+
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,7 +103,7 @@ public class CommentsFragment extends Fragment {
         });
 
 
-/*        for(Post post: StoredData.getInstance().getUser().getListVO().get(index).getPosts()){
+        for(Post post: StoredData.getInstance().getVirtualObject().getPosts()){
             listUsernames.add(post.getPost());
 
             StorageReference user_comment_image_reference=storageReference.child(post.getUsername()+".jpg");
@@ -112,6 +115,7 @@ public class CommentsFragment extends Fragment {
                     public void onSuccess(byte[] bytes) {
                         Bitmap bitmap= BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                         listImages.add(bitmap);
+                        listVirtualObjectsAdapter.notifyDataSetChanged();
 
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -121,47 +125,13 @@ public class CommentsFragment extends Fragment {
                     }
                 });
             }
-        }*/
+        }
 
-
-
-
+        listViewComments.setAdapter(listVirtualObjectsAdapter);
 
 
 
         return view;
-    }
-
-    class ListViewCommentsAdapter extends BaseAdapter{
-
-        @Override
-        public int getCount() {
-            return listUsernames.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View view=getLayoutInflater().inflate(R.layout.list_view_comment_item,null,true);
-
-
-            ImageView imageView=view.findViewById(R.id.image_user_comment);
-            TextView textView=view.findViewById(R.id.text_view_user_comment);
-
-            imageView.setImageBitmap(listImages.get(position));
-            textView.setText(listUsernames.get(position));
-
-            return view;
-        }
     }
 }
 
