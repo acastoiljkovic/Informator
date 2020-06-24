@@ -21,6 +21,12 @@
         app:showAsAction="ifRoom"
         />
     <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom"
+        />
+    <item
         android:id="@+id/logout"
         android:icon="@drawable/ic_exit_to_app_black_24dp"
         android:title="@string/logout"
