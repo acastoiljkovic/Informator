@@ -257,7 +257,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void dispatchSettings(){
-        popup_settings.setContentView(R.layout.popup_add_virtual_object);
+        popup_settings.setContentView(R.layout.popup_settings);
         locationTracker = (Switch)popup_settings.findViewById(R.id.switchLocTracker);
 
         if(StoredData.getInstance().user.getStatus() == "online")
@@ -309,7 +309,7 @@ public class ProfileFragment extends Fragment {
         tabLayout = (TabLayout) view.findViewById(R.id.tabLayout_profile);
         viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
 
-
+        popup_settings = new Dialog(this.getActivity());
         adapter = new TabAdapterProfile(getFragmentManager());
 
         sharedPreferences = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);

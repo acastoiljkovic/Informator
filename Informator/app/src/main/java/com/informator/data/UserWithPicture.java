@@ -52,7 +52,7 @@ public class UserWithPicture {
         profilePhoto = null;
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
-        points = user.points;
+        points = "0";
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
@@ -79,8 +79,8 @@ public class UserWithPicture {
         username = user.username;
         id=user.id;
         profilePhoto = image;
-        points = user.points;
-        status = user.status;
+        points = "0";
+        status = "online";
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         this.nearFriends = new ArrayList<>();
