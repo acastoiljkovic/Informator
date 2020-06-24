@@ -54,7 +54,7 @@ public class RegisterActivity extends AppCompatActivity {
     FirebaseAuth firebaseAuth = null;
     FirebaseDatabase database;
     DatabaseReference mDatabase;
-    User user;
+    UserWithPicture user;
     EditText etEmail;
     EditText etPassword;
     EditText etConfPassword;
@@ -77,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        user = new User();
+        user = new UserWithPicture();
         storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
         storageRef = storage.getReference();
 
@@ -209,6 +209,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         // add user
                                         user.setId(FirebaseAuth.getInstance().getUid());
                                         user.setPoints("0");
+                                        user.setStatus("online");
                                         mDatabase.child("users").child(user.getUsername()).setValue(user);
 
                                         SharedPreferences.Editor edit = sharedPreferences.edit();
@@ -237,7 +238,8 @@ public class RegisterActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                                    StoredData.getInstance().setUser(new UserWithPicture(user,image));
+                                                    user.setProfilePhoto(image);
+                                                    StoredData.getInstance().setUser(user);
 //                                                    Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
                                                     Intent i = new Intent(getApplicationContext(),StartActivity.class);
                                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

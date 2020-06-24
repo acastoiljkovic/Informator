@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     StorageReference storageRef;
     ProgressDialog dialog;
     Bitmap picture;
-    User user;
+    UserWithPicture user;
     SharedPreferences sharedPreferences;
     EditText etEmail;
     EditText etPassword;
@@ -99,6 +99,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 user.setPhone(String.valueOf(data.child("phone").getValue()));
                                                 user.setId(String.valueOf(data.child("id").getValue()));
                                                 user.setPoints(String.valueOf(data.child("points")));
+                                                user.setStatus(String.valueOf(data.child("status")));
                                             }
                                             i++;
                                         }
@@ -117,20 +118,19 @@ public class LoginActivity extends AppCompatActivity {
                                             @Override
                                             public void onSuccess(byte[] bytes) {
                                                 picture = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                                StoredData.getInstance().setUser(new UserWithPicture(user,picture));
+                                                user.setProfilePhoto(picture);
+                                                StoredData.getInstance().setUser(user);
                                                 successLogin();
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                StoredData.getInstance().setUser(new UserWithPicture(user,
-                                                                Bitmap.createScaledBitmap(
-                                                                        ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
-                                                                        3000,
-                                                                        3000,
-                                                                        false)
-                                                        )
-                                                );
+                                                user.setProfilePhoto(Bitmap.createScaledBitmap(
+                                                        ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
+                                                        3000,
+                                                        3000,
+                                                        false));
+                                                StoredData.getInstance().setUser(user);
                                                 failedLoginPicture();
                                             }
                                         });
@@ -156,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void Initialize(){
-        user = new User();
+        user = new UserWithPicture();
         try {
             firebaseAuth = FirebaseAuth.getInstance();
         }

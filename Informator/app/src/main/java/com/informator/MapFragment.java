@@ -348,6 +348,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,locationListener);
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 current_user_location=currentLocation;
+                StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
                 centreMapOnLocation(currentLocation);
                 calculateVisibleRegionRadius();
                 //showVirtualObjectsOnMap();

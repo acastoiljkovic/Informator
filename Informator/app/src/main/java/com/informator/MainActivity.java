@@ -48,13 +48,13 @@ public class MainActivity extends AppCompatActivity {
     StorageReference storageRef;
     ProgressDialog dialog;
     Bitmap picture;
-    User user;
+    UserWithPicture user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        user = new User();
+        user = new UserWithPicture();
         try {
             firebaseAuth = FirebaseAuth.getInstance();
         }
@@ -136,7 +136,8 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(byte[] bytes) {
                                         picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                        StoredData.getInstance().setUser(new UserWithPicture(user, picture));
+                                        user.setProfilePhoto(picture);
+                                        StoredData.getInstance().setUser(user);
                                         dialogDismiss();
                                         Intent i = new Intent(getApplicationContext(), StartActivity.class);
                                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -146,14 +147,12 @@ public class MainActivity extends AppCompatActivity {
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        StoredData.getInstance().setUser(new UserWithPicture(user,
-                                                Bitmap.createScaledBitmap(
-                                                        ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
-                                                        3000,
-                                                        3000,
-                                                        false)
-                                                )
-                                        );
+                                        user.setProfilePhoto(Bitmap.createScaledBitmap(
+                                                ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
+                                                3000,
+                                                3000,
+                                                false));
+                                        StoredData.getInstance().setUser(user);
                                         dialogDismiss();
                                         Toast.makeText(MainActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
                                         Intent i = new Intent(getApplicationContext(), StartActivity.class);

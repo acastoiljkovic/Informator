@@ -23,6 +23,9 @@ public class UserWithPicture {
     ArrayList<String> friends;
     Bitmap profilePhoto;
     String id;
+    String status;
+    ArrayList<NearFriend> nearFriends;
+    ArrayList<NearVirtualObject> nearVirtualObjects;
     ArrayList<VirtualObject> virtual_objects;
     Location currentLocation;
     DatabaseReference databaseReference;
@@ -36,6 +39,10 @@ public class UserWithPicture {
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         points = "0";
+        status = "online";
+        this.nearFriends = new ArrayList<>();
+        this.nearVirtualObjects = new ArrayList<>();
+        initListeners();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -46,6 +53,10 @@ public class UserWithPicture {
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         points = user.points;
+        status = "online";
+        this.nearFriends = new ArrayList<>();
+        this.nearVirtualObjects = new ArrayList<>();
+        initListeners();
     }
 
     public UserWithPicture() {
@@ -56,6 +67,10 @@ public class UserWithPicture {
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         points = "0";
+        status = "online";
+        this.nearFriends = new ArrayList<>();
+        this.nearVirtualObjects = new ArrayList<>();
+        initListeners();
     }
     public UserWithPicture(User user, Bitmap image) {
         fullName = user.fullName;
@@ -65,13 +80,22 @@ public class UserWithPicture {
         id=user.id;
         profilePhoto = image;
         points = user.points;
+        status = user.status;
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
+        this.nearFriends = new ArrayList<>();
+        this.nearVirtualObjects = new ArrayList<>();
+        initListeners();
+    }
+
+    private void initListeners(){
         databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("friends").addChildEventListener(childEventListenerFrineds);
         databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("virtual_objects").addChildEventListener(childEventListenerVirtualObjects);
         databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("points").addChildEventListener(childEventListenerPoints);
-
+        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("status").addChildEventListener(childEventListenerStatus);
+        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("longitude").addChildEventListener(childEventListenerLongitude);
+        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("latitude").addChildEventListener(childEventListenerLatitude);
     }
 
 
@@ -90,6 +114,90 @@ public class UserWithPicture {
             }
         }
     }
+
+    ChildEventListener childEventListenerStatus = new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            status = dataSnapshot.getValue(String.class);
+            // TODO notify status has changed
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
+    ChildEventListener childEventListenerLatitude= new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            currentLocation.setLatitude(dataSnapshot.getValue(Double.class));
+            // TODO notify location has changed
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
+    ChildEventListener childEventListenerLongitude = new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            currentLocation.setLongitude(dataSnapshot.getValue(Double.class));
+            // TODO notify status has changed
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
 
     ChildEventListener childEventListenerVirtualObjects= new ChildEventListener() {
         @Override
@@ -177,6 +285,50 @@ public class UserWithPicture {
 
         }
     };
+
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setLongitude(double longitude){
+        this.currentLocation.setLongitude(longitude);
+    }
+    public void setLatitude(double latitude){
+        this.currentLocation.setLatitude(latitude);
+    }
+
+    public double getLongitude(){
+        return this.currentLocation.getLongitude();
+    }
+
+    public double getLatitude(){
+        return this.currentLocation.getLatitude();
+    }
+
+    public void setCurrentLocation(Location currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+    public ArrayList<NearFriend> getNearFriends() {
+        return nearFriends;
+    }
+
+    public void setNearFriends(ArrayList<NearFriend> nearFriends) {
+        this.nearFriends = nearFriends;
+    }
+
+    public ArrayList<NearVirtualObject> getNearVirtualObjects() {
+        return nearVirtualObjects;
+    }
+
+    public void setNearVirtualObjects(ArrayList<NearVirtualObject> nearVirtualObjects) {
+        this.nearVirtualObjects = nearVirtualObjects;
+    }
 
     public String getId() {
         return id;
