@@ -27,6 +27,7 @@
 
         <activity android:name=".StartActivity">
         </activity>
+        <service android:name=".services.LocationTracker" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".MainActivity">

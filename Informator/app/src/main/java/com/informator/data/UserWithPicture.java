@@ -11,6 +11,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.informator.MainActivity;
 
 import java.util.ArrayList;
 
@@ -116,7 +117,7 @@ public class UserWithPicture {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             status = dataSnapshot.getValue(String.class);
-            // TODO notify status has changed
+            // TODO observer to start/stop service
         }
 
         @Override

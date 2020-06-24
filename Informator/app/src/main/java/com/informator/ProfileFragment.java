@@ -260,7 +260,7 @@ public class ProfileFragment extends Fragment {
         popup_settings.setContentView(R.layout.popup_settings);
         locationTracker = (Switch)popup_settings.findViewById(R.id.switchLocTracker);
 
-        if(StoredData.getInstance().user.getStatus() == "online")
+        if(StoredData.getInstance().user.getStatus().equals("online"))
             locationTracker.setChecked(true);
         else
             locationTracker.setChecked(false);
