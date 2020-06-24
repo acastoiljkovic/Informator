@@ -90,12 +90,12 @@ public class UserWithPicture {
 
     private void initListeners(){
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("friends").addChildEventListener(childEventListenerFrineds);
-        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("virtual_objects").addChildEventListener(childEventListenerVirtualObjects);
-        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("points").addChildEventListener(childEventListenerPoints);
-        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("status").addChildEventListener(childEventListenerStatus);
-        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("longitude").addChildEventListener(childEventListenerLongitude);
-        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("latitude").addChildEventListener(childEventListenerLatitude);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("friends").addChildEventListener(childEventListenerFrineds);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("virtual_objects").addChildEventListener(childEventListenerVirtualObjects);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("points").addChildEventListener(childEventListenerPoints);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("status").addChildEventListener(childEventListenerStatus);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("longitude").addChildEventListener(childEventListenerLongitude);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("latitude").addChildEventListener(childEventListenerLatitude);
     }
 
 

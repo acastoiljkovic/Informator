@@ -182,13 +182,6 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = (Button) findViewById(R.id.loginBtnLogin);
     }
 
-    private void initDialog(){
-        dialog =new ProgressDialog(this);
-        dialog.setTitle("Please Wait");
-        dialog.setMessage("Loading...");
-        dialog.setCancelable(false);
-        dialog.setInverseBackgroundForced(false);
-    }
 
     private void successLogin(){
         dialogDismiss();
@@ -208,6 +201,14 @@ public class LoginActivity extends AppCompatActivity {
     public void failedLoginUser(){
         Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
         dialogHide();
+    }
+
+    private void initDialog(){
+        dialog =new ProgressDialog(this);
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Loading...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
     }
 
     public void dialogShow(){

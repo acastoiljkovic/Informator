@@ -1,5 +1,7 @@
 package com.informator;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,8 +17,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,9 +31,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,14 +42,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.informator.data.Constants;
-import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.StoredData;
 import com.informator.data.User;
-import com.informator.data.UserWithPicture;
 import com.informator.profile_fragments.*;
 
 import com.google.android.material.tabs.TabLayout;
-import com.informator.profile_fragments.EventsFragment;
 import com.informator.profile_fragments.TabAdapterProfile;
 
 import java.util.ArrayList;
@@ -70,6 +71,9 @@ public class ProfileFragment extends Fragment {
     private TextView tvGroups;
     private TextView tvPoints;
     private LinearLayout editOrAdd;
+    private Dialog popup_settings;
+    ProgressDialog dialog;
+    Switch locationTracker;
     Toolbar toolbar;
     SharedPreferences sharedPreferences;
     String username = null;
@@ -214,7 +218,10 @@ public class ProfileFragment extends Fragment {
 
                     } else if (item.getItemId() == R.id.add_friends_bluetooth) {
                         ((StartActivity) getActivity()).setFragment(R.id.add_friends_bluetooth, null);
+                    } else if (item.getItemId() == R.id.settings) {
+                        dispatchSettings();
                     }
+                    dialogDismiss();
                     return false;
                 }
             });
@@ -222,6 +229,7 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     ((StartActivity) getActivity()).setFragment(R.string.edit_profile_id, null);
+                    dialogDismiss();
                 }
             });
 
@@ -246,6 +254,47 @@ public class ProfileFragment extends Fragment {
 
 
         return view;
+    }
+
+    private void dispatchSettings(){
+        popup_settings.setContentView(R.layout.popup_add_virtual_object);
+        locationTracker = (Switch)popup_settings.findViewById(R.id.switchLocTracker);
+
+        if(StoredData.getInstance().user.getStatus() == "online")
+            locationTracker.setChecked(true);
+        else
+            locationTracker.setChecked(false);
+
+        locationTracker.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                dialogShow();
+                if(b)
+                    StoredData.getInstance().user.setStatus("online");
+                else
+                    StoredData.getInstance().user.setStatus("offline");
+                FirebaseDatabase.getInstance().getReference()
+                        .child(Constants.FIREBASE_CHILD_USERS)
+                        .child(StoredData.getInstance().user.getUsername())
+                        .child("status")
+                        .setValue(StoredData.getInstance().user.getStatus()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        dialogHide();
+                        Toast.makeText(getContext(), "Status has been change !", Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnCanceledListener(new OnCanceledListener() {
+                    @Override
+                    public void onCanceled() {
+                        dialogHide();
+                        Toast.makeText(getContext(), "Error with database !", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+
+        popup_settings.show();
     }
 
     private void Initialize(View view, Bundle bundle){
@@ -277,6 +326,49 @@ public class ProfileFragment extends Fragment {
         tvFriends = (TextView) view.findViewById(R.id.tvFriends);
         tvGroups = (TextView) view.findViewById(R.id.tvGroups);
         tvPoints = (TextView) view.findViewById(R.id.tvPoints);
+        initDialog();
+    }
+
+    private void initDialog(){
+        dialog =new ProgressDialog(getContext());
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Loading...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+    }
+
+    public void dialogShow(){
+        try {
+            if (!dialog.isShowing()) {
+                dialog.show();
+                getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void dialogHide(){
+        try {
+            if (dialog.isShowing())
+                dialog.hide();
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void dialogDismiss(){
+        try{
+            dialog.dismiss();
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void Logout(){
@@ -284,6 +376,7 @@ public class ProfileFragment extends Fragment {
         Intent i = new Intent(getContext(), MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
+        dialogDismiss();
 
         SharedPreferences.Editor edit = sharedPreferences.edit();
         edit.putBoolean(Constants.SHARED_PREFERENCES_LOGGED, false);
