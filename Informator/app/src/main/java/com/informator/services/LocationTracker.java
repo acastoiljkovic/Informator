@@ -3,6 +3,7 @@ package com.informator.services;
 
 import android.Manifest;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -10,16 +11,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -27,7 +32,9 @@ import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.informator.MainActivity;
 import com.informator.R;
 import com.informator.StartActivity;
@@ -35,12 +42,14 @@ import com.informator.data.Constants;
 import com.informator.data.NearFriend;
 import com.informator.data.NearVirtualObject;
 import com.informator.data.StoredData;
+import com.informator.receivers.LocationTrackerRestarter;
 
-public class LocationTracker extends Service implements ChildEventListener {
+public class LocationTracker extends Service {
     int test = 0;
     SharedPreferences sharedPreferences;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    DatabaseReference databaseReference;
 
     @Nullable
     @Override
@@ -100,61 +109,54 @@ public class LocationTracker extends Service implements ChildEventListener {
 
         }
 
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
+            startMyOwnForeground();
+        else
+            startForeground(1,new Notification());
 
         super.onCreate();
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void startMyOwnForeground()
+    {
+
+        String NOTIFICATION_CHANNEL_ID = "example.permanence";
+        String channelName = "Background Service";
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert manager != null;
+        manager.createNotificationChannel(chan);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setContentTitle("App is running in background")
+                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .build();
+        startForeground(2, notification);
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-
-        // test, radi
-        //        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
-//                .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
-//                .child("longitude").setValue(25.77887);
-
-
-
-
-
-
-//        Handler handler = new Handler();
-//        handler.postDelayed(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                if(test == 2) {
-//                    notifyFriend(new NearFriend("test", 15, 15));
-//                    Toast.makeText(LocationTracker.this, "proslo 2", Toast.LENGTH_SHORT).show();
-//
-//                }
-//                else if (test == 4){
-//                    notifyVO(new NearVirtualObject("vo","user",15,15));
-//                    Toast.makeText(LocationTracker.this, "proslo 3", Toast.LENGTH_SHORT).show();
-//                }
-//                test++;
-//
-//            }
-//        }, 1000);
-
-
         super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
 
     private void updateLocation(Location location){
-        Toast.makeText(this, "Lokacija se menja", Toast.LENGTH_SHORT).show();
-        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
-                .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
-                .child("longitude").setValue(location.getLongitude());
-        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
-                .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
-                .child("latitude").setValue(location.getLatitude());
+        if(location != null) {
+            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
+                    .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME, ""))
+                    .child("longitude").setValue(location.getLongitude());
+            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
+                    .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME, ""))
+                    .child("latitude").setValue(location.getLatitude());
+        }
     }
 
     private void notifyVO(NearVirtualObject vo){
-
-        Toast.makeText(this, "Objekat", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(this, StartActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -169,7 +171,7 @@ public class LocationTracker extends Service implements ChildEventListener {
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(1, builder.build());
+        notificationManager.notify(2, builder.build());
 
         FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
                 .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
@@ -177,9 +179,6 @@ public class LocationTracker extends Service implements ChildEventListener {
     }
 
     private void notifyFriend(NearFriend friend){
-
-        Toast.makeText(this, "Prijatelj", Toast.LENGTH_SHORT).show();
-
         Intent intent = new Intent(this, StartActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
@@ -207,51 +206,52 @@ public class LocationTracker extends Service implements ChildEventListener {
 
         FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
                 .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
-                .child("points")
-                .addChildEventListener(this);
+                .child("near_friends")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.hasChildren())
+                            notifyFriend(dataSnapshot.getValue(NearFriend.class));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
 
         FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
                 .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
-                .child("phone")
-                .addChildEventListener(this);
+                .child("near_virtual_objects")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.hasChildren())
+                            notifyVO(dataSnapshot.getValue(NearVirtualObject.class));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
     }
 
     @Override
     public void onDestroy() {
+
         super.onDestroy();
-        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
-        .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
-        .child("status").setValue("offline");
-        Toast.makeText(this, "Service has been stopped!", Toast.LENGTH_LONG).show();
-    }
 
-    @Override
-    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-        try {
-            notifyFriend(dataSnapshot.getValue(NearFriend.class));
+        if(StoredData.getInstance().user.getStatus().equals("online")){
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction("restartservice");
+            broadcastIntent.setClass(this, LocationTrackerRestarter.class);
+            sendBroadcast(broadcastIntent);
         }
-        catch (Exception e){
-            notifyVO(dataSnapshot.getValue(NearVirtualObject.class));
+        else{
         }
-    }
-
-    @Override
-    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
     }
 
-    @Override
-    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-    }
-
-    @Override
-    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-    }
-
-    @Override
-    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-    }
 }

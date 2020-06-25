@@ -5,6 +5,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -31,6 +33,7 @@ import com.informator.profile_fragments.AddFriendsBluetoothFragment;
 import com.informator.profile_fragments.EditProfile;
 import com.informator.profile_fragments.SearchFriendsFragment;
 import com.informator.profile_fragments.SendMessageFragment;
+import com.informator.services.LocationTracker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -247,5 +250,22 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(isMyServiceRunning(LocationTracker.class))
+            stopService(new Intent(this, LocationTracker.class));
+        super.onDestroy();
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

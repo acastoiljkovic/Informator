@@ -1,5 +1,6 @@
 package com.informator;
 
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -48,6 +49,7 @@ import com.informator.profile_fragments.*;
 
 import com.google.android.material.tabs.TabLayout;
 import com.informator.profile_fragments.TabAdapterProfile;
+import com.informator.services.LocationTracker;
 
 import java.util.ArrayList;
 
@@ -141,7 +143,10 @@ public class ProfileFragment extends Fragment {
                         bundleFrends.putStringArrayList("friends",friendsOfPerson);
                         fragmentRanking.setArguments(bundleFrends);
                         fragmentFriends.setArguments(bundleFrends);
-                        fragmentPhotos.setArguments(bundleProfile);
+                        Bundle bundlePhotos = new Bundle();
+                        bundlePhotos.putBoolean("profile",true);
+                        bundlePhotos.putString("username",username);
+                        fragmentPhotos.setArguments(bundlePhotos);
                         fragmentEvents.setArguments(bundleProfile);
 
                         if(adapter.getCount() > 0)
@@ -269,10 +274,21 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 dialogShow();
-                if(b)
+                if(b){
                     StoredData.getInstance().user.setStatus("online");
-                else
+                    if(!isMyServiceRunning(LocationTracker.class)) {
+                        Toast.makeText(getContext(), "Pokrecem servis", Toast.LENGTH_SHORT).show();
+                        getContext().startService(new Intent(getContext(), LocationTracker.class));
+                    }
+                }
+                else {
                     StoredData.getInstance().user.setStatus("offline");
+                    if(isMyServiceRunning(LocationTracker.class)) {
+                        Toast.makeText(getContext(), "Gasim servis", Toast.LENGTH_SHORT).show();
+                        getContext().stopService(new Intent(getContext(), LocationTracker.class));
+                    }
+                }
+
                 FirebaseDatabase.getInstance().getReference()
                         .child(Constants.FIREBASE_CHILD_USERS)
                         .child(StoredData.getInstance().user.getUsername())
@@ -297,6 +313,16 @@ public class ProfileFragment extends Fragment {
         popup_settings.show();
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void Initialize(View view, Bundle bundle){
         editOrAdd = (LinearLayout)view.findViewById(R.id.edit_profile_or_add_friend);
 
@@ -310,6 +336,7 @@ public class ProfileFragment extends Fragment {
         viewPager = (ViewPager) view.findViewById(R.id.viewpager_profile);
 
         popup_settings = new Dialog(this.getActivity());
+
         adapter = new TabAdapterProfile(getFragmentManager());
 
         sharedPreferences = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
@@ -326,6 +353,7 @@ public class ProfileFragment extends Fragment {
         tvFriends = (TextView) view.findViewById(R.id.tvFriends);
         tvGroups = (TextView) view.findViewById(R.id.tvGroups);
         tvPoints = (TextView) view.findViewById(R.id.tvPoints);
+
         initDialog();
     }
 
