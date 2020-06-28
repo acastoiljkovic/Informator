@@ -41,6 +41,7 @@ public class FriendsFragment extends Fragment {
     Boolean profile = false;
     ListView listFriends;
     ArrayList<String> friendsUsernames;
+    ArrayList<String> friendsUsernamesForView;
     ArrayList<String> friendsOfPersonFullNames;
     MapPicturesWithName friendsOfPersonPictures;
     SearchFriendsListViewItem adapter = null;
@@ -60,13 +61,14 @@ public class FriendsFragment extends Fragment {
 
         for(String friend : friendsUsernames) {
 
-            final String f = friend;
+            final String fUser = friend;
 
             mDatabase.child("users").child(friend).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null) {
                         friendsOfPersonFullNames.add(String.valueOf(dataSnapshot.child("fullName").getValue()));
+                        friendsUsernamesForView.add(fUser);
                         adapter.notifyDataSetChanged();
 
                     }
@@ -77,14 +79,14 @@ public class FriendsFragment extends Fragment {
 
                 }
             });
-            StorageReference profilePicture = storageRef.child(f + ".jpg");
+            StorageReference profilePicture = storageRef.child(fUser + ".jpg");
             profilePicture.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
 
 
                     Bitmap picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    friendsOfPersonPictures.add(picture, f);
+                    friendsOfPersonPictures.add(picture, fUser);
                     adapter.notifyDataSetChanged();
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -95,7 +97,7 @@ public class FriendsFragment extends Fragment {
                             ProfileFragment.drawableToBitmap(getResources().getDrawable(R.drawable.ic_person_outline_black_24dp)),
                             3000,
                             3000,
-                            false), f
+                            false), fUser
                     );
                     adapter.notifyDataSetChanged();
                 }
@@ -116,6 +118,7 @@ public class FriendsFragment extends Fragment {
         friendsOfPersonFullNames = new ArrayList<>();
         friendsOfPersonPictures = new MapPicturesWithName();
         friendsUsernames = new ArrayList<>();
+        friendsUsernamesForView = new ArrayList<>();
 
         try {
             database = FirebaseDatabase.getInstance();
@@ -151,7 +154,7 @@ public class FriendsFragment extends Fragment {
             tvWelcome.setVisibility(View.GONE);
         }
 
-        adapter = new SearchFriendsListViewItem(getActivity(),friendsOfPersonFullNames,friendsUsernames, friendsOfPersonPictures);
+        adapter = new SearchFriendsListViewItem(getActivity(),friendsOfPersonFullNames,friendsUsernamesForView, friendsOfPersonPictures);
         listFriends.setAdapter(adapter);
     }
 

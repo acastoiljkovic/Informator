@@ -3,6 +3,7 @@ package com.informator;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -36,6 +37,7 @@ import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.data.User;
 import com.informator.data.UserWithPicture;
+import com.informator.services.LocationTracker;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -57,31 +59,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        user = new UserWithPicture();
-        try {
-            firebaseAuth = FirebaseAuth.getInstance();
-        }
-        catch (Exception e){
-            Toast.makeText(this,e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
-        try{
-            database = FirebaseDatabase.getInstance();
-            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
-            storageRef = storage.getReference();
-            mDatabase = database.getReference();
-        }
-        catch (Exception e){
-            Toast.makeText(this,"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
 
-        dialog =new ProgressDialog(this);
-        dialog.setTitle("Please Wait");
-        dialog.setMessage("Loading...");
-        dialog.setCancelable(false);
-        dialog.setInverseBackgroundForced(false);
+        Initialize();
 
-        sharedPreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
         checkuserLogged();
+
         Button btnLogin = (Button)findViewById(R.id.mainActivity_btnLogin);
         Button btnRegister = (Button)findViewById(R.id.mainActivity_btnReister);
 
@@ -102,6 +84,41 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    private void Initialize(){
+        user = new UserWithPicture();
+        try {
+            firebaseAuth = FirebaseAuth.getInstance();
+        }
+        catch (Exception e){
+            Toast.makeText(this,e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+        try{
+            database = FirebaseDatabase.getInstance();
+            storage = FirebaseStorage.getInstance(Constants.URL_STORAGE);
+            storageRef = storage.getReference();
+            mDatabase = database.getReference();
+        }
+        catch (Exception e){
+            Toast.makeText(this,"Database error : "+e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+
+        sharedPreferences = this.getSharedPreferences(Constants.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
+
+        initDialog();
+
+        createNotificationChannel();
+    }
+
+    private void initDialog(){
+
+        dialog =new ProgressDialog(this);
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Loading...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+    }
+
     public void checkuserLogged(){
         if(sharedPreferences.getBoolean(Constants.SHARED_PREFERENCES_LOGGED,false)) {
             String email = sharedPreferences.getString(Constants.SHARED_PREFERENCES_EMAIL,"");
@@ -113,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
-                        mDatabase.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addValueEventListener(new ValueEventListener() {
+                        mDatabase.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 int i = 0;
@@ -124,11 +141,8 @@ public class MainActivity extends AppCompatActivity {
                                         user.setFullName(String.valueOf(data.child("fullName").getValue()));
                                         user.setPhone(String.valueOf(data.child("phone").getValue()));
                                         user.setId(String.valueOf(data.child("id").getValue()));
-//                                        ArrayList<String> friends = new ArrayList<>();
-//                                        for(DataSnapshot data1 : data.child("friends").getChildren()){
-//                                            friends.add(String.valueOf(data1.getValue()));
-//                                        }
-//                                        user.setFriends(friends);
+                                        user.setStatus(String.valueOf(data.child("status").getValue()));
+                                        startLocator(user.getStatus());
                                     }
                                     i++;
                                 }
@@ -185,7 +199,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    public void startLocator(String status){
+        if(status.equals("online")){
+            startService(new Intent(MainActivity.this,LocationTracker.class));
         }
+        else if(status.equals("offline")){
+            stopService(new Intent(MainActivity.this,LocationTracker.class));
+        }
+    }
 
 
     private void createNotificationChannel() {
@@ -230,6 +253,23 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(isMyServiceRunning(LocationTracker.class))
+            stopService(new Intent(this, LocationTracker.class));
+        super.onDestroy();
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
