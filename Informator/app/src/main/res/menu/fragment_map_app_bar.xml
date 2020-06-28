@@ -11,6 +11,17 @@
 
     </item>
 
+
+
+    <item
+        android:id="@+id/search_on_map"
+        android:icon="@drawable/ic_filter_list_black_24dp"
+        android:title="@string/map"
+        app:showAsAction="ifRoom"
+        >
+
+    </item>
+
     <item
         android:id="@+id/search_in_radius"
         android:icon="@drawable/ic_gps_fixed_black_24dp"
@@ -20,11 +31,20 @@
     </item>
 
     <item
-        android:id="@+id/search_on_map"
-        android:icon="@drawable/ic_filter_list_black_24dp"
-        android:title="@string/map"
-        app:showAsAction="ifRoom"
-        >
+        android:id="@+id/id_show_default"
+        android:title="Default display">
+
+    </item>
+
+    <item
+        android:id="@+id/id_show_online_friends"
+        android:title="Online friends display">
+
+    </item>
+
+    <item
+        android:id="@+id/id_show_virtual_objects"
+        android:title="Virtual objects display">
 
     </item>
 

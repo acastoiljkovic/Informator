@@ -37,7 +37,9 @@ import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
 import com.informator.data.ListVirtualObjectsAdapter;
+import com.informator.data.MapPicturesWithName;
 import com.informator.data.Post;
+import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.StoredData;
 import com.informator.data.VirtualObject;
 
@@ -54,6 +56,7 @@ public class ListVirtualObjectsFragment extends Fragment {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     private HashMap<String,Integer> virtualObjectIdMapPosition;
+    MapPicturesWithName virtualObjectPictures;
 
     @Nullable
     @Override
@@ -66,6 +69,7 @@ public class ListVirtualObjectsFragment extends Fragment {
         storageReference=firebaseStorage.getReference();
         databaseReference=firebaseDatabase.getReference();
         virtualObjectIdMapPosition=new HashMap<>();
+        virtualObjectPictures = new MapPicturesWithName();
         final int[] positionCount = {0};
 
         final ArrayList<String> titles=new ArrayList<>();
@@ -76,7 +80,7 @@ public class ListVirtualObjectsFragment extends Fragment {
         Bundle bundle=this.getArguments();
         final float radius=bundle.getFloat("radius");
         Toast.makeText(getActivity(),String.valueOf(radius),Toast.LENGTH_LONG).show();
-        final ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),titles,images);
+        final ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),titles,images,virtualObjectPictures);
 
 
         //preuzima moje virtuelne objekte i proverva da li su u radiusu
@@ -107,6 +111,7 @@ public class ListVirtualObjectsFragment extends Fragment {
                                 StoredData.getInstance().getUser().setVirtualObjectWithId(virtualObject.getId(),bitmap);
                                 int pos=virtualObjectIdMapPosition.get(virtualObject.getId());
                                 virtualObjects.get(pos).setVirtual_object_image(bitmap);
+                                virtualObjectPictures.add(bitmap,virtualObject.getTitle());
 
                             }
 
@@ -167,6 +172,7 @@ public class ListVirtualObjectsFragment extends Fragment {
                                             vo.setVirtual_object_image(bitmap);
                                             int pos=virtualObjectIdMapPosition.get(vo.getId());
                                             virtualObjects.get(pos).setVirtual_object_image(bitmap);
+                                            virtualObjectPictures.add(bitmap,vo.getTitle());
 
                                         }
 

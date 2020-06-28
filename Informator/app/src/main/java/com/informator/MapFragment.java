@@ -82,6 +82,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LocationListener locationListener;
     private Location current_user_location;
 
+    private HashMap<String,Integer> virtualObjectIdMapPosition;
+
     private float current_zoom=12;
     public static ArrayList<VirtualObject> virtualObjects;
     private HashMap<Marker,String> markerPlaceIdMap;
@@ -107,6 +109,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     EditText editTextDesc;
     EditText editTextTitle;
     Bitmap bitmap;
+    ArrayList<VirtualObject> listPinnedVirtualObjects;
 
     private float currentZoom;
     private float radius;
@@ -156,6 +159,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     Bundle bundle=new Bundle();
                     bundle.putFloat("radius",radius);
                     ((StartActivity)getActivity()).setFragment(R.string.open_listVO,bundle);
+                }
+                else if(item.getItemId()==R.id.id_show_virtual_objects){
+                    getVirtualObjects();
+                    for(VirtualObject virtualObject:listPinnedVirtualObjects){
+                        addVirtualObjectMarker(virtualObject);
+                    }
+                }
+                else if(item.getItemId()==R.id.id_show_online_friends){
+                    //prikazuje u realnom vremenu trenutne lokacije svih prijatelja
+                }
+                else if(item.getItemId()==R.id.id_show_default){
+                    mMap.clear();
+                    //defaultni prikaz eventa i groupa na mapi ili prazno videcemo
                 }
                 return false;
             }
@@ -417,131 +433,126 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
     private void getVirtualObjects() {
+        virtualObjectIdMapPosition=new HashMap<>();
+        final int[] positionCount = {0};
+        listPinnedVirtualObjects=new ArrayList<>();
         markerPlaceIdMap=new HashMap<Marker, String>();
-        StoredData.getInstance().getUser().setListVO(new ArrayList<VirtualObject>());
+        for(final VirtualObject virtualObject:StoredData.getInstance().getUser().getListVO()){
 
-        databaseReference.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                if(dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("friends").getValue()!=null){
-                    for(DataSnapshot  ds: dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("friends").getChildren()){
-                        StoredData.getInstance().getUser().addFriend(ds.getValue().toString());
-                    }
-                }
+            if(virtualObject.getVirtual_object_image()!=null){
+                listPinnedVirtualObjects.add(virtualObject);
+                virtualObjectIdMapPosition.put(virtualObject.getId(), positionCount[0]);
+                positionCount[0]++;
+            }
+            else
+            {
+                listPinnedVirtualObjects.add(virtualObject);
+                virtualObjectIdMapPosition.put(virtualObject.getId(), positionCount[0]);
+                positionCount[0]++;
+                StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
 
-                for(final String username: StoredData.getInstance().getUser().getFriends()){
-
-                    databaseReference.child("users").child("").orderByChild("id").equalTo(username).addListenerForSingleValueEvent(new ValueEventListener() {
+                if(virtualObjectImage!=null){
+                    virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                         @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            findVirtualObjectForUserWithUsername(username,dataSnapshot);
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                            StoredData.getInstance().getUser().setVirtualObjectWithId(virtualObject.getId(),bitmap);
+                            int pos=virtualObjectIdMapPosition.get(virtualObject.getId());
+                            listPinnedVirtualObjects.get(pos).setVirtual_object_image(bitmap);
+                            notifyDownloadPictureForVirtualObject();
+
                         }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
                         }
                     });
+                }
+            }
+
+        }
+
+        for(final String friendUsername:StoredData.getInstance().getUser().getFriends()){
+            databaseReference.child("users").child(friendUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.child("virtual_objects")!=null){
+                        DataSnapshot ds1=dataSnapshot.child("virtual_objects");
+                        for(DataSnapshot ds:ds1.getChildren()){
+
+                            final VirtualObject vo=new VirtualObject();
+                            vo.setDescription(ds.child("description").getValue().toString());
+                            vo.setId(ds.child("id").getValue().toString());
+                            vo.setLatitude(Double.valueOf(ds.child("latitude").getValue().toString()));
+                            vo.setLongitude(Double.valueOf(ds.child("longitude").getValue().toString()));
+                            vo.setNumberOfRates(Integer.valueOf(ds.child("numberOfRates").getValue().toString()));
+                            vo.setRating(Float.valueOf(ds.child("rating").getValue().toString()));
+                            vo.setTitle(ds.child("title").getValue().toString());
+                            vo.setUserRecommended(friendUsername);
+
+                            for(DataSnapshot dataSnapshot1:ds.child("comments").getChildren()){
+                                vo.getPosts().add(new Post(dataSnapshot1.child("username").getValue().toString(),dataSnapshot1.child("post").getValue().toString()));
+                            }
+
+                            listPinnedVirtualObjects.add(vo);
+                            virtualObjectIdMapPosition.put(vo.getId(), positionCount[0]);
+
+
+                            StorageReference virtualObjectImage=storageReference.child(ds.child("id").getValue()+".jpg");
+
+                            if(virtualObjectImage!=null){
+                                virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                                        vo.setVirtual_object_image(bitmap);
+                                        int pos=virtualObjectIdMapPosition.get(vo.getId());
+                                        listPinnedVirtualObjects.get(pos).setVirtual_object_image(bitmap);
+                                        notifyDownloadPictureForVirtualObject();
+
+                                    }
+
+
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                    }
+                                });
+                            }
+                        }
+
+
+                        }
+
+                    }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
+            });
+        }
 
-                findVirtualObjectForUserWithUsername(StoredData.getInstance().getUser().getUsername(),dataSnapshot);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
-    private void findVirtualObjectForUserWithUsername(String username,DataSnapshot dataSnapshot){
-
-        if(dataSnapshot.child(username).child("virtual_objects").getValue()!=null)
-        {
-            for(DataSnapshot dataSnapshot1: dataSnapshot.child(username)
-                    .child("virtual_objects").getChildren()){
-
-                double lat=(Double) dataSnapshot1.child("latitude").getValue();
-                double lon=(Double)dataSnapshot1.child("longitude").getValue();
-                if(checkIfInRadius(new LatLng(lat,lon))){
-
-                    String id=dataSnapshot1.child("id").getValue().toString();
-                    String description=dataSnapshot1.child("description").getValue().toString();
-
-
-                    float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
-                    String title=dataSnapshot1.child("title").getValue().toString();
-                    int numberOfRates=Integer.parseInt(dataSnapshot1.child("numberOfRates").getValue().toString());
-                    final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
-                    virtualObject.setId(id);
-                    virtualObject.setUserRecommended(StoredData.getInstance().getUser().getUsername());
-                    virtualObject.setNumberOfRates(numberOfRates);
-                    virtualObject.setRating(rating);
-
-                    if(dataSnapshot1.child("comments").getValue()!=null){
-                        for(DataSnapshot dataSnapshot2:dataSnapshot1.child("comments").getChildren()){
-                            Post post=new Post();
-                            String user_comment=dataSnapshot2.child("username").getValue().toString();
-                            String comment=dataSnapshot2.child("post").getValue().toString();
-                            post.setPost(comment);
-                            post.setUsername(user_comment);
-                            virtualObject.addPost(post);
-                        }
-                    }
-
-                    StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
-                    bitmap=null;
-                    if(virtualObjectImage!=null){
-                        virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                            @Override
-                            public void onSuccess(byte[] bytes) {
-                                bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                virtualObject.setVirtual_object_image(bitmap);
-                                StoredData.getInstance().getUser().addVirtualObject(virtualObject);
-                                List<VirtualObject> vo=StoredData.getInstance().getUser().getListVO();
-                            }
-
-
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                StoredData.getInstance().getUser().addVirtualObject(virtualObject);
-                            }
-                        });
-                    }
-                }
-
-
-            }
+    //posto treba vremena da se skinu slike objekata u trenutku kada se skinu poziva se ova funkcija i postavlja na markere sliku inace je neka defaultna slika
+    public void notifyDownloadPictureForVirtualObject(){
+        mMap.clear();
+        for(VirtualObject virtualObject:listPinnedVirtualObjects){
+            addVirtualObjectMarker(virtualObject);
         }
     }
 
-    private boolean checkIfInRadius(LatLng position){
-        float distanceFromCurrentLocation[]=new float[1];
-
-        Location.distanceBetween(
-                current_user_location.getLatitude(),
-                current_user_location.getLongitude(),
-                position.latitude,
-                position.longitude,
-                distanceFromCurrentLocation
-                );
-
-        if(distanceFromCurrentLocation[0] > radius)
-            return false;
-        else
-            return true;
-    }
 
     private void addVirtualObjectMarker(VirtualObject virtualObject){
         LatLng location=new LatLng(virtualObject.getLatitude(),virtualObject.getLongitude());
         MarkerOptions markerOptions=new MarkerOptions();
         markerOptions.position(location);
         if(virtualObject.getVirtual_object_image()!=null){
-            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(virtualObject.getVirtual_object_image(),55,55,false)));
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(virtualObject.getVirtual_object_image(),100,100,false)));
         }
         else {
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
@@ -554,9 +565,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+
+
+                String idVirtualObject=markerPlaceIdMap.get(marker);
+                int pos=0;
+
+                while(listPinnedVirtualObjects.get(pos).getId().compareTo(idVirtualObject)!=0){
+                    pos++;
+                }
+                StoredData.getInstance().setVirtualObject(listPinnedVirtualObjects.get(pos));
                 //logika za klik na marker
                 Bundle result=new Bundle();
-                //problem onback press drugi put postavlja result na null??
                 result.putString("idVirtualObject",markerPlaceIdMap.get(marker));
 
                 ((StartActivity) getActivity()).setFragment(R.string.virtualObjectId,result);

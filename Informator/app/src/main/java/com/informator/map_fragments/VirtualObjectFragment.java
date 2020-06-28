@@ -147,7 +147,7 @@ public class VirtualObjectFragment extends Fragment {
             final ArrayList<Bitmap> pictures=new ArrayList<>();
 
 
-            final ListVirtualObjectsAdapter listVirtualObjectsAdapter = new ListVirtualObjectsAdapter(getActivity(),comments,pictures);
+            final ListVirtualObjectsAdapter listVirtualObjectsAdapter = new ListVirtualObjectsAdapter(getActivity(),comments,pictures,null);
 
             comments.add(StoredData.getInstance().getVirtualObject().getPosts()
                     .get(StoredData.getInstance().getVirtualObject().getPosts().size()-1).getPost());
@@ -228,138 +228,6 @@ public class VirtualObjectFragment extends Fragment {
             ratingBarLayout.addView(btnRate);
         }
 
-
-
-
-
-//        for(int i=0;i< StoredData.getInstance().user.getListVO().size();i++){
-//            if(StoredData.getInstance().user.getListVO().get(i).getId().compareTo(idVirtualObject)==0){
-//                indexOfVirtualObject=i;
-//                imageView.setImageBitmap(StoredData.getInstance().user.getListVO().get(i).getVirtual_object_image());
-//                textViewTitle.setText(StoredData.getInstance().user.getListVO().get(i).getTitle());
-//                textViewRecommendedBy.setText("Recommended by "+StoredData.getInstance().user.getListVO().get(i).getUserRecommended());
-//                textViewDescription.setText(StoredData.getInstance().user.getListVO().get(i).getDescription());
-//                textViewNumberOfPosts.setText(StoredData.getInstance().user.getListVO().get(i).getPosts().size()+" comments");
-//                imageViewUserImage.setImageBitmap(StoredData.getInstance().user.getProfilePhoto());
-//                textViewRating.setText("Rate: "+StoredData.getInstance().user.getListVO().get(i).getRating());
-//
-//                if(StoredData.getInstance().user.getListVO().get(i).getPosts().size()>0)//postoje komentari treba ih dodati
-//                {
-//                    final FrameLayout frameLayout=new FrameLayout(getContext());
-//                    FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(170,170);
-//                    lp.gravity= Gravity.CENTER;
-//                    frameLayout.setLayoutParams(lp);
-//
-//                    final ImageView img=new ImageView(getContext());
-//                    LinearLayout.LayoutParams lpi = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-//                            LinearLayout.LayoutParams.MATCH_PARENT);
-//                    lpi.bottomMargin=6;
-//                    lpi.topMargin=6;
-//                    lpi.leftMargin=6;
-//                    lpi.rightMargin=6;
-//                    img.setLayoutParams(lpi);
-//
-//                    StorageReference user_image_reference=storageReference.child(StoredData.getInstance().getUser().getListVO().get(i)
-//                            .getPosts().get(StoredData.getInstance().getUser().getListVO().get(i)
-//                                    .getPosts().size()-1).getUsername()+".jpg");
-//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//
-//                    if(user_image_reference!=null){
-//                        user_image_reference.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-//                            @Override
-//                            public void onSuccess(byte[] bytes) {
-//                                Bitmap bitmap= BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-//
-//                                img.setImageBitmap(bitmap);
-//                                frameLayout.addView(img);
-//                            }
-//                        }).addOnFailureListener(new OnFailureListener() {
-//                            @Override
-//                            public void onFailure(@NonNull Exception e) {
-//
-//                            }
-//                        });
-//                    }
-//
-//
-//                    ImageView img1=new ImageView(getContext());
-//                    LinearLayout.LayoutParams lpi1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-//                            LinearLayout.LayoutParams.MATCH_PARENT);
-//                    img1.setLayoutParams(lpi1);
-//                    img1.setImageResource(R.drawable.profile_picture);
-//
-//                    frameLayout.addView(img1);
-//
-//                    linearLayoutImage.addView(frameLayout);
-//
-//                    TextView textView=new TextView(getContext());
-//                    LinearLayout.LayoutParams lpTextView=new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-//                            LinearLayout.LayoutParams.WRAP_CONTENT);
-//
-//                    lpTextView.topMargin=7;
-//                    lpTextView.gravity=Gravity.CENTER;
-//
-//                    textView.setText(StoredData.getInstance().user.getListVO().get(i).getPosts()
-//                            .get(StoredData.getInstance().user.getListVO().get(i).getPosts().size()-1).getPost());
-//                    textView.setTextSize(14);
-//                    textView.setTextColor(getResources().getColor(R.color.color_black));
-//                    textView.setBackground(getResources().getDrawable(R.drawable.backround_comments));
-//
-//                    linearLayoutTextView.addView(textView);
-//
-//
-//                }
-//
-//                //String userRecommended=StoredData.getInstance().getUser().getListVO().get(i).getUserRecommended();
-//
-//                //ako je prijateljev objekat moguce ga je oceniti
-//                //napomena ovde svoj ocenjuje zbog testiranja
-//                if(StoredData.getInstance().getUser().getListVO().get(i).getUserRecommended().compareTo(StoredData.getInstance().getUser().getUsername())==0){
-//                    RatingBar ratingBar=new RatingBar(getContext());
-//                    ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-//                        @Override
-//                        public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-//                            currentRating=rating;
-//                            Toast.makeText(getActivity(),String.valueOf(currentRating),Toast.LENGTH_LONG).show();
-//                        }
-//                    });
-//
-//                    Button btnRate=new Button(getContext());
-//                    btnRate.setText("Rate");
-//                    btnRate.setTextColor(getResources().getColor(R.color.color_black));
-//                    btnRate.setBackground(getResources().getDrawable(R.drawable.button_white_border));
-//                    btnRate.setTextSize(20);
-//
-//                    final int finalI = i;
-//                    btnRate.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            if(currentRating==0){
-//                                Toast.makeText(getActivity(),"Rate first!",Toast.LENGTH_LONG).show();
-//                            }
-//                            else {
-//                                int num=StoredData.getInstance().user.getListVO().get(finalI).getNumberOfRates()+1;
-//                                float rating=(StoredData.getInstance().user.getListVO().get(finalI).getRating()
-//                                        *StoredData.getInstance().user.getListVO().get(finalI).getNumberOfRates()+currentRating)/num;
-//                                databaseReference.child("users").child(StoredData.getInstance().user.getListVO().get(finalI).getUserRecommended())
-//                                        .child("virtual_objects").child(StoredData.getInstance().user.getListVO().get(finalI).getTitle())
-//                                        .child("numberOfRates").setValue(num);
-//                                databaseReference.child("users").child(StoredData.getInstance().user.getListVO().get(finalI).getUserRecommended())
-//                                        .child("virtual_objects").child(StoredData.getInstance().user.getListVO().get(finalI).getTitle())
-//                                        .child("rating").setValue(rating);
-//
-//                            }
-//                        }
-//                    });
-//
-//                    ratingBarLayout.addView(ratingBar);
-//                    ratingBarLayout.addView(btnRate);
-//                }
-//
-//                break;
-//
-//            }
-//        }
         return view;
     }
 
