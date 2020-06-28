@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -104,8 +105,8 @@ public class SearchFriendsFragment extends Fragment {
         btnSearchFrineds.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fetchDataFromDatabase(etSearchFriends.getText().toString());
                 dialogShow();
+                fetchDataFromDatabase(etSearchFriends.getText().toString());
                 hideDialogAfter5sec();
             }
         });
@@ -151,7 +152,7 @@ public class SearchFriendsFragment extends Fragment {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                dialogDismiss();
+                dialogHide();
             }
         }, 5*1000);
         return;
@@ -184,6 +185,7 @@ public class SearchFriendsFragment extends Fragment {
                                     adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
+                                dialogHide();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -198,6 +200,7 @@ public class SearchFriendsFragment extends Fragment {
                                     adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
+                                dialogHide();
                             }
                         });
                     }
@@ -216,7 +219,7 @@ public class SearchFriendsFragment extends Fragment {
                                     adapter = new SearchFriendsListViewItem(getActivity(), fullname, usernames, profileImages);
                                     listViewSearchFriends.setAdapter(adapter);
                                 }
-
+                                dialogHide();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -232,6 +235,7 @@ public class SearchFriendsFragment extends Fragment {
                                     listViewSearchFriends.setAdapter(adapter);
 
                                 }
+                                dialogHide();
                             }
                         });
                     }
@@ -248,10 +252,14 @@ public class SearchFriendsFragment extends Fragment {
     }
 
 
+
     public void dialogShow(){
         try {
-            if (!dialog.isShowing())
+            if (!dialog.isShowing()) {
                 dialog.show();
+                getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -262,6 +270,7 @@ public class SearchFriendsFragment extends Fragment {
         try {
             if (dialog.isShowing())
                 dialog.hide();
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -271,6 +280,7 @@ public class SearchFriendsFragment extends Fragment {
     public void dialogDismiss(){
         try{
             dialog.dismiss();
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
         catch (Exception e){
             e.printStackTrace();

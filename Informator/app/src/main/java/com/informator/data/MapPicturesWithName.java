@@ -8,21 +8,21 @@ import java.util.Map;
 
 public class MapPicturesWithName {
 
-    private Map<String,Bitmap> images = null;
+    private Map<String, Bitmap> images = null;
 
     public MapPicturesWithName() {
         images = new HashMap<>();
     }
 
-    public MapPicturesWithName(Map<String,Bitmap> images) {
+    public MapPicturesWithName(Map<String, Bitmap> images) {
         this.images = images;
     }
 
-    public Map<String,Bitmap> getImages() {
+    public Map<String, Bitmap> getImages() {
         return images;
     }
 
-    public void setImages(Map<String,Bitmap> images) {
+    public void setImages(Map<String, Bitmap> images) {
         this.images = images;
     }
 
@@ -39,7 +39,10 @@ public class MapPicturesWithName {
         images.put(name,picture);
     }
 
+
     public void clear(){
         images.clear();
     }
 }
+
+
