@@ -17,9 +17,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,13 +27,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.informator.MainActivity;
 import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
@@ -43,6 +39,8 @@ import com.informator.data.NearFriend;
 import com.informator.data.NearVirtualObject;
 import com.informator.data.StoredData;
 import com.informator.receivers.LocationTrackerRestarter;
+
+import java.util.UUID;
 
 public class LocationTracker extends Service {
     int test = 0;
@@ -171,7 +169,7 @@ public class LocationTracker extends Service {
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(2, builder.build());
+        notificationManager.notify(vo.getTitle().hashCode(), builder.build());
 
         FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
                 .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
@@ -186,17 +184,17 @@ public class LocationTracker extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_info_24)
                 .setContentTitle("Found Friend")
-                .setContentText("Your friend with username : "+friend.getUser()+" is near you !")
+                .setContentText("Your friend with username : "+friend.getUsername()+" is near you !")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(1, builder.build());
+        notificationManager.notify(friend.getUsername().hashCode(), builder.build());
 
         FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
                 .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
-                .child("near_friends").child(friend.getUser()).removeValue();
+                .child("near_friends").child(friend.getUsername()).removeValue();
     }
 
 
@@ -210,8 +208,12 @@ public class LocationTracker extends Service {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.hasChildren())
-                            notifyFriend(dataSnapshot.getValue(NearFriend.class));
+                        if(dataSnapshot.hasChildren()){
+                            for(DataSnapshot data : dataSnapshot.getChildren()){
+                                notifyFriend(data.getValue(NearFriend.class));
+                                break;
+                            }
+                        }
                     }
 
                     @Override
@@ -226,8 +228,12 @@ public class LocationTracker extends Service {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.hasChildren())
-                            notifyVO(dataSnapshot.getValue(NearVirtualObject.class));
+                        if(dataSnapshot.hasChildren()){
+                            for(DataSnapshot data : dataSnapshot.getChildren()){
+                                notifyVO(data.getValue(NearVirtualObject.class));
+                                break;
+                            }
+                        }
                     }
 
                     @Override

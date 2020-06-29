@@ -54,6 +54,7 @@ public class UserWithPicture {
         this.friends = new ArrayList<>();
         points = "0";
         status = "online";
+        currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
     }
@@ -67,6 +68,7 @@ public class UserWithPicture {
         this.friends = new ArrayList<>();
         points = "0";
         status = "online";
+        currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
     }
@@ -354,7 +356,7 @@ public class UserWithPicture {
 
     public void setPoints(){
         this.points = String.valueOf(this.countPoints());
-//        databaseReference.child(Constants.FIREBASE_CHILD).child(username).child("points").setValue(this.points);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("points").setValue(this.points);
     }
 
     public String getFriend(int index){

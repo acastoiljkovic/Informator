@@ -12,6 +12,8 @@
     <ListView
         android:id="@+id/list_friends"
         android:layout_width="match_parent"
+        android:dividerHeight="0dp"
+        android:divider="@color/color_white"
         android:layout_height="wrap_content"/>
     <ImageButton
         android:id="@+id/fragment_friends_add_friend_button"

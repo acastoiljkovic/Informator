@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
                                         user.setPhone(String.valueOf(data.child("phone").getValue()));
                                         user.setId(String.valueOf(data.child("id").getValue()));
                                         user.setStatus(String.valueOf(data.child("status").getValue()));
+                                        user.setPoints(String.valueOf(data.child("points").getValue()));
                                         startLocator(user.getStatus());
                                     }
                                     i++;

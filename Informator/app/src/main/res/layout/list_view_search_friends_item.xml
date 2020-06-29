@@ -17,7 +17,7 @@
                 android:layout_height="match_parent"/>
 
             <ImageView
-                android:src="@drawable/profile_picture"
+                android:src="@drawable/picture_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </FrameLayout>

@@ -29,6 +29,7 @@ import com.informator.ProfileFragment;
 import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
+import com.informator.data.FriendsListViewItem;
 import com.informator.data.MapPicturesWithName;
 import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.StoredData;
@@ -45,7 +46,7 @@ public class RankingFragment extends Fragment {
     ArrayList<String> friendsUsernames;
     ArrayList<String> friendsOfPersonFullNames;
     MapPicturesWithName friendsOfPersonPictures;
-    SearchFriendsListViewItem adapter = null;
+    FriendsListViewItem adapter = null;
     FirebaseDatabase database;
     DatabaseReference mDatabase;
     FirebaseStorage storage;
@@ -153,7 +154,7 @@ public class RankingFragment extends Fragment {
             tvWelcome.setVisibility(View.GONE);
         }
 
-        adapter = new SearchFriendsListViewItem(getActivity(),friendsOfPersonFullNames,friendsUsernames, friendsOfPersonPictures);
+        adapter = new FriendsListViewItem(getActivity(),friendsOfPersonFullNames,friendsUsernames, friendsOfPersonPictures);
         listFriends.setAdapter(adapter);
     }
 

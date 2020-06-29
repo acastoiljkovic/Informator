@@ -3,6 +3,7 @@ package com.informator.profile_fragments;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -43,6 +45,7 @@ import java.util.TimerTask;
 
 public class SearchFriendsFragment extends Fragment {
 
+    LinearLayout layout;
     EditText etSearchFriends;
     ImageButton btnSearchFrineds;
     ListView listViewSearchFriends;
@@ -119,6 +122,9 @@ public class SearchFriendsFragment extends Fragment {
         etSearchFriends = (EditText) view.findViewById(R.id.etSearchFriends);
         btnSearchFrineds = (ImageButton) view.findViewById(R.id.btnSearchFriends);
         listViewSearchFriends = (ListView) view.findViewById(R.id.listViewSearchFriends);
+
+//        layout = view.findViewById(R.id.fragment_search_friends_layout);
+//        layout.setBackgroundColor(Color.WHITE);
 
         fullname = new ArrayList<>();
         profileImages = new MapPicturesWithName();

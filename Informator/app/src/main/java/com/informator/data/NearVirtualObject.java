@@ -3,21 +3,21 @@ package com.informator.data;
 public class NearVirtualObject {
     private String title;
     private String user;
-    private double latitude;
-    private double longitude;
+    private double lat;
+    private double lng;
 
     public NearVirtualObject(String title, String user, double latitude, double longitude) {
         this.title = title;
         this.user = user;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.lat = latitude;
+        this.lng = longitude;
     }
 
     public NearVirtualObject() {
         this.title = "No name";
         this.user = "None";
-        this.latitude = 0;
-        this.longitude = 0;
+        this.lat = 0;
+        this.lng = 0;
     }
 
     public String getTitle() {
@@ -36,19 +36,19 @@ public class NearVirtualObject {
         this.user = user;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public double getLat() {
+        return lat;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public double getLng() {
+        return lng;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 }

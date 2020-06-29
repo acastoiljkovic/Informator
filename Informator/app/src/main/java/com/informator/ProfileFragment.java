@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -45,6 +46,7 @@ import com.google.firebase.storage.StorageReference;
 import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.data.User;
+import com.informator.data.UserWithPicture;
 import com.informator.profile_fragments.*;
 
 import com.google.android.material.tabs.TabLayout;
@@ -56,12 +58,13 @@ import java.util.ArrayList;
 
 public class ProfileFragment extends Fragment {
 
+    LinearLayout layout;
     FirebaseDatabase database;
     DatabaseReference mDatabase;
     FirebaseStorage storage;
     StorageReference storageRef;
     Bitmap picture;
-    User user;
+    UserWithPicture user;
     private TabAdapterProfile adapter;
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -120,44 +123,69 @@ public class ProfileFragment extends Fragment {
             mDatabase.child("users").child(username).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    user = new User();
+                    user = new UserWithPicture();
                     if(dataSnapshot != null){
                         user.setUsername(String.valueOf(dataSnapshot.child("username").getValue()));
                         user.setEmail(String.valueOf(dataSnapshot.child("email").getValue()));
                         user.setFullName(String.valueOf(dataSnapshot.child("fullName").getValue()));
+                        user.setPoints(String.valueOf(dataSnapshot.child("points").getValue()));
                         tvFullName.setText(String.valueOf(user.getFullName()).toUpperCase());
                         for(DataSnapshot data1 : dataSnapshot.child("friends").getChildren()){
                             friendsOfPerson.add(String.valueOf(data1.getValue()));
                             if(String.valueOf(data1.getValue()).compareTo(StoredData.getInstance().getUser().getUsername()) == 0){
-                                isFriends = true;
-                                tvEditProfile.setText(R.string.remove_friend);
-                                imageViewEditProfile.setImageResource(R.drawable.ic_delete_black_24dp);
+
+                                try {
+                                    isFriends = true;
+                                    tvEditProfile.setText(R.string.remove_friend);
+                                    imageViewEditProfile.setImageResource(R.drawable.ic_delete_black_24dp);
+                                }
+                                catch (Exception e){
+
+                                }
+
                             }
                         }
-                        tvFriends.setText(getContext().getResources().getString(R.string.friends) +" " + friendsOfPerson.size());
+                        try {
+                            tvFriends.setText(getContext().getResources().getString(R.string.friends) + " " + friendsOfPerson.size());
+                            tvGroups.setText(getContext().getResources().getString(R.string.groups) + " " + friendsOfPerson.size());
+                            tvPoints.setText(getContext().getResources().getString(R.string.points) + " " + user.getPoints());
+                        }
+                        catch (Exception e){
 
-                        Bundle bundleProfile = new Bundle();
-                        bundleProfile.putBoolean("profile",true);
-                        Bundle bundleFrends = new Bundle();
-                        bundleFrends.putBoolean("profile",true);
-                        bundleFrends.putStringArrayList("friends",friendsOfPerson);
-                        fragmentRanking.setArguments(bundleFrends);
-                        fragmentFriends.setArguments(bundleFrends);
-                        Bundle bundlePhotos = new Bundle();
-                        bundlePhotos.putBoolean("profile",true);
-                        bundlePhotos.putString("username",username);
-                        fragmentPhotos.setArguments(bundlePhotos);
-                        fragmentEvents.setArguments(bundleProfile);
+                        }
 
-                        if(adapter.getCount() > 0)
-                            adapter = new TabAdapterProfile(getFragmentManager());
-                        adapter.addFragment(fragmentRanking, "Ranking");
-                        adapter.addFragment(fragmentFriends, "Friends");
-                        adapter.addFragment(fragmentPhotos, "Photos");
-                        adapter.addFragment(fragmentEvents, "Events");
+                        try {
+                            Bundle bundleProfile = new Bundle();
+                            bundleProfile.putBoolean("profile",true);
+                            Bundle bundleFrends = new Bundle();
+                            bundleFrends.putBoolean("profile",true);
+                            bundleFrends.putStringArrayList("friends",friendsOfPerson);
+                            fragmentRanking.setArguments(bundleFrends);
+                            fragmentFriends.setArguments(bundleFrends);
+                            Bundle bundlePhotos = new Bundle();
+                            bundlePhotos.putBoolean("profile",true);
+                            bundlePhotos.putString("username",username);
+                            fragmentPhotos.setArguments(bundlePhotos);
+                            fragmentEvents.setArguments(bundleProfile);
+                        }
+                            catch (Exception e){
 
-                        viewPager.setAdapter(adapter);
-                        tabLayout.setupWithViewPager(viewPager);
+                        }
+
+                        try {
+                            if (adapter.getCount() > 0)
+                                adapter = new TabAdapterProfile(getFragmentManager());
+                            adapter.addFragment(fragmentRanking, "Ranking");
+                            adapter.addFragment(fragmentFriends, "Friends");
+                            adapter.addFragment(fragmentPhotos, "Photos");
+                            adapter.addFragment(fragmentEvents, "Events");
+
+                            viewPager.setAdapter(adapter);
+                            tabLayout.setupWithViewPager(viewPager);
+                        }
+                        catch (Exception e){
+
+                        }
                     }
 
                     StorageReference profilePicture = storageRef.child(user.getUsername()+".jpg");
@@ -207,7 +235,7 @@ public class ProfileFragment extends Fragment {
                 tvFullName.setText(StoredData.getInstance().user.getFullName().toUpperCase());
                 tvFriends.setText(getContext().getResources().getString(R.string.friends) +" " + StoredData.getInstance().getUser().getNumberOfFriends());
                 tvGroups.setText(getContext().getResources().getString(R.string.groups) +" " + StoredData.getInstance().getUser().getNumberOfFriends());
-                tvPoints.setText(getContext().getResources().getString(R.string.points) +" " + StoredData.getInstance().getUser().getPoints());
+                tvPoints.setText(getContext().getResources().getString(R.string.points) +" " + StoredData.getInstance().getUser().getPoints().toString());
             }
 
             toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -346,6 +374,8 @@ public class ProfileFragment extends Fragment {
 
         }
 
+        layout = view.findViewById(R.id.fragment_profile_layout);
+        layout.setBackgroundColor(Color.WHITE);
         imageViewEditProfile = (ImageView) view.findViewById(R.id.imageView_editProfile);
         tvEditProfile = (TextView) view.findViewById(R.id.textView_editProfile);
         imageViewProfilePicture = (ImageView) view.findViewById(R.id.profile_picture);

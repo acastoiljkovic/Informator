@@ -48,6 +48,7 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         try {
 
