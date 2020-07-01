@@ -6,6 +6,7 @@ import android.location.Location;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -69,6 +70,7 @@ public class UserWithPicture {
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        currentLocation = new Location(Location.convert(0,0));
     }
 
     public UserWithPicture(User user, Bitmap image) {

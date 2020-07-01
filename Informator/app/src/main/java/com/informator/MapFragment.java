@@ -1,6 +1,7 @@
 package com.informator;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -53,6 +55,7 @@ import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -64,6 +67,8 @@ import com.google.firebase.storage.UploadTask;
 import com.informator.data.Constants;
 import com.informator.data.Post;
 import com.informator.data.StoredData;
+import com.informator.data.User;
+import com.informator.data.UserWithPicture;
 import com.informator.data.VirtualObject;
 import com.informator.map_fragments.VirtualObjectFragment;
 
@@ -83,16 +88,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private Location current_user_location;
 
     private HashMap<String,Integer> virtualObjectIdMapPosition;
+    private HashMap<String,Integer> userIdMapPosition;
 
     private float current_zoom=12;
     public static ArrayList<VirtualObject> virtualObjects;
     private HashMap<Marker,String> markerPlaceIdMap;
+    private HashMap<Marker,String> markerUserIdMap;
 
     static final int PERMISSION_ACCESS_FINE_LOCATION=1;
     static final int  CAMERA_PERMISSION = 2;
     static final int  REQUEST_IMAGE_CAPTURE = 3;
     Toolbar toolbar;
     Dialog popup_add_virtual_object;
+    Dialog popup_online_friend;
 
 
     Bitmap virtual_object_image;
@@ -110,9 +118,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     EditText editTextTitle;
     Bitmap bitmap;
     ArrayList<VirtualObject> listPinnedVirtualObjects;
+    ArrayList<UserWithPicture> listOnlineFriends;
 
     private float currentZoom;
     private float radius;
+    private int positionCountOnlineFriends;
 
 
     @Override
@@ -143,6 +153,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         dialog.setInverseBackgroundForced(false);
 
         popup_add_virtual_object=new Dialog(this.getActivity());
+        popup_online_friend=new Dialog(this.getActivity());
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_map_toolbar);
         currentZoom = 12;
 
@@ -153,7 +164,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     showPopup();
 
                 }else if(item.getItemId()==R.id.search_on_map){
-                    
+
                 }
                 else if(item.getItemId()==R.id.search_in_radius){
                     Bundle bundle=new Bundle();
@@ -167,7 +178,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     }
                 }
                 else if(item.getItemId()==R.id.id_show_online_friends){
-                    //prikazuje u realnom vremenu trenutne lokacije svih prijatelja
+                    listOnlineFriends=new ArrayList<>();
+                    positionCountOnlineFriends=0;
+                    userIdMapPosition=new HashMap<>();
+                    markerUserIdMap=new HashMap<>();
+                    getOnlineFriends();
+
                 }
                 else if(item.getItemId()==R.id.id_show_default){
                     mMap.clear();
@@ -182,11 +198,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 .findFragmentById(R.id.mapFrag);
         mapFragment.getMapAsync(MapFragment.this);
 
+
         locationManager=(LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationListener=new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                centreMapOnLocation(location);
+                //centreMapOnLocation(location);
                 current_user_location=new Location(location);
                 StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
                 //addVirtualObjectMarkers();
@@ -211,23 +228,171 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return view;
     }
 
-    public void dialogShow(){
-        try {
-            if (!dialog.isShowing())
-                dialog.show();
+    private void addFriendsMarker(UserWithPicture user) {
+        LatLng location=new LatLng(user.getLatitude(),user.getLongitude());
+        MarkerOptions markerOptions=new MarkerOptions();
+        markerOptions.position(location);
+        if(user.getProfilePhoto()!=null){
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(user.getProfilePhoto(),75,75,false)));
         }
-        catch (Exception e){
-            e.printStackTrace();
+        else {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
         }
+
+        Marker marker=mMap.addMarker(markerOptions);
+        markerUserIdMap.put(marker,user.getId());
+
+
+
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                String idFriend=markerUserIdMap.get(marker);
+                int index=0;
+                for (UserWithPicture userWithPicture:listOnlineFriends){
+                    if(idFriend.compareTo(userWithPicture.getId())==0){
+                        showPopupFriend(userWithPicture);
+                        break;
+                    }
+                }
+
+
+                return true;
+            }
+        });
     }
 
-    public void dialogHide(){
-        try {
-            if (dialog.isShowing())
-                dialog.hide();
+    private void showPopupFriend(final UserWithPicture userWithPicture){
+        popup_online_friend.setContentView(R.layout.popup_friend_on_map);
+        ImageView profilePhoto=popup_online_friend.findViewById(R.id.idProfilePicture);
+        TextView fullName=popup_online_friend.findViewById(R.id.id_profile_fullName);
+        TextView textViewEmail=popup_online_friend.findViewById(R.id.textViewEmail);
+        TextView textViewPhoneNumber=popup_online_friend.findViewById(R.id.textView_phone);
+        TextView textViewPoints=popup_online_friend.findViewById(R.id.textView_points);
+        ImageView imageViewSendMessage=popup_online_friend.findViewById(R.id.idSendMessage);
+        Button buttonShowProfile=popup_online_friend.findViewById(R.id.idShowProfile);
+
+        profilePhoto.setImageBitmap(userWithPicture.getProfilePhoto());
+        fullName.setText(userWithPicture.getFullName());
+        textViewEmail.setText(userWithPicture.getEmail());
+        textViewPhoneNumber.setText(userWithPicture.getPhone());
+        textViewPoints.setText(userWithPicture.getPoints());
+
+        buttonShowProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popup_online_friend.cancel();
+                Bundle bundle = new Bundle();
+                bundle.putString("username",userWithPicture.getUsername());
+                ((StartActivity)getActivity()).setFragment(R.id.profile,bundle);
+            }
+        });
+
+        popup_online_friend.show();
+    }
+
+    //funkcija koja preuzima prijatelje koji su online i postavlja markere sa njihovim slikama
+    public void getOnlineFriends(){
+
+        for(final String friendUsername:StoredData.getInstance().getUser().getFriends()){
+
+            databaseReference.child("users").child(friendUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+
+                    if(dataSnapshot.child("status").exists()){
+                        String status=dataSnapshot.child(friendUsername).child("status").toString();
+                        if(dataSnapshot.child("status").getValue().toString().compareTo("online")==0){
+                            final UserWithPicture userWithPicture=new UserWithPicture();
+                            userWithPicture.setEmail(dataSnapshot.child("email").getValue().toString());
+                            userWithPicture.setFullName(dataSnapshot.child("fullName").getValue().toString());
+                            userWithPicture.setId(dataSnapshot.child("id").getValue().toString());
+                            userWithPicture.setPhone(dataSnapshot.child("phone").getValue().toString());
+                            userWithPicture.setStatus("online");
+                            userWithPicture.setUsername(dataSnapshot.child("username").getValue().toString());
+                            userWithPicture.setLatitude(Double.valueOf(dataSnapshot.child("latitude").getValue().toString()));
+                            userWithPicture.setLongitude(Double.valueOf(dataSnapshot.child("longitude").getValue().toString()));
+
+
+
+                            listOnlineFriends.add(userWithPicture);
+                            userIdMapPosition.put(userWithPicture.getUsername(),positionCountOnlineFriends);
+                            positionCountOnlineFriends++;
+
+                            databaseReference.child("users").child(userWithPicture.getUsername()).child("longitude").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    int pos=userIdMapPosition.get(userWithPicture.getUsername());
+                                    double longitude=Double.valueOf(dataSnapshot.getValue().toString());
+                                    listOnlineFriends.get(pos).setLongitude(longitude);
+                                    mMap.clear();
+                                    for(UserWithPicture user:listOnlineFriends){
+                                        addFriendsMarker(user);
+                                    }
+                                }
+
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    Toast.makeText(getContext(), "Canceled", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                            databaseReference.child("users").child(userWithPicture.getUsername()).child("latitude").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    int pos=userIdMapPosition.get(userWithPicture.getUsername());
+                                    double latitude=Double.valueOf(dataSnapshot.getValue().toString());
+                                    listOnlineFriends.get(pos).setLatitude(latitude);
+                                    mMap.clear();
+                                    for(UserWithPicture user:listOnlineFriends){
+                                        addFriendsMarker(user);
+                                    }
+                                }
+
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    Toast.makeText(getContext(), "Canceled", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+
+                            StorageReference userImage=storageReference.child(userWithPicture.getUsername()+".jpg");
+
+                            if(userImage!=null){
+                                userImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                                        int pos=userIdMapPosition.get(userWithPicture.getUsername());
+                                        listOnlineFriends.get(pos).setProfilePhoto(bitmap);
+                                        notifyDownloadProfilePhoto();
+                                    }
+                                });
+                            }
+
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
-        catch (Exception e){
-            e.printStackTrace();
+
+    }
+
+    private void notifyDownloadProfilePhoto() {
+        mMap.clear();
+        for(UserWithPicture user:listOnlineFriends){
+            addFriendsMarker(user);
         }
     }
 
@@ -552,7 +717,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         MarkerOptions markerOptions=new MarkerOptions();
         markerOptions.position(location);
         if(virtualObject.getVirtual_object_image()!=null){
-            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(virtualObject.getVirtual_object_image(),100,100,false)));
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(virtualObject.getVirtual_object_image(),50,50,false)));
         }
         else {
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
@@ -599,6 +764,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return resizedBitmap;
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 

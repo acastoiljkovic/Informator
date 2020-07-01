@@ -2,7 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -41,15 +44,16 @@
         <ListView
             android:id="@+id/list_view_comments"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="35dp">
+            android:layout_height="550dp"
+            android:layout_marginBottom="5dp">
 
         </ListView>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp">
 
             <EditText
                 android:layout_gravity="center"
@@ -69,11 +73,12 @@
                 android:layout_marginLeft="5dp"
                 android:text="@string/post"
                 android:textSize="13sp"
+                android:layout_gravity="center"
                 android:textColor="@color/color_white"
                 android:background="@drawable/button_black_border"
                 android:id="@+id/btn_add_comment"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
             </Button>
 
@@ -81,8 +86,7 @@
 
     </LinearLayout>
 
-
-
+    </LinearLayout>
 
 
 
