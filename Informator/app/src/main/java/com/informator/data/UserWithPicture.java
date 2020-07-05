@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,8 +36,8 @@ public class UserWithPicture {
     ArrayList<NearVirtualObject> nearVirtualObjects;
     ArrayList<VirtualObject> virtual_objects;
     ArrayList<Event> events;
-
     HashMap<String,Event> eventsWithId;
+    ArrayList<Group> groups;
     Location currentLocation;
     DatabaseReference databaseReference;
     ListUserUpdateEventListener updateListener;
@@ -64,6 +65,7 @@ public class UserWithPicture {
         this.nearVirtualObjects = new ArrayList<>();
         this.events = new ArrayList<>();
         this.eventsWithId = new HashMap<>();
+        this.groups=new ArrayList<>();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -80,6 +82,8 @@ public class UserWithPicture {
         this.nearVirtualObjects = new ArrayList<>();
         this.events = new ArrayList<>();
         this.eventsWithId = new HashMap<>();
+        this.groups=new ArrayList<>();
+
     }
 
     public UserWithPicture() {
@@ -96,6 +100,9 @@ public class UserWithPicture {
         this.nearVirtualObjects = new ArrayList<>();
         this.events = new ArrayList<>();
         this.eventsWithId = new HashMap<>();
+        this.groups=new ArrayList<>();
+        currentLocation = new Location(Location.convert(0,0));
+
     }
 
     public UserWithPicture(User user, Bitmap image) {
@@ -114,6 +121,7 @@ public class UserWithPicture {
         this.nearVirtualObjects = new ArrayList<>();
         this.events = new ArrayList<>();
         this.eventsWithId = new HashMap<>();
+        this.groups=new ArrayList<>();
     }
 
     public void SetListeners(){

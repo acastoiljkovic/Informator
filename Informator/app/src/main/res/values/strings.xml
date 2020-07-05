@@ -37,6 +37,7 @@
     <string name="virtual_object">Virtual object</string>
     <string name="write_comment">Write a comment...</string>
     <string name="open_comments">OpenComments123</string>
+    <string name="single_group">SingleGroup</string>
     <string name="post">Post</string>
     <string name="comments">Comments</string>
     <string name="search_in_radius">Search in radius</string>

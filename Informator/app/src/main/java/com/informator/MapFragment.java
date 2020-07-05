@@ -1,6 +1,7 @@
 package com.informator;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -53,6 +55,7 @@ import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -64,6 +67,8 @@ import com.google.firebase.storage.UploadTask;
 import com.informator.data.Constants;
 import com.informator.data.Post;
 import com.informator.data.StoredData;
+import com.informator.data.User;
+import com.informator.data.UserWithPicture;
 import com.informator.data.VirtualObject;
 import com.informator.map_fragments.VirtualObjectFragment;
 
@@ -82,15 +87,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LocationListener locationListener;
     private Location current_user_location;
 
+    private HashMap<String,Integer> virtualObjectIdMapPosition;
+    private HashMap<String,Integer> userIdMapPosition;
+
     private float current_zoom=12;
     public static ArrayList<VirtualObject> virtualObjects;
     private HashMap<Marker,String> markerPlaceIdMap;
+    private HashMap<Marker,String> markerUserIdMap;
 
     static final int PERMISSION_ACCESS_FINE_LOCATION=1;
     static final int  CAMERA_PERMISSION = 2;
     static final int  REQUEST_IMAGE_CAPTURE = 3;
     Toolbar toolbar;
     Dialog popup_add_virtual_object;
+    Dialog popup_online_friend;
 
 
     Bitmap virtual_object_image;
@@ -107,9 +117,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     EditText editTextDesc;
     EditText editTextTitle;
     Bitmap bitmap;
+    ArrayList<VirtualObject> listPinnedVirtualObjects;
+    ArrayList<UserWithPicture> listOnlineFriends;
 
     private float currentZoom;
     private float radius;
+    private int positionCountOnlineFriends;
 
 
     @Override
@@ -142,6 +155,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         dialog.setInverseBackgroundForced(false);
 
         popup_add_virtual_object=new Dialog(this.getActivity());
+        popup_online_friend=new Dialog(this.getActivity());
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_map_toolbar);
         currentZoom = 12;
 
@@ -152,12 +166,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     showPopup();
 
                 }else if(item.getItemId()==R.id.search_on_map){
-                    
+
                 }
                 else if(item.getItemId()==R.id.search_in_radius){
                     Bundle bundle=new Bundle();
                     bundle.putFloat("radius",radius);
                     ((StartActivity)getActivity()).setFragment(R.string.open_listVO,bundle);
+                }
+                else if(item.getItemId()==R.id.id_show_virtual_objects){
+                    getVirtualObjects();
+                    for(VirtualObject virtualObject:listPinnedVirtualObjects){
+                        addVirtualObjectMarker(virtualObject);
+                    }
+                }
+                else if(item.getItemId()==R.id.id_show_online_friends){
+                    listOnlineFriends=new ArrayList<>();
+                    positionCountOnlineFriends=0;
+                    userIdMapPosition=new HashMap<>();
+                    markerUserIdMap=new HashMap<>();
+                    getOnlineFriends();
+
+                }
+                else if(item.getItemId()==R.id.id_show_default){
+                    mMap.clear();
+                    //defaultni prikaz eventa i groupa na mapi ili prazno videcemo
                 }
                 return false;
             }
@@ -168,11 +200,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 .findFragmentById(R.id.mapFrag);
         mapFragment.getMapAsync(MapFragment.this);
 
+
         locationManager=(LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationListener=new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                centreMapOnLocation(location);
+                //centreMapOnLocation(location);
                 current_user_location=new Location(location);
                 StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
                 //addVirtualObjectMarkers();
@@ -197,23 +230,171 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return view;
     }
 
-    public void dialogShow(){
-        try {
-            if (!dialog.isShowing())
-                dialog.show();
+    private void addFriendsMarker(UserWithPicture user) {
+        LatLng location=new LatLng(user.getLatitude(),user.getLongitude());
+        MarkerOptions markerOptions=new MarkerOptions();
+        markerOptions.position(location);
+        if(user.getProfilePhoto()!=null){
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(user.getProfilePhoto(),75,75,false)));
         }
-        catch (Exception e){
-            e.printStackTrace();
+        else {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
         }
+
+        Marker marker=mMap.addMarker(markerOptions);
+        markerUserIdMap.put(marker,user.getId());
+
+
+
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                String idFriend=markerUserIdMap.get(marker);
+                int index=0;
+                for (UserWithPicture userWithPicture:listOnlineFriends){
+                    if(idFriend.compareTo(userWithPicture.getId())==0){
+                        showPopupFriend(userWithPicture);
+                        break;
+                    }
+                }
+
+
+                return true;
+            }
+        });
     }
 
-    public void dialogHide(){
-        try {
-            if (dialog.isShowing())
-                dialog.hide();
+    private void showPopupFriend(final UserWithPicture userWithPicture){
+        popup_online_friend.setContentView(R.layout.popup_friend_on_map);
+        ImageView profilePhoto=popup_online_friend.findViewById(R.id.idProfilePicture);
+        TextView fullName=popup_online_friend.findViewById(R.id.id_profile_fullName);
+        TextView textViewEmail=popup_online_friend.findViewById(R.id.textViewEmail);
+        TextView textViewPhoneNumber=popup_online_friend.findViewById(R.id.textView_phone);
+        TextView textViewPoints=popup_online_friend.findViewById(R.id.textView_points);
+        ImageView imageViewSendMessage=popup_online_friend.findViewById(R.id.idSendMessage);
+        Button buttonShowProfile=popup_online_friend.findViewById(R.id.idShowProfile);
+
+        profilePhoto.setImageBitmap(userWithPicture.getProfilePhoto());
+        fullName.setText(userWithPicture.getFullName());
+        textViewEmail.setText(userWithPicture.getEmail());
+        textViewPhoneNumber.setText(userWithPicture.getPhone());
+        textViewPoints.setText(userWithPicture.getPoints());
+
+        buttonShowProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popup_online_friend.cancel();
+                Bundle bundle = new Bundle();
+                bundle.putString("username",userWithPicture.getUsername());
+                ((StartActivity)getActivity()).setFragment(R.id.profile,bundle);
+            }
+        });
+
+        popup_online_friend.show();
+    }
+
+    //funkcija koja preuzima prijatelje koji su online i postavlja markere sa njihovim slikama
+    public void getOnlineFriends(){
+
+        for(final String friendUsername:StoredData.getInstance().getUser().getFriends()){
+
+            databaseReference.child("users").child(friendUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+
+                    if(dataSnapshot.child("status").exists()){
+                        String status=dataSnapshot.child(friendUsername).child("status").toString();
+                        if(dataSnapshot.child("status").getValue().toString().compareTo("online")==0){
+                            final UserWithPicture userWithPicture=new UserWithPicture();
+                            userWithPicture.setEmail(dataSnapshot.child("email").getValue().toString());
+                            userWithPicture.setFullName(dataSnapshot.child("fullName").getValue().toString());
+                            userWithPicture.setId(dataSnapshot.child("id").getValue().toString());
+                            userWithPicture.setPhone(dataSnapshot.child("phone").getValue().toString());
+                            userWithPicture.setStatus("online");
+                            userWithPicture.setUsername(dataSnapshot.child("username").getValue().toString());
+                            userWithPicture.setLatitude(Double.valueOf(dataSnapshot.child("latitude").getValue().toString()));
+                            userWithPicture.setLongitude(Double.valueOf(dataSnapshot.child("longitude").getValue().toString()));
+
+
+
+                            listOnlineFriends.add(userWithPicture);
+                            userIdMapPosition.put(userWithPicture.getUsername(),positionCountOnlineFriends);
+                            positionCountOnlineFriends++;
+
+                            databaseReference.child("users").child(userWithPicture.getUsername()).child("longitude").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    int pos=userIdMapPosition.get(userWithPicture.getUsername());
+                                    double longitude=Double.valueOf(dataSnapshot.getValue().toString());
+                                    listOnlineFriends.get(pos).setLongitude(longitude);
+                                    mMap.clear();
+                                    for(UserWithPicture user:listOnlineFriends){
+                                        addFriendsMarker(user);
+                                    }
+                                }
+
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    Toast.makeText(getContext(), "Canceled", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                            databaseReference.child("users").child(userWithPicture.getUsername()).child("latitude").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    int pos=userIdMapPosition.get(userWithPicture.getUsername());
+                                    double latitude=Double.valueOf(dataSnapshot.getValue().toString());
+                                    listOnlineFriends.get(pos).setLatitude(latitude);
+                                    mMap.clear();
+                                    for(UserWithPicture user:listOnlineFriends){
+                                        addFriendsMarker(user);
+                                    }
+                                }
+
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    Toast.makeText(getContext(), "Canceled", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+
+                            StorageReference userImage=storageReference.child(userWithPicture.getUsername()+".jpg");
+
+                            if(userImage!=null){
+                                userImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                                        int pos=userIdMapPosition.get(userWithPicture.getUsername());
+                                        listOnlineFriends.get(pos).setProfilePhoto(bitmap);
+                                        notifyDownloadProfilePhoto();
+                                    }
+                                });
+                            }
+
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
-        catch (Exception e){
-            e.printStackTrace();
+
+    }
+
+    private void notifyDownloadProfilePhoto() {
+        mMap.clear();
+        for(UserWithPicture user:listOnlineFriends){
+            addFriendsMarker(user);
         }
     }
 
@@ -419,107 +600,108 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
     private void getVirtualObjects() {
-        markerPlaceIdMap=new HashMap<Marker, String>();
-        StoredData.getInstance().getUser().setListVO(new ArrayList<VirtualObject>());
+        virtualObjectIdMapPosition = new HashMap<>();
+        final int[] positionCount = {0};
+        listPinnedVirtualObjects = new ArrayList<>();
+        markerPlaceIdMap = new HashMap<Marker, String>();
+        for (final VirtualObject virtualObject : StoredData.getInstance().getUser().getListVO()) {
 
-        databaseReference.child("users").child("").orderByChild("id").equalTo(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                if(dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("friends").getValue()!=null){
-                    for(DataSnapshot  ds: dataSnapshot.child(StoredData.getInstance().getUser().getUsername()).child("friends").getChildren()){
-                        StoredData.getInstance().getUser().addFriend(ds.getValue().toString());
-                    }
-                }
+            if (virtualObject.getVirtual_object_image() != null) {
+                listPinnedVirtualObjects.add(virtualObject);
+                virtualObjectIdMapPosition.put(virtualObject.getId(), positionCount[0]);
+                positionCount[0]++;
+            } else {
+                listPinnedVirtualObjects.add(virtualObject);
+                virtualObjectIdMapPosition.put(virtualObject.getId(), positionCount[0]);
+                positionCount[0]++;
+                StorageReference virtualObjectImage = storageReference.child(virtualObject.getId() + ".jpg");
 
-                for(final String username: StoredData.getInstance().getUser().getFriends()){
-
-                    databaseReference.child("users").child("").orderByChild("id").equalTo(username).addListenerForSingleValueEvent(new ValueEventListener() {
+                if (virtualObjectImage != null) {
+                    virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                         @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            findVirtualObjectForUserWithUsername(username,dataSnapshot);
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            StoredData.getInstance().getUser().setVirtualObjectWithId(virtualObject.getId(), bitmap);
+                            int pos = virtualObjectIdMapPosition.get(virtualObject.getId());
+                            listPinnedVirtualObjects.get(pos).setVirtual_object_image(bitmap);
+                            notifyDownloadPictureForVirtualObject();
+
                         }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
                         }
                     });
-
                 }
-
-                findVirtualObjectForUserWithUsername(StoredData.getInstance().getUser().getUsername(),dataSnapshot);
-
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+        }
 
-            }
-        });
-    }
+        for (final String friendUsername : StoredData.getInstance().getUser().getFriends()) {
+            databaseReference.child("users").child(friendUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child("virtual_objects") != null) {
+                        DataSnapshot ds1 = dataSnapshot.child("virtual_objects");
+                        for (DataSnapshot ds : ds1.getChildren()) {
 
-    private void findVirtualObjectForUserWithUsername(String username,DataSnapshot dataSnapshot){
+                            final VirtualObject vo = new VirtualObject();
+                            vo.setDescription(ds.child("description").getValue().toString());
+                            vo.setId(ds.child("id").getValue().toString());
+                            vo.setLatitude(Double.valueOf(ds.child("latitude").getValue().toString()));
+                            vo.setLongitude(Double.valueOf(ds.child("longitude").getValue().toString()));
+                            vo.setNumberOfRates(Integer.valueOf(ds.child("numberOfRates").getValue().toString()));
+                            vo.setRating(Float.valueOf(ds.child("rating").getValue().toString()));
+                            vo.setTitle(ds.child("title").getValue().toString());
+                            vo.setUserRecommended(friendUsername);
 
-        if(dataSnapshot.child(username).child("virtual_objects").getValue()!=null)
-        {
-            for(DataSnapshot dataSnapshot1: dataSnapshot.child(username)
-                    .child("virtual_objects").getChildren()){
+                            for (DataSnapshot dataSnapshot1 : ds.child("comments").getChildren()) {
+                                vo.getPosts().add(new Post(dataSnapshot1.child("username").getValue().toString(), dataSnapshot1.child("post").getValue().toString()));
+                            }
 
-                double lat=(Double) dataSnapshot1.child("latitude").getValue();
-                double lon=(Double)dataSnapshot1.child("longitude").getValue();
-                if(checkIfInRadius(new LatLng(lat,lon))){
-
-                    String id=dataSnapshot1.child("id").getValue().toString();
-                    String description=dataSnapshot1.child("description").getValue().toString();
+                            listPinnedVirtualObjects.add(vo);
+                            virtualObjectIdMapPosition.put(vo.getId(), positionCount[0]);
 
 
-                    float rating=Float.parseFloat(dataSnapshot1.child("rating").getValue().toString());
-                    String title=dataSnapshot1.child("title").getValue().toString();
-                    int numberOfRates=Integer.parseInt(dataSnapshot1.child("numberOfRates").getValue().toString());
-                    final VirtualObject virtualObject=new VirtualObject(title,description,lat,lon,rating);
-                    virtualObject.setId(id);
-                    virtualObject.setUserRecommended(StoredData.getInstance().getUser().getUsername());
-                    virtualObject.setNumberOfRates(numberOfRates);
-                    virtualObject.setRating(rating);
+                            StorageReference virtualObjectImage = storageReference.child(ds.child("id").getValue() + ".jpg");
 
-                    if(dataSnapshot1.child("comments").getValue()!=null){
-                        for(DataSnapshot dataSnapshot2:dataSnapshot1.child("comments").getChildren()){
-                            Post post=new Post();
-                            String user_comment=dataSnapshot2.child("username").getValue().toString();
-                            String comment=dataSnapshot2.child("post").getValue().toString();
-                            post.setPost(comment);
-                            post.setUsername(user_comment);
-                            virtualObject.addPost(post);
+                            if (virtualObjectImage != null) {
+                                virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                        vo.setVirtual_object_image(bitmap);
+                                        int pos = virtualObjectIdMapPosition.get(vo.getId());
+                                        listPinnedVirtualObjects.get(pos).setVirtual_object_image(bitmap);
+                                        notifyDownloadPictureForVirtualObject();
+
+                                    }
+
+
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                    }
+                                });
+                            }
                         }
+
+
                     }
 
-                    StorageReference virtualObjectImage=storageReference.child(virtualObject.getId()+".jpg");
-                    bitmap=null;
-                    if(virtualObjectImage!=null){
-                        virtualObjectImage.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                            @Override
-                            public void onSuccess(byte[] bytes) {
-                                bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                virtualObject.setVirtual_object_image(bitmap);
-                                StoredData.getInstance().getUser().addVirtualObject(virtualObject);
-                                List<VirtualObject> vo=StoredData.getInstance().getUser().getListVO();
-                            }
-
-
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                StoredData.getInstance().getUser().addVirtualObject(virtualObject);
-                            }
-                        });
-                    }
                 }
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
+                }
+            });
         }
     }
+
 
     private boolean checkIfInRadius(LatLng position){
         float[] distanceFromCurrentLocation =new float[1];
@@ -533,14 +715,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 );
 
         return !(distanceFromCurrentLocation[0] > radius);
+
     }
+
+    //posto treba vremena da se skinu slike objekata u trenutku kada se skinu poziva se ova funkcija i postavlja na markere sliku inace je neka defaultna slika
+    public void notifyDownloadPictureForVirtualObject(){
+        mMap.clear();
+        for(VirtualObject virtualObject:listPinnedVirtualObjects){
+            addVirtualObjectMarker(virtualObject);
+        }
+    }
+
 
     private void addVirtualObjectMarker(VirtualObject virtualObject){
         LatLng location=new LatLng(virtualObject.getLatitude(),virtualObject.getLongitude());
         MarkerOptions markerOptions=new MarkerOptions();
         markerOptions.position(location);
         if(virtualObject.getVirtual_object_image()!=null){
-            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(virtualObject.getVirtual_object_image(),55,55,false)));
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(virtualObject.getVirtual_object_image(),50,50,false)));
         }
         else {
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
@@ -553,9 +745,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+
+
+                String idVirtualObject=markerPlaceIdMap.get(marker);
+                int pos=0;
+
+                while(listPinnedVirtualObjects.get(pos).getId().compareTo(idVirtualObject)!=0){
+                    pos++;
+                }
+                StoredData.getInstance().setVirtualObject(listPinnedVirtualObjects.get(pos));
                 //logika za klik na marker
                 Bundle result=new Bundle();
-                //problem onback press drugi put postavlja result na null??
                 result.putString("idVirtualObject",markerPlaceIdMap.get(marker));
 
                 ((StartActivity) getActivity()).setFragment(R.string.virtualObjectId,result);
@@ -579,6 +779,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return resizedBitmap;
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 

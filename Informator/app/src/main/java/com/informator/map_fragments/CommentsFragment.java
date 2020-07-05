@@ -31,6 +31,7 @@ import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
 import com.informator.data.ListVirtualObjectsAdapter;
+import com.informator.data.MapPicturesWithName;
 import com.informator.data.Post;
 import com.informator.data.StoredData;
 
@@ -53,6 +54,8 @@ public class CommentsFragment extends Fragment {
     FirebaseStorage firebaseStorage;
     StorageReference storageReference;
 
+    MapPicturesWithName commentMapToUserPicture;
+
 
     @Nullable
     @Override
@@ -66,6 +69,7 @@ public class CommentsFragment extends Fragment {
 
         listUsernames=new ArrayList<String>();
         listImages=new ArrayList<Bitmap>();
+        commentMapToUserPicture=new MapPicturesWithName();
 
         Bundle bundle=this.getArguments();
         final String userRecommended=bundle.getString("userRecommendedName");
@@ -75,7 +79,7 @@ public class CommentsFragment extends Fragment {
         btnPost=view.findViewById(R.id.btn_add_comment);
         editTextWriteComment=view.findViewById(R.id.id_write_comment);
 
-        final ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),listUsernames,listImages);
+        final ListVirtualObjectsAdapter listVirtualObjectsAdapter=new ListVirtualObjectsAdapter(getActivity(),listUsernames,listImages,commentMapToUserPicture);
 
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,7 +107,7 @@ public class CommentsFragment extends Fragment {
         });
 
 
-        for(Post post: StoredData.getInstance().getVirtualObject().getPosts()){
+        for(final Post post: StoredData.getInstance().getVirtualObject().getPosts()){
             listUsernames.add(post.getPost());
 
             StorageReference user_comment_image_reference=storageReference.child(post.getUsername()+".jpg");
@@ -116,6 +120,7 @@ public class CommentsFragment extends Fragment {
                         Bitmap bitmap= BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                         listImages.add(bitmap);
                         listVirtualObjectsAdapter.notifyDataSetChanged();
+                        commentMapToUserPicture.add(bitmap,post.getPost());
 
                     }
                 }).addOnFailureListener(new OnFailureListener() {

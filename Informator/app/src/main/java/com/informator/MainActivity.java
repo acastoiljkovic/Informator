@@ -99,14 +99,12 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<InstanceIdResult> task) {
                         if (!task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this,"token",Toast.LENGTH_SHORT).show();
                             Log.e(MainActivity.class.getSimpleName(), "Error while fetching token");
                             return;
                         }
 
                         String token = task.getResult().getToken();
                         String msg = "Token : "+token;
-                        Toast.makeText(MainActivity.this,token,Toast.LENGTH_SHORT).show();
                         Log.d(MainActivity.class.getSimpleName(), msg);
 
                     }

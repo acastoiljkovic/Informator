@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="325dp"
+    android:layout_height="500dp"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    android:background="@drawable/rounded_style">
+
+    <TextView
+        android:id="@+id/popup_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Group"
+        android:textStyle="bold"
+        android:textColor="@color/color_black"
+        android:layout_gravity="center"
+        android:textSize="25sp"
+        android:paddingBottom="0dp"
+        android:layout_margin="0dp"
+        >
+
+    </TextView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/color_gray">
+
+    </View>
+
+    <EditText
+        android:id="@+id/group_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:layout_margin="20dp"
+        android:inputType="textEmailAddress"
+        android:hint="Name"
+        android:textSize="25sp"
+        android:layout_gravity="center"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="10dp">
+
+        <ImageButton
+            android:layout_gravity="center"
+            android:id="@+id/add_group_photo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/button_white_border"
+            android:padding="5dp"
+            android:src="@drawable/ic_add_a_photo_black_24dp"
+            android:text="@string/mainActivity_btnRegister_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp" />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose peoples: "
+        android:textSize="20sp"
+        android:textColor="@color/color_black"
+        android:layout_marginLeft="20dp">
+        
+        
+
+    </TextView>
+    
+    <ListView
+        android:id="@+id/list_view_friends"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginLeft="15dp"
+
+        ></ListView>
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/btn_add_group"
+            android:layout_gravity="center"
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:background="@drawable/button_black_border"
+            android:textColor="@color/color_white"
+            android:text="Add">
+
+        </Button>
+
+    </LinearLayout>
+
+
+</LinearLayout>

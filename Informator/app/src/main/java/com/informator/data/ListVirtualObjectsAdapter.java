@@ -17,12 +17,14 @@ public class ListVirtualObjectsAdapter extends ArrayAdapter<String> {
     private Activity context = null;
     private ArrayList<String> titles = null;
     private ArrayList<Bitmap> images = null;
+    private MapPicturesWithName pictures = null;
 
-    public ListVirtualObjectsAdapter(Activity context,ArrayList<String> titles,ArrayList<Bitmap> images){
+    public ListVirtualObjectsAdapter(Activity context,ArrayList<String> titles,ArrayList<Bitmap> images,MapPicturesWithName pictures){
         super(context, R.layout.fragment_list_virual_objects, titles);
         this.context=context;
         this.titles=titles;
         this.images=images;
+        this.pictures=pictures;
 
     }
 
@@ -35,12 +37,32 @@ public class ListVirtualObjectsAdapter extends ArrayAdapter<String> {
         ImageView imageView = (ImageView) rowView.findViewById(R.id.image_user_comment);
 
         txtTitle.setText(titles.get(position));
-        if(position >= images.size()){
-            imageView.setImageResource(R.drawable.ic_person_outline_black_24dp);
+
+        if(pictures==null){
+
+            if(images.size()==0){
+                imageView.setImageResource(R.drawable.ic_person_outline_black_24dp);
+            }
+            else
+            {
+                Bitmap image=images.get(position);
+                imageView.setImageBitmap(image);
+            }
+
         }
-        else {
-            imageView.setImageBitmap(images.get(position));
+        else
+        {
+            Bitmap img = pictures.getImage(titles.get(position));
+
+            if(img != null){
+                imageView.setImageBitmap(img);
+            }
+            else{
+                imageView.setImageResource(R.drawable.ic_person_outline_black_24dp);
+            }
         }
+
+
         return rowView;
     }
 
