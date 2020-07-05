@@ -29,6 +29,7 @@ public class UserWithPicture {
     ArrayList<NearFriend> nearFriends;
     ArrayList<NearVirtualObject> nearVirtualObjects;
     ArrayList<VirtualObject> virtual_objects;
+    ArrayList<Group> groups;
     Location currentLocation;
     DatabaseReference databaseReference;
     ListUserUpdateEventListener updateListener;
@@ -44,6 +45,7 @@ public class UserWithPicture {
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.groups=new ArrayList<>();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -57,6 +59,7 @@ public class UserWithPicture {
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.groups=new ArrayList<>();
     }
 
     public UserWithPicture() {
@@ -70,6 +73,7 @@ public class UserWithPicture {
         status = "online";
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.groups=new ArrayList<>();
         currentLocation = new Location(Location.convert(0,0));
     }
 
@@ -86,6 +90,7 @@ public class UserWithPicture {
         this.friends = new ArrayList<>();
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.groups=new ArrayList<>();
     }
 
     public void SetListeners(){

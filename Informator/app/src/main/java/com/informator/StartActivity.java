@@ -129,6 +129,10 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         else if(itemId==R.string.edit_profile_id){
             retFragment=new EditProfile();
         }
+        else if(itemId==R.string.single_group){
+            retFragment=new GroupFragment();
+            retFragment.setArguments(bundle);
+        }
 
         retFragment.setArguments(bundle);
         return retFragment;
