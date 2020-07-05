@@ -30,6 +30,12 @@
         </activity>
         <service android:name=".services.LocationTracker"
             android:enabled="true" />
+        <service
+            android:name=".services.FirstserviceTest">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <receiver android:name=".receivers.LocationTrackerRestarter"
             android:enabled="true"
             android:exported="true">
@@ -39,7 +45,8 @@
         </receiver>
         <activity android:name=".RegisterActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

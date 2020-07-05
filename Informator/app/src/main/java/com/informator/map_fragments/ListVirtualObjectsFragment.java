@@ -214,7 +214,7 @@ public class ListVirtualObjectsFragment extends Fragment {
     }
 
     private boolean checkIfInRadius(LatLng position,float radius){
-        float distanceFromCurrentLocation[]=new float[1];
+        float[] distanceFromCurrentLocation =new float[1];
 
         Location.distanceBetween(
                 StoredData.getInstance().getUser().getCurrentLocation().getLatitude(),
@@ -224,10 +224,7 @@ public class ListVirtualObjectsFragment extends Fragment {
                 distanceFromCurrentLocation
         );
 
-        if(distanceFromCurrentLocation[0] > radius)
-            return false;
-        else
-            return true;
+        return !(distanceFromCurrentLocation[0] > radius);
     }
 
 

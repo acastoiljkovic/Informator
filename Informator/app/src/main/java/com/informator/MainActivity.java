@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -31,12 +32,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.informator.data.Constants;
 import com.informator.data.StoredData;
 import com.informator.data.User;
 import com.informator.data.UserWithPicture;
+import com.informator.services.FirstserviceTest;
 import com.informator.services.LocationTracker;
 
 import java.util.ArrayList;
@@ -59,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getToken();
 
         Initialize();
 
@@ -84,6 +91,27 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    private void getToken(){
+        FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(MainActivity.this,"token",Toast.LENGTH_SHORT).show();
+                            Log.e(MainActivity.class.getSimpleName(), "Error while fetching token");
+                            return;
+                        }
+
+                        String token = task.getResult().getToken();
+                        String msg = "Token : "+token;
+                        Toast.makeText(MainActivity.this,token,Toast.LENGTH_SHORT).show();
+                        Log.d(MainActivity.class.getSimpleName(), msg);
+
+                    }
+                });
+    }
 
     private void Initialize(){
         user = new UserWithPicture();

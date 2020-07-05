@@ -128,8 +128,8 @@ public class VirtualObjectFragment extends Fragment {
         });
 
 
-        Bundle bundle=this.getArguments();
-        idVirtualObject=bundle.getString("idVirtualObject");
+//        Bundle bundle=this.getArguments();
+//        idVirtualObject=bundle.getString("idVirtualObject");
 
         imageView.setImageBitmap(StoredData.getInstance().getVirtualObject().getVirtual_object_image());
         textViewTitle.setText(StoredData.getInstance().getVirtualObject().getTitle());

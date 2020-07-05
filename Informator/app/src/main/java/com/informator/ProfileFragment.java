@@ -235,7 +235,7 @@ public class ProfileFragment extends Fragment {
                 tvFullName.setText(StoredData.getInstance().user.getFullName().toUpperCase());
                 tvFriends.setText(getContext().getResources().getString(R.string.friends) +" " + StoredData.getInstance().getUser().getNumberOfFriends());
                 tvGroups.setText(getContext().getResources().getString(R.string.groups) +" " + StoredData.getInstance().getUser().getNumberOfFriends());
-                tvPoints.setText(getContext().getResources().getString(R.string.points) +" " + StoredData.getInstance().getUser().getPoints().toString());
+                tvPoints.setText(getContext().getResources().getString(R.string.points) +" " + StoredData.getInstance().getUser().getPoints());
             }
 
             toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -352,6 +352,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void Initialize(View view, Bundle bundle){
+        ((StartActivity)getActivity()).setBottomNavItemSelected(R.id.profile);
         editOrAdd = (LinearLayout)view.findViewById(R.id.edit_profile_or_add_friend);
 
         fragmentRanking = new RankingFragment();

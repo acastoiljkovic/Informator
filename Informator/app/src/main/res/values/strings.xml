@@ -36,17 +36,28 @@
 
     <string name="virtual_object">Virtual object</string>
     <string name="write_comment">Write a comment...</string>
-    <string name="virtualObjectId">Object5</string>
     <string name="open_comments">OpenComments123</string>
     <string name="post">Post</string>
     <string name="comments">Comments</string>
     <string name="search_in_radius">Search in radius</string>
+
+    <string name="virtualObjectId">Object5</string>
     <string name="open_listVO">OpenListVo123</string>
     <string name="edit_profile_id">aasd3#</string>
+    <string name="single_event_id">j51s@@asd#</string>
+
     <string name="settings">Settings</string>
     <string name="location_settings">Location Tracker</string>
     <string name="channel_name">Notify object find</string>
     <string name="channel_description">Notify user when find object or friend near him.</string>
+    <string name="pick_date">Pick Date</string>
+    <string name="set_time">Set Time</string>
+    <string name="notifications">Notifications</string>
+    <string name="invite_friend">Invite Friend</string>
+    <string name="add_location">Add Location</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
 
 
 

@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.UUID;
 
@@ -125,11 +126,7 @@ public class AddFriendsBluetoothFragment extends Fragment {
             public void handleMessage(@NonNull Message msg) {
                 if(msg.what == MESSAGE_READ){
                     String readMessage = null;
-                    try {
-                        readMessage = new String((byte[]) msg.obj, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
+                    readMessage = new String((byte[]) msg.obj, StandardCharsets.UTF_8);
                     Toast.makeText(getContext(),"Message : "+readMessage,Toast.LENGTH_SHORT).show();
                 }
 

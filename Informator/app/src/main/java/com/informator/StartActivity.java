@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -20,6 +21,13 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.informator.data.VirtualObject;
+import com.informator.event_fragments.AddEventFragment;
+import com.informator.event_fragments.SingleEventFragment;
 import com.informator.map_fragments.CommentsFragment;
 import com.informator.map_fragments.ListVirtualObjectsFragment;
 import com.google.firebase.storage.FirebaseStorage;
@@ -43,11 +51,14 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
     FirebaseStorage storage;
     StorageReference storageRef;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+
+        fromNotifications();
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         try {
@@ -62,8 +73,42 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new GroupsFragment()).addToBackStack(null).commit();
 
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
+
     }
 
+    private void fromNotifications() {
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            // TODO uvek daje poslednju notifikaciju, da se vidi zasto
+            String username = bundle.getString("username");
+            String title = bundle.getString("title");
+            String user = bundle.getString("user");
+            if (username != null && !username.isEmpty()) {
+                bundle = new Bundle();
+                bundle.putString("username", username);
+//                setFragment(R.id.profile, bundle);
+            }
+            if (title != null && !title.isEmpty() && user != null && !user.isEmpty()) {
+                FirebaseDatabase.getInstance().getReference().child("users").child(user).child("virtual_objects")
+                        .child(title).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        StoredData.getInstance().setVirtualObject(dataSnapshot.getValue(VirtualObject.class));
+                        Bundle bundle = new Bundle();
+                        bundle.putString("idVirtualObject", StoredData.getInstance().getVirtualObject().getId());
+                        setFragment(R.string.virtualObjectId, bundle);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.w(StartActivity.class.getSimpleName(),"Canceled fetching data for virtual object !");
+                    }
+                });
+            }
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -101,7 +146,10 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
 //            retFragment=new SearchMapFragment();
         }
         else if(itemId==R.id.add_event){
-//            retFragment=new AddEventFragment();
+            retFragment=new AddEventFragment();
+        }
+        else if(itemId==R.string.single_event_id){
+            retFragment=new SingleEventFragment();
         }
         else if(itemId==R.id.find_event){
 //            retFragment=new FindEventFragment();
@@ -142,6 +190,11 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         catch (Exception e){
             Log.e("Error :",e.getMessage());
         }
+    }
+
+    public void setBottomNavItemSelected(int item){
+        if(bottomNavigationView.getSelectedItemId() != item )
+            bottomNavigationView.setSelectedItemId(item);
     }
 
     @Override

@@ -126,6 +126,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map,container,false);
 
+        ((StartActivity)getActivity()).setBottomNavItemSelected(R.id.map);
+
         firebaseStorage=FirebaseStorage.getInstance(Constants.URL_STORAGE);
         storageReference=firebaseStorage.getReference();
         firebaseDatabase=FirebaseDatabase.getInstance();
@@ -520,7 +522,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private boolean checkIfInRadius(LatLng position){
-        float distanceFromCurrentLocation[]=new float[1];
+        float[] distanceFromCurrentLocation =new float[1];
 
         Location.distanceBetween(
                 current_user_location.getLatitude(),
@@ -530,10 +532,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 distanceFromCurrentLocation
                 );
 
-        if(distanceFromCurrentLocation[0] > radius)
-            return false;
-        else
-            return true;
+        return !(distanceFromCurrentLocation[0] > radius);
     }
 
     private void addVirtualObjectMarker(VirtualObject virtualObject){

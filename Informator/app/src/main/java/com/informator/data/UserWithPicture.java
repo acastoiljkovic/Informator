@@ -2,6 +2,8 @@ package com.informator.data;
 
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.text.format.DateFormat;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,10 +12,14 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
 import com.informator.MainActivity;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 public class UserWithPicture {
     String fullName;
@@ -28,9 +34,21 @@ public class UserWithPicture {
     ArrayList<NearFriend> nearFriends;
     ArrayList<NearVirtualObject> nearVirtualObjects;
     ArrayList<VirtualObject> virtual_objects;
+    ArrayList<Event> events;
+
+    HashMap<String,Event> eventsWithId;
     Location currentLocation;
     DatabaseReference databaseReference;
     ListUserUpdateEventListener updateListener;
+
+    public ArrayList<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(ArrayList<Event> events) {
+        this.events = events;
+    }
+
 
     public UserWithPicture(String fullName, String email, String phone, String username) {
         this.fullName = fullName;
@@ -41,8 +59,11 @@ public class UserWithPicture {
         this.friends = new ArrayList<>();
         points = "0";
         status = "online";
+        currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.events = new ArrayList<>();
+        this.eventsWithId = new HashMap<>();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -57,6 +78,8 @@ public class UserWithPicture {
         currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.events = new ArrayList<>();
+        this.eventsWithId = new HashMap<>();
     }
 
     public UserWithPicture() {
@@ -71,6 +94,8 @@ public class UserWithPicture {
         currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.events = new ArrayList<>();
+        this.eventsWithId = new HashMap<>();
     }
 
     public UserWithPicture(User user, Bitmap image) {
@@ -82,10 +107,13 @@ public class UserWithPicture {
         profilePhoto = image;
         points = "0";
         status = "online";
+        currentLocation = new Location(Location.convert(0,0));
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
+        this.events = new ArrayList<>();
+        this.eventsWithId = new HashMap<>();
     }
 
     public void SetListeners(){
@@ -96,6 +124,7 @@ public class UserWithPicture {
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("status").addChildEventListener(childEventListenerStatus);
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("longitude").addChildEventListener(childEventListenerLongitude);
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("latitude").addChildEventListener(childEventListenerLatitude);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("events").addChildEventListener(childEventListenerEvents);
     }
 
 
@@ -143,10 +172,39 @@ public class UserWithPicture {
         }
     };
 
+    ChildEventListener childEventListenerEvents = new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            Event event = dataSnapshot.getValue(Event.class);
+            addEvent(event);
+            addEventWithId(event);
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
     ChildEventListener childEventListenerLatitude= new ChildEventListener() {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            currentLocation.setLatitude(dataSnapshot.getValue(Double.class));
+            setLatitude(dataSnapshot.getValue(Double.class));
             // TODO notify location has changed
         }
 
@@ -174,27 +232,30 @@ public class UserWithPicture {
     ChildEventListener childEventListenerLongitude = new ChildEventListener() {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            currentLocation.setLongitude(dataSnapshot.getValue(Double.class));
+            setLongitude(dataSnapshot.getValue(Double.class));
             // TODO notify status has changed
         }
 
         @Override
         public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+            Log.d(UserWithPicture.class.getSimpleName(),s);
         }
 
         @Override
         public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+            Log.d(UserWithPicture.class.getSimpleName(),"child removed");
 
         }
 
         @Override
         public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            Log.d(UserWithPicture.class.getSimpleName(),"child moved");
 
         }
 
         @Override
         public void onCancelled(@NonNull DatabaseError databaseError) {
+            Log.d(UserWithPicture.class.getSimpleName(),"cancel");
 
         }
     };
@@ -292,6 +353,21 @@ public class UserWithPicture {
         }
     };
 
+    private void addEventWithId(Event e){
+        this.eventsWithId.put(e.getId(),e);
+    }
+
+    public HashMap<String, Event> getEventsWithId() {
+        return eventsWithId;
+    }
+
+    public void setEventsWithId(HashMap<String, Event> eventsWithId) {
+        this.eventsWithId = eventsWithId;
+    }
+
+    public void addEvent(Event event){
+        this.events.add(event);
+    }
 
     public String getStatus() {
         return status;

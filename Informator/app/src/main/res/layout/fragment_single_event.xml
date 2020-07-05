@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_weight="20"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:layout_weight="3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_weight="10"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+
+                android:layout_width="@dimen/toolbar"
+                android:layout_height="@dimen/toolbar"
+                android:foreground="@drawable/ic_baseline_access_time_24"/>
+            <TextView
+                android:id="@+id/textViewTime"
+                android:textColor="#000000"
+                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="10"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+
+                android:layout_width="@dimen/toolbar"
+                android:layout_height="@dimen/toolbar"
+                android:foreground="@drawable/ic_baseline_hourglass_empty_24"/>
+            <TextView
+                android:id="@+id/textViewRemainingTime"
+                android:textColor="#000000"
+                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="10"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imageViewEstimatedTime"
+                android:layout_width="@dimen/toolbar"
+                android:layout_height="@dimen/toolbar"
+                android:foreground="@drawable/ic_baseline_timer_24_green"/>
+            <TextView
+                android:id="@+id/textViewEstimatedTime"
+                android:textColor="#000000"
+                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="4"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/mapSingleEvent"
+                android:layout_width="match_parent"
+                android:layout_height="370dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_weight="20"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

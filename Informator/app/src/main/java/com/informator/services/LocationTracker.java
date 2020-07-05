@@ -156,20 +156,24 @@ public class LocationTracker extends Service {
 
     private void notifyVO(NearVirtualObject vo){
 
+
         Intent intent = new Intent(this, StartActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        intent.putExtra("title",vo.getTitle());
+        intent.putExtra("user",vo.getUser());
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
+                .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_baseline_info_24)
                 .setContentTitle("Found Virtual Object")
                 .setContentText("Virtual object : "+vo.getTitle()+ ", recommended by "+vo.getUser()+" is near you !")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(vo.getTitle().hashCode(), builder.build());
+        notificationManager.notify(vo.getTitle().hashCode(),builder.build() );
 
         FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHILD_USERS)
                 .child(sharedPreferences.getString(Constants.SHARED_PREFERENCES_USERNAME,""))
@@ -177,9 +181,11 @@ public class LocationTracker extends Service {
     }
 
     private void notifyFriend(NearFriend friend){
+
         Intent intent = new Intent(this, StartActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        intent.putExtra("username",friend.getUsername());
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_info_24)

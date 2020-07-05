@@ -69,7 +69,7 @@ public class RankingFragment extends Fragment {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null) {
-                        friendsOfPersonFullNames.add(String.valueOf(dataSnapshot.child("fullName").getValue()) + " - "+ String.valueOf(dataSnapshot.child("points").getValue()) +" points");
+                        friendsOfPersonFullNames.add(dataSnapshot.child("fullName").getValue() + " - "+ dataSnapshot.child("points").getValue() +" points");
                         adapter.notifyDataSetChanged();
 
                     }

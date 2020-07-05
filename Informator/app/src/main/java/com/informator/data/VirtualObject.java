@@ -25,6 +25,7 @@ public class VirtualObject {
         this.numberOfRates=0;
         this.rating=0;
         this.posts=new ArrayList<Post>();
+        this.userRecommended = "none";
     }
 
     public VirtualObject(String title, String description,double latitude,double longitude) {
@@ -35,6 +36,7 @@ public class VirtualObject {
         this.numberOfRates=0;
         this.rating=0;
         this.posts=new ArrayList<Post>();
+        this.userRecommended = "none";
     }
 
     public VirtualObject(String title, String description,double latitude,double longitude,float rating) {
@@ -44,6 +46,7 @@ public class VirtualObject {
         this.longitude=longitude;
         this.rating=rating;
         this.posts=new ArrayList<Post>();
+        this.userRecommended = "none";
     }
 
     public void addPost(Post post){
