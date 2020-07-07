@@ -10,13 +10,6 @@
 
     </item>
 
-    <item
-        android:id="@+id/find_group"
-        android:icon="@drawable/ic_search_black_24dp"
-        android:title="@string/find_group"
-        app:showAsAction="ifRoom">
-
-    </item>
 
 
 </menu>

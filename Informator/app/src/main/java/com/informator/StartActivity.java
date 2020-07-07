@@ -139,9 +139,6 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
         else if(itemId==R.id.add_group){
 //            retFragment=new AddGroupFragment();
         }
-        else if(itemId==R.id.find_group){
-//            retFragment=new FindGroupFragment();
-        }
         else if(itemId==R.id.search_on_map){
 //            retFragment=new SearchMapFragment();
         }
