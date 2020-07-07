@@ -134,9 +134,6 @@ public class GroupsFragment extends Fragment {
                 if(item.getItemId()==R.id.add_group){
                     addGroup();
                 }
-                else if(item.getItemId()==R.id.find_group){
-
-                }
 
                 return false;
             }
@@ -168,6 +165,12 @@ public class GroupsFragment extends Fragment {
                                             listGroupsAdapter.notifyDataSetChanged();
                                             groupPictureMap.add(bitmap,groupId);
 
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            listGroupsAdapter.notifyDataSetChanged();
+                                            groupPictureMap.add(null,groupId);
                                         }
                                     });
                                 }
@@ -254,6 +257,8 @@ public class GroupsFragment extends Fragment {
                         }
                         databaseReference.child("groups").child(key).child("numberOfMembers").setValue(listSelectedFriends.size()+1);
 
+                        databaseReference.child("groups").child(key).child("groupMembers").child(StoredData.getInstance().getUser().getUsername())
+                                .setValue(StoredData.getInstance().getUser().getUsername());
                         databaseReference.child("users").child(StoredData.getInstance().getUser().getUsername()).child("groupsMember").child(key).setValue(key);
 
                         StorageReference group_image_reference=storageReference.child(key+".jpg");
@@ -306,6 +311,14 @@ public class GroupsFragment extends Fragment {
                         //friendsPictures.set(pos,bitmap);
                         friendsPicturesMap.add(bitmap,friendUsername);
 
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        listFriendsAdapter.notifyDataSetChanged();
+                        int pos=friendsUsernameMapPosition.get(friendUsername);
+                        //friendsPictures.set(pos,bitmap);
+                        friendsPicturesMap.add(null,friendUsername);
                     }
                 });
             }

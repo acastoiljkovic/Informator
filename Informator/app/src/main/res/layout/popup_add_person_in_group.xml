@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="325dp"
+    android:layout_height="350dp"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    android:background="@drawable/rounded_style">
+
+
+    <ListView
+        android:id="@+id/list_view_friends_no_in_group"
+        android:layout_width="match_parent"
+        android:layout_height="290dp">
+
+    </ListView>
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/btn_add_person_in_group"
+            android:layout_gravity="center"
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:background="@drawable/button_black_border"
+            android:textColor="@color/color_white"
+            android:text="Add">
+
+        </Button>
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
