@@ -388,6 +388,8 @@ public class ProfileFragment extends Fragment {
         initDialog();
     }
 
+
+
     private void initDialog(){
         dialog =new ProgressDialog(getContext());
         dialog.setTitle("Please Wait");
@@ -443,6 +445,11 @@ public class ProfileFragment extends Fragment {
         edit.putString(Constants.SHARED_PREFERENCES_USERNAME, "");
         edit.putString(Constants.SHARED_PREFERENCES_PASSWORD, "");
         edit.commit();
+
+        if(isMyServiceRunning(LocationTracker.class)) {
+            Toast.makeText(getContext(), "Gasim servis", Toast.LENGTH_SHORT).show();
+            getContext().stopService(new Intent(getContext(), LocationTracker.class));
+        }
     }
 
     private void AddFriend(){

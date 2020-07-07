@@ -106,6 +106,8 @@ public class RankingFragment extends Fragment {
         }
 
 
+
+
         return  view;
     }
 
@@ -114,7 +116,7 @@ public class RankingFragment extends Fragment {
 
         listFriends = view.findViewById(R.id.list_points);
         tvWelcome = (TextView)view.findViewById(R.id.tv_welcome_text_ranking_fragment);
-        btnAddFriend = view.findViewById(R.id.fragment_ranks_add_friend_button);
+//        btnAddFriend = view.findViewById(R.id.fragment_ranks_add_friend_button);
 
         friendsOfPersonFullNames = new ArrayList<>();
         friendsOfPersonPictures = new MapPicturesWithName();
@@ -145,7 +147,7 @@ public class RankingFragment extends Fragment {
             friendsUsernames = bundle.getStringArrayList("friends");
         }
 
-        SetBtnAdd();
+//        SetBtnAdd();
 
         if(friendsUsernames.size() <= 0) {
             tvWelcome.setText(R.string.no_friends);
@@ -158,25 +160,25 @@ public class RankingFragment extends Fragment {
         listFriends.setAdapter(adapter);
     }
 
-    private void SetBtnAdd(){
-        if(!profile) {
-            btnAddFriend.setVisibility(View.VISIBLE);
-            btnAddFriend.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ((StartActivity) getActivity()).setFragment(R.id.search_friends, null);
-                }
-            });
-            if(StoredData.getInstance().getUser().getNumberOfFriends() == 0) {
-                tvWelcome.setText(R.string.no_friends);
-            }
-            else{
-                friendsUsernames = StoredData.getInstance().getUser().getFriends();
-            }
-        }
-        else {
-            btnAddFriend.setVisibility(View.GONE);
-
-        }
-    }
+//    private void SetBtnAdd(){
+//        if(!profile) {
+//            btnAddFriend.setVisibility(View.VISIBLE);
+//            btnAddFriend.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    ((StartActivity) getActivity()).setFragment(R.id.search_friends, null);
+//                }
+//            });
+//            if(StoredData.getInstance().getUser().getNumberOfFriends() == 0) {
+//                tvWelcome.setText(R.string.no_friends);
+//            }
+//            else{
+//                friendsUsernames = StoredData.getInstance().getUser().getFriends();
+//            }
+//        }
+//        else {
+//            btnAddFriend.setVisibility(View.GONE);
+//
+//        }
+//    }
 }

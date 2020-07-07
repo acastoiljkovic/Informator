@@ -129,7 +129,6 @@ public class EventsFragment extends Fragment {
             }
         }
         adapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), (month+1) + "/" + dayOfMonth + "/" + year, Toast.LENGTH_LONG).show();
     }
 
     private void onToolbarItemClick(MenuItem item){

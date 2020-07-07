@@ -10,17 +10,13 @@
         <FrameLayout
             android:layout_width="?attr/actionBarSize"
             android:layout_height="match_parent">
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/list_item_image_view"
                 android:layout_margin="6dp"
                 android:layout_width="match_parent"
                 android:scaleType="centerCrop"
                 android:layout_height="match_parent"/>
 
-            <ImageView
-                android:src="@drawable/picture_list_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
         </FrameLayout>
         <TextView
             android:id="@+id/list_item_search_friends"
