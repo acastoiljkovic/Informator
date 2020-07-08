@@ -49,6 +49,23 @@ public class UserWithPicture {
     DatabaseReference databaseReference;
     ListUserUpdateEventListener updateListener;
 
+    public ListUserUpdateEventListener getUpdateListener() {
+        return updateListener;
+    }
+
+    public void setUpdateListener(ListUserUpdateEventListener updateListener) {
+        this.updateListener = updateListener;
+    }
+
+    public ListFriendsUpdateListener getFriendsUpdateListener() {
+        return friendsUpdateListener;
+    }
+
+    public void setFriendsUpdateListener(ListFriendsUpdateListener friendsUpdateListener) {
+        this.friendsUpdateListener = friendsUpdateListener;
+    }
+
+    ListFriendsUpdateListener friendsUpdateListener;
 
 
     public UserWithPicture(String fullName, String email, String phone, String username) {
@@ -397,6 +414,8 @@ public class UserWithPicture {
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             String friendUsername=dataSnapshot.getValue(String.class);
             friends.add(friendUsername);
+            if(updateListener != null)
+                updateListener.onListFriendsUpdated();
         }
 
         @Override
@@ -406,7 +425,10 @@ public class UserWithPicture {
 
         @Override
         public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
+            String friendUsername=dataSnapshot.getValue(String.class);
+            friends.remove(friendUsername);
+            if(updateListener != null)
+                updateListener.onListFriendsUpdated();
         }
 
         @Override

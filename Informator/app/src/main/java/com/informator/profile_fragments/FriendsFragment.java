@@ -28,6 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import com.informator.ProfileFragment;
 import com.informator.R;
 import com.informator.StartActivity;
+import com.informator.data.ListFriendsUpdateListener;
 import com.informator.data.MapPicturesWithName;
 import com.informator.data.Constants;
 import com.informator.data.SearchFriendsListViewItem;
@@ -58,7 +59,26 @@ public class FriendsFragment extends Fragment {
 
         Initialize(view,bundle);
 
+        fetchData();
 
+        StoredData.getInstance().user.setFriendsUpdateListener(new ListFriendsUpdateListener() {
+            @Override
+            public void onFriendsUpdate() {
+//                clearData();
+//                fetchData();
+            }
+        });
+
+
+        return  view;
+    }
+
+    private void clearData(){
+        friendsOfPersonFullNames.clear();
+        friendsOfPersonPictures.clear();
+    }
+
+    private void fetchData(){
         for(String friend : friendsUsernames) {
 
             final String fUser = friend;
@@ -103,9 +123,6 @@ public class FriendsFragment extends Fragment {
                 }
             });
         }
-
-
-        return  view;
     }
 
     private void Initialize(View view, Bundle bundle){

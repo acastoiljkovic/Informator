@@ -468,6 +468,7 @@ public class ProfileFragment extends Fragment {
         StoredData.getInstance().getUser().addFriend(username);
 
         Toast.makeText(getContext(),"Dodao",Toast.LENGTH_SHORT).show();
+        ((StartActivity)getActivity()).setFragment(R.id.profile,null);
     }
 
     private void RemoveFriend(){
@@ -483,6 +484,7 @@ public class ProfileFragment extends Fragment {
         StoredData.getInstance().getUser().removeFriend(username);
 
         Toast.makeText(getContext(),"Obrisao",Toast.LENGTH_SHORT).show();
+        ((StartActivity)getActivity()).setFragment(R.id.profile,null);
     }
 
     public static Bitmap drawableToBitmap (Drawable drawable) {

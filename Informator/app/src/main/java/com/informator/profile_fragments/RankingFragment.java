@@ -30,6 +30,7 @@ import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
 import com.informator.data.FriendsListViewItem;
+import com.informator.data.ListUserUpdateEventListener;
 import com.informator.data.MapPicturesWithName;
 import com.informator.data.SearchFriendsListViewItem;
 import com.informator.data.StoredData;
@@ -61,6 +62,26 @@ public class RankingFragment extends Fragment {
         Initialize(view,bundle);
 
 
+        fetchData();
+
+        StoredData.getInstance().user.setUpdateListener(new ListUserUpdateEventListener() {
+            @Override
+            public void onListFriendsUpdated() {
+//                clearData();
+//                fetchData();
+            }
+        });
+
+
+        return  view;
+    }
+
+    private void clearData(){
+        friendsOfPersonFullNames.clear();
+        friendsOfPersonPictures.clear();
+    }
+
+    private void fetchData(){
         for(String friend : friendsUsernames) {
 
             final String f = friend;
@@ -105,10 +126,6 @@ public class RankingFragment extends Fragment {
             });
         }
 
-
-
-
-        return  view;
     }
 
     private void Initialize(View view, Bundle bundle){
