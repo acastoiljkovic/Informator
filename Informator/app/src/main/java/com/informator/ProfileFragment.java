@@ -465,7 +465,7 @@ public class ProfileFragment extends Fragment {
         mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
                 .child("friends").child(username).setValue(username);
 
-        StoredData.getInstance().getUser().addFriend(username);
+//        StoredData.getInstance().getUser().addFriend(username);
 
         Toast.makeText(getContext(),"Dodao",Toast.LENGTH_SHORT).show();
         ((StartActivity)getActivity()).setFragment(R.id.profile,null);
@@ -481,7 +481,7 @@ public class ProfileFragment extends Fragment {
         mDatabase.child("users").child(StoredData.getInstance().user.getUsername())
                 .child("friends").child(username).removeValue();
 
-        StoredData.getInstance().getUser().removeFriend(username);
+//        StoredData.getInstance().getUser().removeFriend(username);
 
         Toast.makeText(getContext(),"Obrisao",Toast.LENGTH_SHORT).show();
         ((StartActivity)getActivity()).setFragment(R.id.profile,null);
