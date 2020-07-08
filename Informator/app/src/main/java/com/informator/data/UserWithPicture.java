@@ -413,7 +413,7 @@ public class UserWithPicture {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             String friendUsername=dataSnapshot.getValue(String.class);
-            friends.add(friendUsername);
+//            friends.add(friendUsername);
             if(updateListener != null)
                 updateListener.onListFriendsUpdated();
         }
@@ -426,7 +426,7 @@ public class UserWithPicture {
         @Override
         public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
             String friendUsername=dataSnapshot.getValue(String.class);
-            friends.remove(friendUsername);
+//            friends.remove(friendUsername);
             if(updateListener != null)
                 updateListener.onListFriendsUpdated();
         }
