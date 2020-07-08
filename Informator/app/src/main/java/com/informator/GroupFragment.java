@@ -263,6 +263,8 @@ public class GroupFragment extends Fragment {
                 }
 
                 final String postKey=databaseReference.child("groups").push().getKey();
+
+
                 databaseReference.child("groups").child(groupId).child(postKey).addListenerForSingleValueEvent(new ValueEventListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
@@ -272,6 +274,21 @@ public class GroupFragment extends Fragment {
                         DateTimeFormatter dateTimeFormatter=DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
                         String formattedDate=dateTime.format(dateTimeFormatter);
 
+                        postIds.add(postKey);
+                        postByUsernames.add(StoredData.getInstance().getUser().getUsername());
+                        timeOfPosts.add(formattedDate);
+                        contentOfPosts.add(editTextPost.getText().toString());
+                        numberOfComments.add(0);
+                        if(hasPic){
+                            picturesOfPosts.add(postPicture,postKey);
+                        }
+                        else
+                        {
+                            picturesOfPosts.add(null,postKey);
+                        }
+                        picturesOfUser.add(StoredData.getInstance().getUser().getProfilePhoto(),postKey);
+                        flags.add(postHasPicture);
+                        listPostsInGroupAdapter.notifyDataSetChanged();
 
                         databaseReference.child("groups").child(groupId).child("posts").child(postKey).child("postId")
                                 .setValue(postKey);

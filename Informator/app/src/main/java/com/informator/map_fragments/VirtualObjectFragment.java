@@ -213,11 +213,12 @@ public class VirtualObjectFragment extends Fragment {
                             int num=StoredData.getInstance().getVirtualObject().getNumberOfRates()+1;
                             float rating=(StoredData.getInstance().getVirtualObject().getRating()
                                     *StoredData.getInstance().getVirtualObject().getNumberOfRates()+currentRating)/num;
+                            textViewRating.setText("Rate: "+rating);
                             databaseReference.child("users").child(StoredData.getInstance().getVirtualObject().getUserRecommended())
-                                    .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getTitle())
+                                    .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getId())
                                     .child("numberOfRates").setValue(num);
                             databaseReference.child("users").child(StoredData.getInstance().getVirtualObject().getUserRecommended())
-                                    .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getTitle())
+                                    .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getId())
                                     .child("rating").setValue(rating);
 
                             databaseReference.child("users").child(StoredData.getInstance().getUser().getUsername()).child("list_rated_virtual_objects")

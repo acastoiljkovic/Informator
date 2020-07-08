@@ -335,6 +335,16 @@ public class ListVirtualObjectsFragment extends Fragment {
             }
         }
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Bundle bundle=new Bundle();
+                StoredData.getInstance().setVirtualObject(listVirtualObjects.get(position));
+                ((StartActivity)getActivity()).setFragment(R.string.virtualObjectId,bundle);
+            }
+        });
+
         listView.setAdapter(listVirtualObjectsAdapterMy);
     }
 
@@ -374,6 +384,7 @@ public class ListVirtualObjectsFragment extends Fragment {
         }
 
         for(String friendUsername:StoredData.getInstance().getUser().getFriends()){
+
             databaseReference.child("users").child(friendUsername).child("virtual_objects").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

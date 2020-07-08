@@ -90,6 +90,10 @@ public class CommentsFragment extends Fragment {
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 String key=databaseReference.child("users").push().getKey();
+                                listUsernames.add(editTextWriteComment.getText().toString());
+                                listImages.add(StoredData.getInstance().getUser().getProfilePhoto());
+                                commentMapToUserPicture.add(StoredData.getInstance().getUser().getProfilePhoto(),editTextWriteComment.getText().toString());
+                                listVirtualObjectsAdapter.notifyDataSetChanged();
                                 Post post=new Post(StoredData.getInstance().getUser().getUsername(),editTextWriteComment.getText().toString());
                                 databaseReference.child("users").child(userRecommended)
                                         .child("virtual_objects").child(virtualObjectName)
@@ -103,6 +107,7 @@ public class CommentsFragment extends Fragment {
                             }
                         }
                 );
+                //editTextWriteComment.setText("");
             }
         });
 
