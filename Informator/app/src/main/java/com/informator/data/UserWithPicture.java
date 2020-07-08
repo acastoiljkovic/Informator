@@ -36,6 +36,7 @@ public class UserWithPicture {
     ArrayList<NearVirtualObject> nearVirtualObjects;
     ArrayList<VirtualObject> virtual_objects;
     ArrayList<Event> events;
+    ArrayList<String> listRatedVirtualObjects;
     HashMap<String,Event> eventsWithId;
     ArrayList<Group> groups;
     Location currentLocation;
@@ -66,6 +67,7 @@ public class UserWithPicture {
         this.events = new ArrayList<>();
         this.eventsWithId = new HashMap<>();
         this.groups=new ArrayList<>();
+        this.listRatedVirtualObjects=new ArrayList<>();
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -83,6 +85,7 @@ public class UserWithPicture {
         this.events = new ArrayList<>();
         this.eventsWithId = new HashMap<>();
         this.groups=new ArrayList<>();
+        this.listRatedVirtualObjects=new ArrayList<>();
 
     }
 
@@ -102,6 +105,7 @@ public class UserWithPicture {
         this.eventsWithId = new HashMap<>();
         this.groups=new ArrayList<>();
         currentLocation = new Location(Location.convert(0,0));
+        this.listRatedVirtualObjects=new ArrayList<>();
 
     }
 
@@ -122,12 +126,14 @@ public class UserWithPicture {
         this.events = new ArrayList<>();
         this.eventsWithId = new HashMap<>();
         this.groups=new ArrayList<>();
+        this.listRatedVirtualObjects=new ArrayList<>();
     }
 
     public void SetListeners(){
         databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("friends").addChildEventListener(childEventListenerFrineds);
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("virtual_objects").addChildEventListener(childEventListenerVirtualObjects);
+        databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("list_rated_virtual_objects").addChildEventListener(childEventListenerListRatedVirtualObjects);
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("points").addChildEventListener(childEventListenerPoints);
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("status").addChildEventListener(childEventListenerStatus);
         databaseReference.child(Constants.FIREBASE_CHILD_USERS).child(username).child("longitude").addChildEventListener(childEventListenerLongitude);
@@ -150,6 +156,62 @@ public class UserWithPicture {
                 virtualObject.setVirtual_object_image(bitmap);
             }
         }
+    }
+
+    ChildEventListener childEventListenerListRatedVirtualObjects= new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            String ratedVO=dataSnapshot.getValue().toString();
+            listRatedVirtualObjects.add(ratedVO);
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
+    public void setFriends(ArrayList<String> friends) {
+        this.friends = friends;
+    }
+
+    public ArrayList<VirtualObject> getVirtual_objects() {
+        return virtual_objects;
+    }
+
+    public void setVirtual_objects(ArrayList<VirtualObject> virtual_objects) {
+        this.virtual_objects = virtual_objects;
+    }
+
+    public ArrayList<String> getListRatedVirtualObjects() {
+        return listRatedVirtualObjects;
+    }
+
+    public void setListRatedVirtualObjects(ArrayList<String> listRatedVirtualObjects) {
+        this.listRatedVirtualObjects = listRatedVirtualObjects;
+    }
+
+    public ArrayList<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(ArrayList<Group> groups) {
+        this.groups = groups;
     }
 
     ChildEventListener childEventListenerStatus = new ChildEventListener() {

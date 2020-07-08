@@ -23,10 +23,14 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +77,8 @@ import com.informator.data.VirtualObject;
 import com.informator.map_fragments.VirtualObjectFragment;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +107,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     Toolbar toolbar;
     Dialog popup_add_virtual_object;
     Dialog popup_online_friend;
+    Dialog popup_filter;
 
 
     Bitmap virtual_object_image;
@@ -166,11 +173,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     showPopup();
 
                 }else if(item.getItemId()==R.id.search_on_map){
-
+                    showPopupFilter();
                 }
                 else if(item.getItemId()==R.id.search_in_radius){
                     Bundle bundle=new Bundle();
                     bundle.putFloat("radius",radius);
+                    bundle.putString("search_in_radius","search_in_radius");
                     ((StartActivity)getActivity()).setFragment(R.string.open_listVO,bundle);
                 }
                 else if(item.getItemId()==R.id.id_show_virtual_objects){
@@ -228,6 +236,58 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         };
 
         return view;
+    }
+
+    private void showPopupFilter(){
+        popup_filter=new Dialog(this.getActivity());
+        popup_filter.setContentView(R.layout.popup_filter);
+        final RadioGroup radioGroupSort=popup_filter.findViewById(R.id.radioGroupSort);
+        final RadioGroup radioGroupFilter=popup_filter.findViewById(R.id.radioGroupFilter);
+        Button done=popup_filter.findViewById(R.id.done);
+
+        done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int radioButtonSortId=radioGroupSort.getCheckedRadioButtonId();
+                int radioButtonFilterId=radioGroupFilter.getCheckedRadioButtonId();
+                if(radioButtonSortId!=-1 && radioButtonFilterId!=-1){
+                    Bundle bundle=new Bundle();
+                    RadioButton radioButtonSort=radioGroupSort.findViewById(radioButtonSortId);
+                    RadioButton radioButtonFilter=radioGroupFilter.findViewById(radioButtonFilterId);
+
+                    bundle.putString("Sort",radioButtonSort.getText().toString());
+                    bundle.putString("Filter",radioButtonFilter.getText().toString());
+
+                    ((StartActivity)getActivity()).setFragment(R.string.open_listVO,bundle);
+                }
+                else if(radioButtonSortId!=-1){
+                    Bundle bundle=new Bundle();
+                    RadioButton radioButtonSort=radioGroupSort.findViewById(radioButtonSortId);
+
+                    bundle.putString("Sort",radioButtonSort.getText().toString());
+
+                    ((StartActivity)getActivity()).setFragment(R.string.open_listVO,bundle);
+                }
+                else if(radioButtonFilterId!=-1){
+                    Bundle bundle=new Bundle();
+                    RadioButton radioButtonFilter=radioGroupFilter.findViewById(radioButtonFilterId);
+
+                    bundle.putString("Filter",radioButtonFilter.getText().toString());
+
+                    ((StartActivity)getActivity()).setFragment(R.string.open_listVO,bundle);
+                }
+                else
+                {
+                    Toast.makeText(getContext(),"Select something...",Toast.LENGTH_LONG).show();
+                }
+
+                popup_filter.cancel();
+            }
+        });
+
+
+
+        popup_filter.show();
     }
 
     private void addFriendsMarker(UserWithPicture user) {
@@ -375,6 +435,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         listOnlineFriends.get(pos).setProfilePhoto(bitmap);
                                         notifyDownloadProfilePhoto();
                                     }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                    }
                                 });
                             }
 
@@ -404,6 +469,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         createButton=(Button) popup_add_virtual_object.findViewById(R.id.btn_create_VO);
         editTextTitle=(EditText) popup_add_virtual_object.findViewById(R.id.title_edit_text);
         editTextDesc=(EditText) popup_add_virtual_object.findViewById(R.id.edit_text_desc);
+        final Spinner spinner=popup_add_virtual_object.findViewById(R.id.spinner_choose_type);
+        String options[]={"Food and drink place","Other"};
+        ArrayAdapter<String> adapter;
+
+        adapter=new ArrayAdapter<>(getActivity(),R.layout.support_simple_spinner_dropdown_item,options);
+        spinner.setAdapter(adapter);
 
         imgButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -421,6 +492,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
 
         createButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View v) {
                 if(virtual_object_image==null){
@@ -431,9 +503,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 double lat=current_user_location.getLatitude();
                 double lon=current_user_location.getLongitude();
-                final VirtualObject virtualObject=new VirtualObject(editTextTitle.getText().toString(),editTextDesc.getText().toString(),lat,lon);
 
-                String key=databaseReference.child("users").push().getKey();
+
+                LocalDateTime dateTime=LocalDateTime.now();
+                DateTimeFormatter dateTimeFormatter=DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                String formattedDate=dateTime.format(dateTimeFormatter);
+
+
+                final VirtualObject virtualObject=new VirtualObject(editTextTitle.getText().toString(),editTextDesc.getText().toString(),lat,lon,
+                        formattedDate,spinner.getSelectedItem().toString(),StoredData.getInstance().getUser().getUsername());
+
+                final String key=databaseReference.child("users").push().getKey();
                 virtualObject.setId(key);
 
                 final Bitmap image=virtual_object_image;
@@ -443,7 +523,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         databaseReference.child("users").child(StoredData.getInstance().user.getUsername())
-                                .child("virtual_objects").child(editTextTitle.getText().toString())
+                                .child("virtual_objects").child(key)
                                 .setValue(virtualObject);
 
                         StorageReference virtual_object_image_reference = storageReference.child(virtualObject.getId()+".jpg");
@@ -473,6 +553,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                     }
                 });
+
+                popup_add_virtual_object.cancel();
             }
         });
         popup_add_virtual_object.show();
@@ -633,6 +715,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
+                            int pos = virtualObjectIdMapPosition.get(virtualObject.getId());
+                            listPinnedVirtualObjects.get(pos).setVirtual_object_image(null);
+                            notifyDownloadPictureForVirtualObject();
                         }
                     });
                 }
@@ -684,6 +769,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
+                                        int pos = virtualObjectIdMapPosition.get(vo.getId());
+                                        listPinnedVirtualObjects.get(pos).setVirtual_object_image(null);
+                                        notifyDownloadPictureForVirtualObject();
                                     }
                                 });
                             }

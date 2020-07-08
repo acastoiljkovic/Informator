@@ -112,7 +112,7 @@ public class VirtualObjectFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Bundle bundle=new Bundle();
-                bundle.putString("virtualObjectName",StoredData.getInstance().getVirtualObject().getTitle());
+                bundle.putString("virtualObjectName",StoredData.getInstance().getVirtualObject().getId());
                 bundle.putString("userRecommendedName",StoredData.getInstance().getVirtualObject().getUserRecommended());
 
                 ((StartActivity)getActivity()).setFragment(R.string.open_comments,bundle);
@@ -185,50 +185,68 @@ public class VirtualObjectFragment extends Fragment {
 
         //ako je prijateljev objekat moguce ga je oceniti
         if(StoredData.getInstance().getVirtualObject().getUserRecommended().compareTo(StoredData.getInstance().getUser().getUsername())!=0){
-            final RatingBar ratingBar=new RatingBar(getContext());
-            ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-                @Override
-                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                    currentRating=rating;
-                    Toast.makeText(getActivity(),String.valueOf(currentRating),Toast.LENGTH_LONG).show();
-                }
-            });
 
-            final Button btnRate=new Button(getContext());
-            btnRate.setText("Rate");
-            btnRate.setTextColor(getResources().getColor(R.color.color_black));
-            btnRate.setBackground(getResources().getDrawable(R.drawable.button_white_border));
-            btnRate.setTextSize(20);
-
-
-            btnRate.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(currentRating==0){
-                        Toast.makeText(getActivity(),"Rate first!",Toast.LENGTH_LONG).show();
+            if(!checkIfInListRated(StoredData.getInstance().getVirtualObject().getId())){
+                final RatingBar ratingBar=new RatingBar(getContext());
+                ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                    @Override
+                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                        currentRating=rating;
+                        Toast.makeText(getActivity(),String.valueOf(currentRating),Toast.LENGTH_LONG).show();
                     }
-                    else {
-                        int num=StoredData.getInstance().getVirtualObject().getNumberOfRates()+1;
-                        float rating=(StoredData.getInstance().getVirtualObject().getRating()
-                                *StoredData.getInstance().getVirtualObject().getNumberOfRates()+currentRating)/num;
-                        databaseReference.child("users").child(StoredData.getInstance().getVirtualObject().getUserRecommended())
-                                .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getTitle())
-                                .child("numberOfRates").setValue(num);
-                        databaseReference.child("users").child(StoredData.getInstance().getVirtualObject().getUserRecommended())
-                                .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getTitle())
-                                .child("rating").setValue(rating);
+                });
 
+                final Button btnRate=new Button(getContext());
+                btnRate.setText("Rate");
+                btnRate.setTextColor(getResources().getColor(R.color.color_black));
+                btnRate.setBackground(getResources().getDrawable(R.drawable.button_white_border));
+                btnRate.setTextSize(20);
+
+
+                btnRate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(currentRating==0){
+                            Toast.makeText(getActivity(),"Rate first!",Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            int num=StoredData.getInstance().getVirtualObject().getNumberOfRates()+1;
+                            float rating=(StoredData.getInstance().getVirtualObject().getRating()
+                                    *StoredData.getInstance().getVirtualObject().getNumberOfRates()+currentRating)/num;
+                            databaseReference.child("users").child(StoredData.getInstance().getVirtualObject().getUserRecommended())
+                                    .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getTitle())
+                                    .child("numberOfRates").setValue(num);
+                            databaseReference.child("users").child(StoredData.getInstance().getVirtualObject().getUserRecommended())
+                                    .child("virtual_objects").child(StoredData.getInstance().getVirtualObject().getTitle())
+                                    .child("rating").setValue(rating);
+
+                            databaseReference.child("users").child(StoredData.getInstance().getUser().getUsername()).child("list_rated_virtual_objects")
+                                    .child(StoredData.getInstance().getVirtualObject().getId()).setValue(StoredData.getInstance().getVirtualObject().getId());
+
+                        }
+                        btnRate.setVisibility(View.GONE);
+                        ratingBar.setVisibility(View.GONE);
                     }
-                    btnRate.setVisibility(View.GONE);
-                    ratingBar.setVisibility(View.GONE);
-                }
-            });
+                });
 
-            ratingBarLayout.addView(ratingBar);
-            ratingBarLayout.addView(btnRate);
+                ratingBarLayout.addView(ratingBar);
+                ratingBarLayout.addView(btnRate);
+            }
+
         }
 
         return view;
+    }
+
+    private boolean checkIfInListRated(String virtualObjectId){
+        for(String voId:StoredData.getInstance().getUser().getListRatedVirtualObjects()){
+            if(voId.compareTo(virtualObjectId)==0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

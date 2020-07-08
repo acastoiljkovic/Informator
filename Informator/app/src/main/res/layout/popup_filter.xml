@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="315dp"
+    android:layout_height="425dp"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    android:background="@drawable/rounded_style">
+
+
+    <LinearLayout
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="15dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:src="@drawable/ic_baseline_sort_24"
+            android:layout_margin="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </ImageView>
+
+        <TextView
+            android:layout_gravity="center"
+            android:textSize="15sp"
+            android:textColor="@color/color_black"
+            android:text="Sort by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </TextView>
+
+    </LinearLayout>
+
+    <View
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/color_gray">
+
+    </View>
+
+    <RadioGroup
+        android:id="@+id/radioGroupSort"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:text="Rating"
+            android:id="@+id/sort_by_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </RadioButton>
+
+        <RadioButton
+            android:text="Alphabetically"
+            android:id="@+id/sort_by_alphabetically"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </RadioButton>
+
+        <RadioButton
+            android:text="Due date created"
+            android:id="@+id/sort_by_due_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+        </RadioButton>
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="15dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:src="@drawable/ic_baseline_filter_list_24"
+            android:layout_margin="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </ImageView>
+
+        <TextView
+            android:layout_gravity="center"
+            android:textSize="15sp"
+            android:textColor="@color/color_black"
+            android:text="Filter by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </TextView>
+
+    </LinearLayout>
+
+    <View
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/color_gray">
+
+    </View>
+
+    <RadioGroup
+        android:id="@+id/radioGroupFilter"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:text="Rate Over 4.5"
+            android:id="@+id/filter_by_rate_over_4.5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+        </RadioButton>
+
+        <RadioButton
+            android:text="Food and drink places"
+            android:id="@+id/filter_by_food_and_drink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+        </RadioButton>
+
+        <RadioButton
+            android:text="Other"
+            android:id="@+id/filter_by_other"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </RadioButton>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textColor="@color/color_black"
+        android:textSize="15sp"
+        android:padding="5dp"
+        android:layout_margin="5dp"
+        android:layout_gravity="center"
+        android:background="@drawable/button_white_border"
+        />
+
+
+
+
+</LinearLayout>

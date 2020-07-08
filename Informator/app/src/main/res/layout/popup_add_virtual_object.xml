@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="325dp"
-    android:layout_height="425dp"
+    android:layout_height="470dp"
     android:padding="5dp"
     android:layout_gravity="center"
     android:background="@drawable/rounded_style">
@@ -73,6 +73,35 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textColor="#FFFFFF"
             android:textSize="24sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose type:"
+            android:textSize="16sp"
+            android:textColor="@color/color_black"
+            android:layout_gravity="center"
+            android:gravity="center"
+            >
+
+        </TextView>
+
+        <Spinner
+            android:layout_marginLeft="8dp"
+            android:id="@+id/spinner_choose_type"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+        </Spinner>
 
     </LinearLayout>
 
