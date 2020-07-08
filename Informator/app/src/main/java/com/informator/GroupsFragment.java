@@ -244,7 +244,17 @@ public class GroupsFragment extends Fragment {
                     return;
                 }
 
+
+
                 final String key=databaseReference.child("groups").push().getKey();
+
+                groupNames.add(editTextTitle.getText().toString());
+                groupNumberOfMembers.add(listSelectedFriends.size()+1);
+                groupPictureMap.add(groupPicture,key);
+                groupIds.add(key);
+
+                listGroupsAdapter.notifyDataSetChanged();
+
                 databaseReference.child("groups").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
