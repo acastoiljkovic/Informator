@@ -142,7 +142,7 @@ public class GroupFragment extends Fragment {
                     addPersonInGroup();
 
                 }else if(item.getItemId()==R.id.leave_group){
-
+                    leaveGroup();
                 }
                 return false;
             }
@@ -452,6 +452,50 @@ public class GroupFragment extends Fragment {
 
         listView.setAdapter(listUserAdapter);
         popup_add_person_in_group.show();
+    }
+
+    private void leaveGroup(){
+        databaseReference.child("groups").child(groupId).child("groupMembers").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                databaseReference.child("groups").child(groupId).child("groupMembers").child(StoredData.getInstance().getUser().getUsername()).removeValue();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        databaseReference.child("groups").child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                int numberOfMembers=Integer.valueOf(dataSnapshot.child("numberOfMembers").getValue().toString());
+                numberOfMembers--;
+                databaseReference.child("groups").child(groupId).child("numberOfMembers").setValue(numberOfMembers);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        databaseReference.child("users").child(StoredData.getInstance().getUser().getUsername()).child("groupsMember")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        databaseReference.child("users").child(StoredData.getInstance().getUser().getUsername()).child("groupsMember")
+                                .child(groupId).removeValue();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+        ((StartActivity)getActivity()).setFragment(R.id.groups,null);
     }
 
     private boolean checkIfSelectedUser(String friendUsername){

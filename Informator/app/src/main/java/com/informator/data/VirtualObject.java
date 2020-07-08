@@ -17,10 +17,30 @@ public class VirtualObject {
     private double longitude;
     private int numberOfRates;
     private String userRecommended;
+    private String date;
+    private String typeOfVirtualObject;
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTypeOfVirtualObject() {
+        return typeOfVirtualObject;
+    }
+
+    public void setTypeOfVirtualObject(String typeOfVirtualObject) {
+        this.typeOfVirtualObject = typeOfVirtualObject;
+    }
 
     public VirtualObject() {
         this.title = "title";
         this.description = "description";
+        this.date="date";
+        this.typeOfVirtualObject="type";
         this.virtual_object_image = null;
         this.numberOfRates=0;
         this.rating=0;
@@ -28,15 +48,17 @@ public class VirtualObject {
         this.userRecommended = "none";
     }
 
-    public VirtualObject(String title, String description,double latitude,double longitude) {
+    public VirtualObject(String title, String description,double latitude,double longitude,String date,String type,String userRecommended) {
         this.title = title;
         this.description = description;
         this.latitude=latitude;
         this.longitude=longitude;
+        this.date=date;
+        this.typeOfVirtualObject=type;
         this.numberOfRates=0;
         this.rating=0;
         this.posts=new ArrayList<Post>();
-        this.userRecommended = "none";
+        this.userRecommended = userRecommended;
     }
 
     public VirtualObject(String title, String description,double latitude,double longitude,float rating) {
