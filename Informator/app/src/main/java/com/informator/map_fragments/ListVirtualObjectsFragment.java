@@ -323,10 +323,8 @@ public class ListVirtualObjectsFragment extends Fragment {
                     public void onSuccess(byte[] bytes) {
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         images1.add(bitmap);
-                        listVirtualObjectsAdapterMy.notifyDataSetChanged();
-                        int pos = virtualObjectIdMapPosition.get(virtualObject.getId());
-                        listVirtualObjectsTmp.get(pos).setVirtual_object_image(bitmap);
                         virtualObjectPictures.add(bitmap, virtualObject.getTitle());
+                        listVirtualObjectsAdapterMy.notifyDataSetChanged();
 
                     }
 
@@ -427,6 +425,9 @@ public class ListVirtualObjectsFragment extends Fragment {
 
     private void notifyListChanged(){
         listVirtualObjects.clear();
+        titles1.clear();
+        images1.clear();
+        virtualObjectPictures.clear();
         filterSortData();
     }
 
@@ -442,7 +443,7 @@ public class ListVirtualObjectsFragment extends Fragment {
     private void filterFoodAndDrinkPlaces(){
         listVirtualObjects.clear();
         for(VirtualObject virtualObject:listVirtualObjectsTmp){
-            if(virtualObject.getTypeOfVirtualObject().compareTo("Food and drink places") == 0){
+            if(virtualObject.getTypeOfVirtualObject().compareTo("Food and drink place") == 0){
                 listVirtualObjects.add(virtualObject);
             }
         }
