@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -59,6 +60,7 @@ public class ListVirtualObjectsFragment extends Fragment {
     MapPicturesWithName virtualObjectPictures;
     ListVirtualObjectsAdapter listVirtualObjectsAdapterMy;
     private ArrayList<VirtualObject> listVirtualObjects;
+    private ArrayList<VirtualObject> listVirtualObjectsTmp;
 
     TextView textViewListVirtualObjectFragment;
 
@@ -66,6 +68,9 @@ public class ListVirtualObjectsFragment extends Fragment {
     ArrayList<Bitmap> images1;
     ArrayList<String> virtualObjectIds1;
     private int count;
+    String sort;
+    String filter;
+
 
     @Nullable
     @Override
@@ -80,6 +85,7 @@ public class ListVirtualObjectsFragment extends Fragment {
         virtualObjectIdMapPosition=new HashMap<>();
         virtualObjectPictures = new MapPicturesWithName();
         listVirtualObjects=new ArrayList<>();
+        listVirtualObjectsTmp=new ArrayList<>();
         textViewListVirtualObjectFragment=view.findViewById(R.id.textViewListVirtualObjectFragment);
         final int[] positionCount = {0};
 
@@ -96,8 +102,8 @@ public class ListVirtualObjectsFragment extends Fragment {
         Bundle bundle=this.getArguments();
         final float radius=bundle.getFloat("radius");
         String searchInRadius=bundle.getString("search_in_radius");
-        String sort=bundle.getString("Sort");
-        String filter=bundle.getString("Filter");
+        sort = bundle.getString("Sort");
+        filter = bundle.getString("Filter");
 
         if(searchInRadius!=null){
             float del=radius/1000;
@@ -127,11 +133,11 @@ public class ListVirtualObjectsFragment extends Fragment {
                                 public void onSuccess(byte[] bytes) {
                                     Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
                                     images.add(bitmap);
-                                    listVirtualObjectsAdapter.notifyDataSetChanged();
                                     StoredData.getInstance().getUser().setVirtualObjectWithId(virtualObject.getId(),bitmap);
                                     int pos=virtualObjectIdMapPosition.get(virtualObject.getId());
                                     virtualObjects.get(pos).setVirtual_object_image(bitmap);
                                     virtualObjectPictures.add(bitmap,virtualObject.getTitle());
+                                    listVirtualObjectsAdapter.notifyDataSetChanged();
 
                                 }
 
@@ -235,9 +241,16 @@ public class ListVirtualObjectsFragment extends Fragment {
             listView.setAdapter(listVirtualObjectsAdapter);
         }
 
+        getAllVirtualObjects();
+        filterSortData();
+
+        return view;
+    }
+
+
+    private void filterSortData(){
         if(sort!=null && filter!=null){
             textViewListVirtualObjectFragment.setText("Sort by "+sort+" and filter by "+filter);
-            getAllVirtualObjects();
             if(filter.compareTo("Rate Over 4.5")==0){
                 filterRateOver();
             }
@@ -264,7 +277,6 @@ public class ListVirtualObjectsFragment extends Fragment {
         }
         else if(sort!=null){
             textViewListVirtualObjectFragment.setText("Sort by "+sort);
-            getAllVirtualObjects();
 
             if(sort.compareTo("Rating")==0){
                 sortByRating();
@@ -280,8 +292,6 @@ public class ListVirtualObjectsFragment extends Fragment {
         }
         else if(filter!=null){
             textViewListVirtualObjectFragment.setText("Filter by "+filter);
-
-            getAllVirtualObjects();
             if(filter.compareTo("Rate Over 4.5")==0){
                 filterRateOver();
             }
@@ -293,12 +303,6 @@ public class ListVirtualObjectsFragment extends Fragment {
             }
             setListViewObjects();
         }
-
-
-
-
-
-        return view;
     }
 
     private void setListViewObjects() {
@@ -321,7 +325,7 @@ public class ListVirtualObjectsFragment extends Fragment {
                         images1.add(bitmap);
                         listVirtualObjectsAdapterMy.notifyDataSetChanged();
                         int pos = virtualObjectIdMapPosition.get(virtualObject.getId());
-                        listVirtualObjects.get(pos).setVirtual_object_image(bitmap);
+                        listVirtualObjectsTmp.get(pos).setVirtual_object_image(bitmap);
                         virtualObjectPictures.add(bitmap, virtualObject.getTitle());
 
                     }
@@ -369,18 +373,37 @@ public class ListVirtualObjectsFragment extends Fragment {
     }
 
     private void getAllVirtualObjects(){
+        listVirtualObjectsTmp.clear();
+        listVirtualObjects.clear();
         for(VirtualObject virtualObject:StoredData.getInstance().getUser().getListVO()){
-            listVirtualObjects.add(virtualObject);
+//            listVirtualObjects.add(virtualObject);
+            listVirtualObjectsTmp.add(virtualObject);
         }
 
         for(String friendUsername:StoredData.getInstance().getUser().getFriends()){
-            databaseReference.child("users").child(friendUsername).child("virtual_objects").addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("users").child(friendUsername).child("virtual_objects").addChildEventListener(new ChildEventListener() {
+
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
-                        VirtualObject virtualObject=dataSnapshot1.getValue(VirtualObject.class);
-                        listVirtualObjects.add(virtualObject);
-                    }
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                        VirtualObject virtualObject=dataSnapshot.getValue(VirtualObject.class);
+//                        listVirtualObjects.add(virtualObject);
+                        listVirtualObjectsTmp.add(virtualObject);
+                        notifyListChanged();
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
                 }
 
                 @Override
@@ -391,26 +414,34 @@ public class ListVirtualObjectsFragment extends Fragment {
         }
     }
 
+    private void notifyListChanged(){
+        listVirtualObjects.clear();
+        filterSortData();
+    }
+
     private void filterRateOver(){
-        for(VirtualObject virtualObject:listVirtualObjects){
-            if(virtualObject.getRating()<4.5){
-                listVirtualObjects.remove(virtualObject);
+        listVirtualObjects.clear();
+        for(VirtualObject virtualObject:listVirtualObjectsTmp){
+            if(virtualObject.getRating()>=4.5){
+                listVirtualObjects.add(virtualObject);
             }
         }
     }
 
     private void filterFoodAndDrinkPlaces(){
-        for(VirtualObject virtualObject:listVirtualObjects){
-            if(virtualObject.getTypeOfVirtualObject().compareTo("Food and drink places")!=0){
-                listVirtualObjects.remove(virtualObject);
+        listVirtualObjects.clear();
+        for(VirtualObject virtualObject:listVirtualObjectsTmp){
+            if(virtualObject.getTypeOfVirtualObject().compareTo("Food and drink places") == 0){
+                listVirtualObjects.add(virtualObject);
             }
         }
     }
 
     private void filterOther(){
-        for(VirtualObject virtualObject:listVirtualObjects){
-            if(virtualObject.getTypeOfVirtualObject().compareTo("Other")!=0){
-                listVirtualObjects.remove(virtualObject);
+        listVirtualObjects.clear();
+        for(VirtualObject virtualObject:listVirtualObjectsTmp){
+            if(virtualObject.getTypeOfVirtualObject().compareTo("Other") == 0){
+                listVirtualObjects.add(virtualObject);
             }
         }
     }

@@ -10,12 +10,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -43,15 +40,12 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentFactory;
-import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -59,7 +53,6 @@ import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -71,17 +64,14 @@ import com.google.firebase.storage.UploadTask;
 import com.informator.data.Constants;
 import com.informator.data.Post;
 import com.informator.data.StoredData;
-import com.informator.data.User;
 import com.informator.data.UserWithPicture;
 import com.informator.data.VirtualObject;
-import com.informator.map_fragments.VirtualObjectFragment;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
@@ -215,7 +205,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public void onLocationChanged(Location location) {
                 //centreMapOnLocation(location);
                 current_user_location=new Location(location);
-                StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
+                StoredData.getInstance().getUser().addCurrentLocation(current_user_location);
                 //addVirtualObjectMarkers();
             }
 
@@ -518,41 +508,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 final Bitmap image=virtual_object_image;
 
+
                 databaseReference.child("users").child(StoredData.getInstance().user.getUsername())
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        databaseReference.child("users").child(StoredData.getInstance().user.getUsername())
-                                .child("virtual_objects").child(key)
-                                .setValue(virtualObject);
+                        .child("virtual_objects").child(key)
+                        .setValue(virtualObject);
 
-                        StorageReference virtual_object_image_reference = storageReference.child(virtualObject.getId()+".jpg");
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                StorageReference virtual_object_image_reference = storageReference.child(virtualObject.getId()+".jpg");
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-                        if(virtual_object_image!=null){
-                            virtual_object_image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                            byte[] data = baos.toByteArray();
-                            UploadTask uploadTask = virtual_object_image_reference.putBytes(data);
-                            uploadTask.addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(getActivity(), "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    Toast.makeText(getActivity(), "Virtual object image successfully upload", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
+                if(virtual_object_image!=null){
+                    virtual_object_image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] data = baos.toByteArray();
+                    UploadTask uploadTask = virtual_object_image_reference.putBytes(data);
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getActivity(), "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(getActivity(), "Virtual object image successfully upload", Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
 
-                    }
-                });
+
 
                 popup_add_virtual_object.cancel();
             }
@@ -604,7 +586,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 current_user_location=currentLocation;
-                StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
+                StoredData.getInstance().getUser().addCurrentLocation(current_user_location);
                 centreMapOnLocation(currentLocation);
                 calculateVisibleRegionRadius();
                 //showVirtualObjectsOnMap();
@@ -613,14 +595,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,locationListener);
                 Location currentLocation=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 current_user_location=currentLocation;
-                StoredData.getInstance().getUser().addCurrentLocaation(current_user_location);
+                StoredData.getInstance().getUser().addCurrentLocation(current_user_location);
                 centreMapOnLocation(currentLocation);
                 calculateVisibleRegionRadius();
                 //showVirtualObjectsOnMap();
             }
             else
             {
-                Toast.makeText(getActivity(),"Nije ukljucen ni gps provider ni network provider nemoguce je pronaci lokaciju",Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(),"Please turn on GPS !",Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -848,7 +830,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                 ((StartActivity) getActivity()).setFragment(R.string.virtualObjectId,result);
 
-                Toast.makeText(getActivity(),"kliknuto na marker",Toast.LENGTH_LONG).show();
+//                Toast.makeText(getActivity(),"kliknuto na marker",Toast.LENGTH_LONG).show();
                 return true;
             }
         });

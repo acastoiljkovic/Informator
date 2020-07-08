@@ -116,8 +116,11 @@ public class SingleEventFragment extends Fragment {
             }
             else {
                 if (event.getLatitude() != 0 && event.getLongitude() != 0) {
-                    if (hourRem != -1998) {
+                    if (hourRem == -1998) {
+                        iwEstimatedTime.setForeground(getResources().getDrawable(R.drawable.ic_baseline_timer_24_red));
+                        twEstimatedTime.setText("Estimated time : event has ended");
 
+                    } else {
                         Location loc1 = new Location(Location.convert(0, 0));
                         loc1.setLongitude(event.getLongitude());
                         loc1.setLatitude(event.getLatitude());
@@ -136,14 +139,10 @@ public class SingleEventFragment extends Fragment {
 
                         twEstimatedTime.setText("Estimated time : " + estimatedHour + " : " + estimatedMinute);
 
-                        int remTime = hourRem * 60 + minRem;
+                        int remTime = Math.abs(hourRem) * 60 + Math.abs(minRem);
                         if (remTime < (estimatedHour * 60 + estimatedMinute)) {
                             iwEstimatedTime.setForeground(getResources().getDrawable(R.drawable.ic_baseline_timer_24_red));
                         }
-
-                    } else {
-                        iwEstimatedTime.setForeground(getResources().getDrawable(R.drawable.ic_baseline_timer_24_red));
-                        twEstimatedTime.setText("Estimated time : event has ended");
                     }
 
                     mapView.onCreate(null);

@@ -169,6 +169,8 @@ public class MainActivity extends AppCompatActivity {
                                         user.setId(String.valueOf(data.child("id").getValue()));
                                         user.setStatus(String.valueOf(data.child("status").getValue()));
                                         user.setPoints(String.valueOf(data.child("points").getValue()));
+                                        user.setLatitude(data.child("latitude").getValue(Double.class));
+                                        user.setLongitude(data.child("longitude").getValue(Double.class));
                                         startLocator(user.getStatus());
                                     }
                                     i++;
@@ -200,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                                         StoredData.getInstance().setUser(user);
                                         StoredData.getInstance().user.SetListeners();
                                         dialogDismiss();
-                                        Toast.makeText(MainActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, "Error while fetching profile picture !", Toast.LENGTH_SHORT).show();
                                         Intent i = new Intent(getApplicationContext(), StartActivity.class);
                                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

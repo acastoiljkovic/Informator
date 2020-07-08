@@ -433,6 +433,10 @@ public class ProfileFragment extends Fragment {
     }
 
     private void Logout(){
+        if(isMyServiceRunning(LocationTracker.class)) {
+            Toast.makeText(getContext(), "Gasim servis", Toast.LENGTH_SHORT).show();
+            getContext().stopService(new Intent(getContext(), LocationTracker.class));
+        }
         StoredData.getInstance().setUser(null);
         Intent i = new Intent(getContext(), MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -446,10 +450,7 @@ public class ProfileFragment extends Fragment {
         edit.putString(Constants.SHARED_PREFERENCES_PASSWORD, "");
         edit.commit();
 
-        if(isMyServiceRunning(LocationTracker.class)) {
-            Toast.makeText(getContext(), "Gasim servis", Toast.LENGTH_SHORT).show();
-            getContext().stopService(new Intent(getContext(), LocationTracker.class));
-        }
+
     }
 
     private void AddFriend(){

@@ -36,6 +36,7 @@ import com.informator.R;
 import com.informator.StartActivity;
 import com.informator.data.Constants;
 import com.informator.data.ImageAdapter;
+import com.informator.data.ImageAddedListener;
 import com.informator.data.StoredData;
 import com.informator.services.LocationTracker;
 
@@ -128,6 +129,14 @@ public class PhotosFragment extends Fragment {
         StorageReference imagesOfUser = storageRef.child("images").child(username);
         fetchImages(imagesOfUser);
 
+        StoredData.getInstance().user.setImageAddedListener(new ImageAddedListener() {
+            @Override
+            public void onImageAdded() {
+                adapter.notifyDataSetChanged();
+                images.clear();
+                fetchImages( storageRef.child("images").child(username));
+            }
+        });
 
         return  view;
     }

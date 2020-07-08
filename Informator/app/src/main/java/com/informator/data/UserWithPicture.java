@@ -39,17 +39,16 @@ public class UserWithPicture {
     ArrayList<String> listRatedVirtualObjects;
     HashMap<String,Event> eventsWithId;
     ArrayList<Group> groups;
+
+    double longitude;
+    double latitude;
+
+    @Exclude
     Location currentLocation;
+
     DatabaseReference databaseReference;
     ListUserUpdateEventListener updateListener;
 
-    public ArrayList<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(ArrayList<Event> events) {
-        this.events = events;
-    }
 
 
     public UserWithPicture(String fullName, String email, String phone, String username) {
@@ -68,6 +67,8 @@ public class UserWithPicture {
         this.eventsWithId = new HashMap<>();
         this.groups=new ArrayList<>();
         this.listRatedVirtualObjects=new ArrayList<>();
+        this.latitude = 0;
+        this.latitude = 0;
     }
     public UserWithPicture(User user) {
         fullName = user.fullName;
@@ -86,6 +87,8 @@ public class UserWithPicture {
         this.eventsWithId = new HashMap<>();
         this.groups=new ArrayList<>();
         this.listRatedVirtualObjects=new ArrayList<>();
+        this.latitude = 0;
+        this.latitude = 0;
 
     }
 
@@ -106,6 +109,8 @@ public class UserWithPicture {
         this.groups=new ArrayList<>();
         currentLocation = new Location(Location.convert(0,0));
         this.listRatedVirtualObjects=new ArrayList<>();
+        this.latitude = 0;
+        this.latitude = 0;
 
     }
 
@@ -127,6 +132,8 @@ public class UserWithPicture {
         this.eventsWithId = new HashMap<>();
         this.groups=new ArrayList<>();
         this.listRatedVirtualObjects=new ArrayList<>();
+        this.latitude = 0;
+        this.latitude = 0;
     }
 
     public void SetListeners(){
@@ -142,7 +149,7 @@ public class UserWithPicture {
     }
 
 
-    public void addCurrentLocaation(Location location){
+    public void addCurrentLocation(Location location){
         currentLocation=location;
     }
 
@@ -156,6 +163,24 @@ public class UserWithPicture {
                 virtualObject.setVirtual_object_image(bitmap);
             }
         }
+    }
+
+    public ImageAddedListener getImageAddedListener() {
+        return imageAddedListener;
+    }
+
+    public void setImageAddedListener(ImageAddedListener imageAddedListener) {
+        this.imageAddedListener = imageAddedListener;
+    }
+
+    ImageAddedListener imageAddedListener;
+
+    public ArrayList<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(ArrayList<Event> events) {
+        this.events = events;
     }
 
     ChildEventListener childEventListenerListRatedVirtualObjects= new ChildEventListener() {
@@ -398,7 +423,7 @@ public class UserWithPicture {
     ChildEventListener childEventListenerPoints= new ChildEventListener() {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            String points = dataSnapshot.getValue(String.class);
+            String points = dataSnapshot.getValue().toString();
             setPoints(points);
         }
 
@@ -449,17 +474,26 @@ public class UserWithPicture {
 
     public void setLongitude(double longitude){
         this.currentLocation.setLongitude(longitude);
+        this.longitude = longitude;
     }
     public void setLatitude(double latitude){
         this.currentLocation.setLatitude(latitude);
+        this.latitude = latitude;
     }
 
     public double getLongitude(){
-        return this.currentLocation.getLongitude();
+
+        if(this.longitude == 0)
+            return this.currentLocation.getLongitude();
+        else
+            return this.longitude;
     }
 
     public double getLatitude(){
-        return this.currentLocation.getLatitude();
+        if(this.latitude == 0)
+            return this.currentLocation.getLatitude();
+        else
+            return this.latitude;
     }
 
     public void setCurrentLocation(Location currentLocation) {

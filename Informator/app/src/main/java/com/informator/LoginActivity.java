@@ -98,8 +98,10 @@ public class LoginActivity extends AppCompatActivity {
                                                 user.setFullName(String.valueOf(data.child("fullName").getValue()));
                                                 user.setPhone(String.valueOf(data.child("phone").getValue()));
                                                 user.setId(String.valueOf(data.child("id").getValue()));
-                                                user.setPoints(String.valueOf(data.child("points")));
-                                                user.setStatus(String.valueOf(data.child("status")));
+                                                user.setPoints(String.valueOf(data.child("points").getValue()));
+                                                user.setStatus(String.valueOf(data.child("status").getValue()));
+                                                user.setLongitude(data.child("longitude").getValue(Double.class));
+                                                user.setLatitude(data.child("latitude").getValue(Double.class));
                                             }
                                             i++;
                                         }
@@ -193,14 +195,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void failedLoginPicture(){
         dialogDismiss();
-        Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(LoginActivity.this, "Error while fetching profile picture !", Toast.LENGTH_SHORT).show();
         Intent i = new Intent(getApplicationContext(),StartActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
     }
 
     public void failedLoginUser(){
-        Toast.makeText(LoginActivity.this, "Error while fetching data...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(LoginActivity.this, "Error while fetching data !", Toast.LENGTH_SHORT).show();
         dialogHide();
     }
 

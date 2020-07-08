@@ -213,7 +213,7 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
                     dispatchTakePictureIntent();
                 } else {
 
-                    Toast.makeText(StartActivity.this, "Permission denied to access to your Camera", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StartActivity.this, "Permission denied, can't access your Camera", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -223,7 +223,7 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
                     openImagePicker();
                 } else {
 
-                    Toast.makeText(StartActivity.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StartActivity.this, "Permission denied, can't read your External storage", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -271,8 +271,8 @@ public class StartActivity extends AppCompatActivity implements BottomNavigation
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // TODO load fragment profil kako bi ucitao i tu dodatu sliku
-                    Toast.makeText(StartActivity.this,"Image uploaded successfully ",Toast.LENGTH_SHORT).show();
+                    StoredData.getInstance().user.getImageAddedListener().onImageAdded();
+//                    Toast.makeText(StartActivity.this,"Image uploaded successfully ",Toast.LENGTH_SHORT).show();
                 }
             });
         }

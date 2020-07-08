@@ -229,8 +229,14 @@ public class RegisterActivity extends AppCompatActivity {
                                             uploadTask.addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
-                                                    // TODO obrisati kreiranog korisnika sa servera
+                                                    // obavestimo korisnika da je doslo do greske, i bice bez slike, sliku moze da doda kasnije
                                                     Toast.makeText(RegisterActivity.this, "Error while uploading picture to server : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                    StoredData.getInstance().setUser(user);
+                                                    StoredData.getInstance().user.SetListeners();
+//                                                    Toast.makeText(RegisterActivity.this, "User created.", Toast.LENGTH_SHORT).show();
+                                                    Intent i = new Intent(getApplicationContext(),StartActivity.class);
+                                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                    startActivity(i);
                                                     dialogDismiss();
                                                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                                                 }
