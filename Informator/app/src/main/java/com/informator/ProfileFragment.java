@@ -238,26 +238,7 @@ public class ProfileFragment extends Fragment {
                 tvPoints.setText(getContext().getResources().getString(R.string.points) +" " + StoredData.getInstance().getUser().getPoints());
             }
 
-            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    if (item.getItemId() == R.id.logout) {
-                        Logout();
-                    } else if (item.getItemId() == R.id.search_friends) {
-                        ((StartActivity) getActivity()).setFragment(R.id.search_friends, null);
 
-                    } else if (item.getItemId() == R.id.send_message) {
-                        ((StartActivity) getActivity()).setFragment(R.id.send_message, null);
-
-                    } else if (item.getItemId() == R.id.add_friends_bluetooth) {
-                        ((StartActivity) getActivity()).setFragment(R.id.add_friends_bluetooth, null);
-                    } else if (item.getItemId() == R.id.settings) {
-                        dispatchSettings();
-                    }
-                    dialogDismiss();
-                    return false;
-                }
-            });
             editOrAdd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -374,6 +355,26 @@ public class ProfileFragment extends Fragment {
             username = bundle.get("username").toString();
 
         }
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.logout) {
+                    Logout();
+                } else if (item.getItemId() == R.id.search_friends) {
+                    ((StartActivity) getActivity()).setFragment(R.id.search_friends, null);
+
+                } else if (item.getItemId() == R.id.send_message) {
+                    ((StartActivity) getActivity()).setFragment(R.id.send_message, null);
+
+                } else if (item.getItemId() == R.id.add_friends_bluetooth) {
+                    ((StartActivity) getActivity()).setFragment(R.id.add_friends_bluetooth, null);
+                } else if (item.getItemId() == R.id.settings) {
+                    dispatchSettings();
+                }
+                dialogDismiss();
+                return false;
+            }
+        });
 
         layout = view.findViewById(R.id.fragment_profile_layout);
         layout.setBackgroundColor(Color.WHITE);

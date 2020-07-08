@@ -59,7 +59,7 @@ public class UserWithPicture {
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         points = "0";
-        status = "online";
+        status = "offline";
         currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
@@ -79,7 +79,7 @@ public class UserWithPicture {
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();
         points = "0";
-        status = "online";
+        status = "offline";
         currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
@@ -100,7 +100,7 @@ public class UserWithPicture {
         this.virtual_objects = new ArrayList<>();
         this.friends = new ArrayList<>();
         points = "0";
-        status = "online";
+        status = "offline";
         currentLocation = new Location(Location.convert(0,0));
         this.nearFriends = new ArrayList<>();
         this.nearVirtualObjects = new ArrayList<>();
@@ -122,7 +122,7 @@ public class UserWithPicture {
         id=user.id;
         profilePhoto = image;
         points = "0";
-        status = "online";
+        status = "offline";
         currentLocation = new Location(Location.convert(0,0));
         this.virtual_objects=new ArrayList<>();
         this.friends = new ArrayList<>();

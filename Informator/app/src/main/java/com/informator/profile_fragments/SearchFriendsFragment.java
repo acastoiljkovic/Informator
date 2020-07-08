@@ -263,8 +263,8 @@ public class SearchFriendsFragment extends Fragment {
         try {
             if (!dialog.isShowing()) {
                 dialog.show();
-                getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//                getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+//                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             }
         }
         catch (Exception e){
@@ -276,7 +276,7 @@ public class SearchFriendsFragment extends Fragment {
         try {
             if (dialog.isShowing())
                 dialog.hide();
-            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -286,7 +286,7 @@ public class SearchFriendsFragment extends Fragment {
     public void dialogDismiss(){
         try{
             dialog.dismiss();
-            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
         catch (Exception e){
             e.printStackTrace();
