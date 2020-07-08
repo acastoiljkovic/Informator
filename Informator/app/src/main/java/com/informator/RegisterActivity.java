@@ -209,7 +209,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         // add user
                                         user.setId(FirebaseAuth.getInstance().getUid());
                                         user.setPoints("0");
-                                        user.setStatus("online");
+                                        user.setStatus("offline");
                                         mDatabase.child("users").child(user.getUsername()).setValue(user);
 
                                         SharedPreferences.Editor edit = sharedPreferences.edit();
